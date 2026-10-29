@@ -266,3 +266,4 @@ Each step ends with something that runs and has tests. Commit after each step wi
 - Do not invent eval numbers. If a run was not executed, say so.
 - Keep code readable and commented where the logic is non-obvious (the owner must be able to explain every module in an interview).
 - If blocked after 3 attempts on a task, stop, write the state to `docs/progress.md`, and report honestly.
+

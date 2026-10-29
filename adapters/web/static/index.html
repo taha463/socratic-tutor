@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socratic Tutor v2</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    if (typeof mermaid !== "undefined") {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">🦉</div>
+      <div>
+        <div class="logo-title">Socratic Tutor v2</div>
+        <div class="logo-subtitle">Never gives the answer directly · Teaches until you see it</div>
+      </div>
+    </div>
+
+    <div class="controls-area">
+      <div class="input-group">
+        <label for="topicSelect">Topic:</label>
+        <select id="topicSelect">
+          <option value="recursion">Recursion</option>
+          <option value="binary_search">Binary Search</option>
+          <option value="binary_tree">Binary Trees</option>
+          <option value="big_o">Big-O & Complexity</option>
+          <option value="pointers">Pointers & Memory</option>
+          <option value="gradient_descent">Gradient Descent</option>
+          <option value="sql_joins">SQL Joins</option>
+          <option value="http_protocol">HTTP Protocol</option>
+          <option value="hash_maps">Hash Maps</option>
+          <option value="stacks_queues">Stacks & Queues</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="learnerInput">Learner:</label>
+        <input type="text" id="learnerInput" value="learner-default" style="width: 120px;">
+      </div>
+
+      <div id="privacyToggle" class="privacy-toggle active" title="Behavioral signals adapt hint ladder speed. Can be disabled anytime.">
+        🛡️ Telemetry: Active
+      </div>
+
+      <button id="resetBtn" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+        🔄 Reset Session
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-bar">
+    <button id="tabChatBtn" class="tab-btn active">💬 Socratic Chat</button>
+    <button id="tabDashBtn" class="tab-btn">📊 Learner Mastery Dashboard</button>
+  </div>
+
+  <!-- Main View Area -->
+  <main>
+    <!-- Chat Pane -->
+    <div id="paneChat" class="tab-pane active">
+      <div class="chat-container">
+        <!-- Message History -->
+        <div id="chatHistory" class="chat-history"></div>
+
+        <!-- Input Area -->
+        <div class="chat-input-area">
+          <div class="chat-input-row">
+            <textarea
+              id="messageInput"
+              class="chat-textarea"
+              placeholder="Type what you think or predict here... (Enter to send, Shift+Enter for newline)"
+              rows="2"
+            ></textarea>
+
+            <button id="hintBtn" class="btn btn-secondary" title="Ask for a smaller sub-step or hint">
+              💡 Hint
+            </button>
+            <button id="sendBtn" class="btn btn-primary">
+              Send ➤
+            </button>
+          </div>
+
+          <div class="chat-footer">
+            <div class="telemetry-indicator">
+              <span id="telemetryDot" class="status-dot"></span>
+              <span id="telemetryIndicator">Active (Protected)</span>
+            </div>
+            <div>
+              Hint Ladder: 7 Pedagogical Rungs · Critic Gate Active
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Pane -->
+    <div id="paneDash" class="tab-pane">
+      <iframe id="dashboardFrame" class="dashboard-frame" src="/api/dashboard/learner-default"></iframe>
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+

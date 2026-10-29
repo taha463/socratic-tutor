@@ -43,3 +43,4 @@ python -m pytest
 python -m ruff check .
 ```
 Never mock away the core behavior under test or weaken assertions.
+

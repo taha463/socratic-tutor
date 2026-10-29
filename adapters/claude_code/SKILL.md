@@ -29,3 +29,4 @@ Always invoke the local Python core CLI directly so that Teacher, Critic, and Hi
 - Display the tutor's response verbatim to the user.
 - If the tutor response contains a visual path (e.g. `[Visual Generated]: file://...`), present a clickable markdown link to the user and encourage them to open it in their browser to inspect the interactive diagram, analogy, or step-by-step execution trace.
 - Never summarize or reveal the answer ahead of the tutor's active hint ladder rung.
+

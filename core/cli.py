@@ -37,6 +37,12 @@ def build_parser() -> argparse.ArgumentParser:
     diag_parser.add_argument("--learner", "-l", type=str, default="learner-default", help="Learner ID.")
     diag_parser.add_argument("--topic", "-t", type=str, default="recursion", help="Topic to diagnose.")
 
+    # Web subcommand
+    web_parser = subparsers.add_parser("web", help="Start the interactive web adapter interface.")
+    web_parser.add_argument("--host", default="127.0.0.1", help="Host address (default: 127.0.0.1).")
+    web_parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000).")
+    web_parser.add_argument("--reload", action="store_true", help="Enable reload mode.")
+
     return parser
 
 
@@ -97,6 +103,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     elif args.subcommand == "diagnostic":
         print(f"Starting diagnostic for {args.learner} on {args.topic}...")
+        return 0
+
+    elif args.subcommand == "web":
+        import uvicorn
+        print(f"\n[Socratic Tutor v2] Starting web server on http://{args.host}:{args.port}")
+        uvicorn.run("adapters.web.backend:app", host=args.host, port=args.port, reload=args.reload)
         return 0
 
     return 0

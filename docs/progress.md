@@ -71,13 +71,13 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 8
 
 ## Step 9: Web Adapter
-- [ ] FastAPI backend (`adapters/web/backend.py`)
-- [ ] Minimal web chat UI with inline Mermaid, SVG, sandboxed HTML iframe
-- [ ] Client-side behavioral signals collector (paste, tab switch/blur, idle, rapid typing)
-- [ ] Signal-driven pedagogical adaptation in Orchestrator/Teacher
-- [ ] Privacy toggle & local dashboard view
-- [ ] Integration and end-to-end tests
-- [ ] Commit Step 9
+- [x] FastAPI backend (`adapters/web/backend.py`)
+- [x] Minimal web chat UI with inline Mermaid, SVG, sandboxed HTML iframe
+- [x] Client-side behavioral signals collector (paste, tab switch/blur, idle, rapid typing)
+- [x] Signal-driven pedagogical adaptation in Orchestrator/Teacher
+- [x] Privacy toggle & local dashboard view
+- [x] Integration and end-to-end tests
+- [x] Commit Step 9
 
 ## Step 10: Plugins & Extra Skills
 - [ ] `plot` skill (Matplotlib/SVG plots for algorithms, complexity, ML)
