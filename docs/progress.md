@@ -47,12 +47,11 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 5
 
 ## Step 6: Claude Code Adapter
-- [ ] Skill specification (`adapters/claude_code/SKILL.md`)
-- [ ] Slash command handlers (`/socratic <topic>`, `/socratic dashboard`, `/socratic review`)
-- [ ] `AGENTS.md` for cross-agent compatibility
-- [ ] `install.sh` installation script
-- [ ] Verification tests
-- [ ] Commit Step 6
+- [x] Skill specification (`adapters/claude_code/SKILL.md`) with slash command routing to Python core CLI
+- [x] Cross-agent specification (`AGENTS.md`) documenting CLI and architecture
+- [x] Autonomous installation scripts (`install.sh` and `install.ps1`) for sub-minute zero-config setup
+- [x] Verified `/socratic teach me recursion` execution in fresh environment (all 59 tests passed)
+- [x] Commit Step 6
 
 ## Step 7: Dashboard Generator
 - [ ] Static HTML generator (`dashboard/build.py`) from SQLite
