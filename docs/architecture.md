@@ -175,3 +175,4 @@ The learner store (`core/learner.py`) combines:
 2. **Ebbinghaus Forgetting Decay**:
    $$\text{Mastery}(t) = \text{Score} \times e^{-\frac{\Delta t}{S}}$$
    Allows the system to identify decayed concepts requiring spaced repetition.
+

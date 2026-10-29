@@ -51,3 +51,4 @@ Because all data resides in a local SQLite file, you have complete ownership and
   ```bash
   rm -rf .socratic/
   ```
+
