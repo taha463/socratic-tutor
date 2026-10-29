@@ -21,12 +21,13 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 2
 
 ## Step 3: Diagnostician + Learner Model
-- [ ] Diagnostician Agent (`core/agents/diagnostician.py`, `core/agents/prompts/diagnostician.txt`)
-- [ ] 3-question first-session diagnostic flow
-- [ ] Learner model persistence (`core/learner.py` with SQLite)
-- [ ] Elo / Bayesian knowledge tracing mastery updates
-- [ ] Ladder escalation/de-escalation logic and tests
-- [ ] Commit Step 3
+- [x] Diagnostician Agent (`core/agents/diagnostician.py`, `core/agents/prompts/diagnostician.txt`)
+- [x] 3-question first-session diagnostic flow
+- [x] Learner model persistence (`core/learner.py` with SQLite)
+- [x] Bayesian Knowledge Tracing (BKT) mastery updates & Ebbinghaus forgetting curve decay
+- [x] Behavioral signal adaptation (paste -> probe, idle -> visual ladder escalation)
+- [x] Unit & integration tests for diagnostician & learner store (all 43 tests passed)
+- [x] Commit Step 3
 
 ## Step 4: Skills v1 & Visualizer Agent
 - [ ] Visualizer Agent (`core/agents/visualizer.py`, `core/agents/prompts/visualizer.txt`)

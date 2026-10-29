@@ -12,8 +12,10 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from core.agents.critic import CriticAgent, CriticVerdict
+from core.agents.diagnostician import DiagnosticianAgent
 from core.agents.teacher import TeacherAgent, TeacherDraft
 from core.ladder import HintLadder
+from core.learner import LearnerStore
 from core.llm import BaseLLMProvider, get_llm_client
 from storage.db import get_connection, init_db
 
@@ -44,16 +46,18 @@ class TutorOrchestrator:
         db_path: Optional[str | Path] = None,
         teacher: Optional[TeacherAgent] = None,
         critic: Optional[CriticAgent] = None,
-        diagnostician: Optional[Any] = None,
+        diagnostician: Optional[DiagnosticianAgent] = None,
         visualizer: Optional[Any] = None,
+        learner_store: Optional[LearnerStore] = None,
     ) -> None:
         self.db_path = db_path
         init_db(self.db_path)
         self.llm = llm or get_llm_client()
         self.teacher = teacher or TeacherAgent(self.llm)
         self.critic = critic or CriticAgent(self.llm)
-        self.diagnostician = diagnostician  # Integrated in Step 3
+        self.diagnostician = diagnostician or DiagnosticianAgent(self.llm)
         self.visualizer = visualizer  # Integrated in Step 4
+        self.learner_store = learner_store or LearnerStore(self.db_path)
 
     def handle_turn(
         self,
@@ -66,6 +70,7 @@ class TutorOrchestrator:
     ) -> TutorReply:
         """Process a learner turn through the multi-agent pipeline."""
         now_iso = datetime.now(timezone.utc).isoformat()
+        signals = signals or {}
         conn = get_connection(self.db_path)
 
         try:
@@ -80,9 +85,14 @@ class TutorOrchestrator:
                     (session_id, learner_id, topic, now_iso),
                 )
 
+            # Record telemetry signals in DB
+            for sig_k, sig_v in signals.items():
+                if isinstance(sig_v, (int, float)):
+                    self.learner_store.record_signal(session_id, sig_k, float(sig_v))
+
             # 2. Record incoming learner turn
             turn_id_learner = str(uuid.uuid4())
-            signals_json = json.dumps(signals or {})
+            signals_json = json.dumps(signals)
             with conn:
                 conn.execute(
                     """INSERT INTO turns (id, session_id, role, text, rung, skill_used, signals_json, critic_verdict, ts)
@@ -110,32 +120,34 @@ class TutorOrchestrator:
 
             ladder = HintLadder(current_rung=last_tutor_rung)
 
-            # 4. Diagnostician assessment (if available, else light baseline)
-            learner_state = "LEARNING"
-            frustration = 0.2
-            rec_rung = ladder.current_rung
-
-            if self.diagnostician:
-                try:
-                    diag = self.diagnostician.diagnose(
-                        session_id=session_id,
-                        learner_message=learner_message,
-                        signals=signals or {},
-                        history=history,
-                    )
-                    learner_state = diag.state
-                    frustration = diag.frustration
-                    rec_rung = diag.recommended_rung
-                except Exception as e:
-                    logger.warning("Diagnostician error, falling back to light heuristics: %s", e)
+            # 4. Diagnostician assessment
+            prior_mastery = self.learner_store.get_mastery(learner_id, topic)
+            diag = self.diagnostician.diagnose(
+                session_id=session_id,
+                learner_message=learner_message,
+                signals=signals,
+                history=history,
+                mastery_score=prior_mastery,
+                prior_turns_count=len(history),
+            )
+            learner_state = diag.state
+            frustration = diag.frustration
+            rec_rung = diag.recommended_rung
 
             # Update ladder
-            is_success = "got it" in learner_message.lower() or "i understand" in learner_message.lower()
+            is_success = learner_state == "MASTERY" or "got it" in learner_message.lower() or "i understand" in learner_message.lower()
             active_rung = ladder.update(
                 is_success=is_success,
                 frustration=frustration,
                 recommended_rung=rec_rung,
             )
+
+            # Update Bayesian knowledge tracing mastery
+            if is_success:
+                self.learner_store.update_mastery(learner_id, topic, is_success=True)
+            elif learner_state == "STUCK":
+                self.learner_store.update_mastery(learner_id, topic, is_success=False)
+                self.learner_store.record_mistake(learner_id, topic, "stuck_or_confused")
 
             # 5. Teacher-Critic iterative drafting loop (max 2 rewrites)
             max_rewrites = 2

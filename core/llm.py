@@ -215,15 +215,7 @@ class MockLLMProvider(BaseLLMProvider):
             })
 
         if target_schema_name == "DiagnosticResult" or "diagnostician" in prompt_str or '"recommended_rung"' in prompt_str:
-            if "stuck" in prompt_str or "i don't get it" in prompt_str or "confused" in prompt_str:
-                return json.dumps({
-                    "level": "beginner",
-                    "frustration": 0.75,
-                    "state": "STUCK",
-                    "recommended_rung": 4,
-                    "reasoning": "Learner expressed confusion; stepping up to visual explanation.",
-                })
-            elif "paste" in prompt_str or "copier" in prompt_str:
+            if "paste" in user_text or "copier" in user_text:
                 return json.dumps({
                     "level": "intermediate",
                     "frustration": 0.1,
@@ -231,7 +223,15 @@ class MockLLMProvider(BaseLLMProvider):
                     "recommended_rung": 1,
                     "reasoning": "Large unformatted paste detected; probe for conceptual understanding.",
                 })
-            elif "mastery" in prompt_str or "got it" in prompt_str:
+            elif "stuck" in user_text or "i don't get it" in user_text or "confused" in user_text:
+                return json.dumps({
+                    "level": "beginner",
+                    "frustration": 0.75,
+                    "state": "STUCK",
+                    "recommended_rung": 4,
+                    "reasoning": "Learner expressed confusion; stepping up to visual explanation.",
+                })
+            elif "mastery" in user_text or "got it" in user_text:
                 return json.dumps({
                     "level": "advanced",
                     "frustration": 0.0,
