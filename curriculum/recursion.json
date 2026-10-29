@@ -1,0 +1,22 @@
+{
+  "concept_id": "recursion",
+  "name": "Recursion",
+  "ground_truth": "A function calls itself until a base case terminates the call stack.",
+  "analogies": [
+    {
+      "analogy": "Imagine a Russian Matryoshka nesting doll. You open the outermost doll to find another inside, open that one to find another, until you reach the smallest solid doll that cannot be opened.",
+      "mapping_question": "What in recursion corresponds to the smallest solid doll that cannot be opened?"
+    },
+    {
+      "analogy": "Imagine looking into two facing mirrors. The reflection repeats endlessly, but what would happen if a curtain dropped between them?",
+      "mapping_question": "What part of a recursive function acts like the curtain dropping?"
+    }
+  ],
+  "diagrams": [
+    {
+      "mermaid_source": "graph TD\n    A[\"factorial(3)\"] --> B[\"3 * factorial(2)\"]\n    B --> C[\"2 * factorial(1)\"]\n    C --> D[\"?BLANK_BASE_CASE?\"]",
+      "blanks": ["?BLANK_BASE_CASE?"],
+      "prompt": "What return value should replace ?BLANK_BASE_CASE? to stop the chain?"
+    }
+  ]
+}

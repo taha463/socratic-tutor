@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from core.agents.critic import CriticAgent, CriticVerdict
 from core.agents.diagnostician import DiagnosticianAgent
 from core.agents.teacher import TeacherAgent, TeacherDraft
+from core.agents.visualizer import VisualizerAgent
 from core.ladder import HintLadder
 from core.learner import LearnerStore
 from core.llm import BaseLLMProvider, get_llm_client
@@ -47,7 +48,7 @@ class TutorOrchestrator:
         teacher: Optional[TeacherAgent] = None,
         critic: Optional[CriticAgent] = None,
         diagnostician: Optional[DiagnosticianAgent] = None,
-        visualizer: Optional[Any] = None,
+        visualizer: Optional[VisualizerAgent] = None,
         learner_store: Optional[LearnerStore] = None,
     ) -> None:
         self.db_path = db_path
@@ -56,7 +57,7 @@ class TutorOrchestrator:
         self.teacher = teacher or TeacherAgent(self.llm)
         self.critic = critic or CriticAgent(self.llm)
         self.diagnostician = diagnostician or DiagnosticianAgent(self.llm)
-        self.visualizer = visualizer  # Integrated in Step 4
+        self.visualizer = visualizer or VisualizerAgent(self.llm)
         self.learner_store = learner_store or LearnerStore(self.db_path)
 
     def handle_turn(

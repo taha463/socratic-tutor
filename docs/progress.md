@@ -30,15 +30,14 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 3
 
 ## Step 4: Skills v1 & Visualizer Agent
-- [ ] Visualizer Agent (`core/agents/visualizer.py`, `core/agents/prompts/visualizer.txt`)
-- [ ] Skill registry (`skills/registry.py`)
-- [ ] `skills/eli5`
-- [ ] `skills/diagram` (Mermaid blanks)
-- [ ] `skills/analogy`
-- [ ] Visual output written to `.socratic/visuals/`
-- [ ] Curriculum store (`curriculum/`)
-- [ ] Unit & integration tests
-- [ ] Commit Step 4
+- [x] Visualizer Agent (`core/agents/visualizer.py`, `core/agents/prompts/visualizer.txt`)
+- [x] Skill registry (`skills/registry.py`) with automatic artifact writing to `.socratic/visuals/`
+- [x] `skills/eli5` with analogy card and mapping challenge
+- [x] `skills/diagram` with Mermaid dark mode, blanks enforcement, and prediction prompt
+- [x] `skills/analogy` with curriculum mental model and transfer questions
+- [x] Curriculum store (`curriculum/`) with pre-tested analogies and diagram templates
+- [x] Unit & integration tests for skills and visualizer (all 50 tests passed)
+- [x] Commit Step 4
 
 ## Step 5: Trace Skill (Sandboxed Execution)
 - [ ] Trace sandbox (`skills/trace/sandbox.py`) with subprocess, hard 5s timeout, memory limit, forbidden imports/access

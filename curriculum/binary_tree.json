@@ -1,0 +1,18 @@
+{
+  "concept_id": "binary_tree",
+  "name": "Binary Search Tree",
+  "ground_truth": "Every node has at most two children; left subtree values are strictly smaller, right subtree values are strictly greater.",
+  "analogies": [
+    {
+      "analogy": "Imagine a highway fork with clear speed limit signs: all vehicles going under 60 mph must take the left ramp, and all vehicles going over 60 mph must take the right ramp.",
+      "mapping_question": "If a vehicle going 75 mph approaches, which ramp does it take according to this rule?"
+    }
+  ],
+  "diagrams": [
+    {
+      "mermaid_source": "graph TD\n    Root[\"Root: 20\"]\n    Root --> Left[\"Left: 10\"]\n    Root --> Right[\"Right: ?BLANK_NODE?\"]",
+      "blanks": ["?BLANK_NODE?"],
+      "prompt": "For this to be a valid Binary Search Tree, must ?BLANK_NODE? be greater than or less than 20?"
+    }
+  ]
+}

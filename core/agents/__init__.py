@@ -3,6 +3,7 @@
 from core.agents.critic import CriticAgent, CriticVerdict
 from core.agents.diagnostician import DiagnosticianAgent, DiagnosticResult
 from core.agents.teacher import TeacherAgent, TeacherDraft
+from core.agents.visualizer import VisualizerAgent, VisualizerDecision
 
 __all__ = [
     "CriticAgent",
@@ -11,4 +12,6 @@ __all__ = [
     "DiagnosticResult",
     "TeacherAgent",
     "TeacherDraft",
+    "VisualizerAgent",
+    "VisualizerDecision",
 ]
