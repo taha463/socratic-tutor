@@ -1,0 +1,9 @@
+{
+  "id": "http_protocol",
+  "topic": "HTTP Protocol",
+  "ground_truth": "A stateless request-response application protocol transmitting headers, methods, status codes, and body payloads over TCP/TLS.",
+  "pre_quiz": "What does it mean that HTTP is a stateless protocol?",
+  "pre_quiz_answer": "Each request is executed independently without the server automatically remembering previous requests without cookies or tokens.",
+  "post_quiz": "What is the difference in intended idempotency between GET and POST?",
+  "post_quiz_answer": "GET is safe and idempotent (retrieves without changing server state), while POST typically creates or mutates server resources."
+}

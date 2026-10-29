@@ -1,0 +1,9 @@
+{
+  "id": "sql_joins",
+  "topic": "SQL Joins",
+  "ground_truth": "Combines rows from two or more tables based on a related column, retaining matched rows (INNER) or preserving unmatched rows from one side (LEFT/RIGHT).",
+  "pre_quiz": "What is the primary difference between an INNER JOIN and a LEFT JOIN?",
+  "pre_quiz_answer": "INNER JOIN returns only rows with matches in both tables, whereas LEFT JOIN returns all rows from the left table with NULLs for missing matches.",
+  "post_quiz": "If an employee has no assigned department, will they appear in an INNER JOIN or a LEFT JOIN with the departments table?",
+  "post_quiz_answer": "They will appear in the LEFT JOIN (with NULL department values) but be omitted from the INNER JOIN."
+}

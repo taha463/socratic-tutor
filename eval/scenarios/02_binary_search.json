@@ -1,0 +1,9 @@
+{
+  "id": "binary_search",
+  "topic": "Binary Search",
+  "ground_truth": "Halves the search space of a sorted array at each step by comparing the target to the middle element.",
+  "pre_quiz": "Why cannot binary search be directly performed on an unsorted array?",
+  "pre_quiz_answer": "Because eliminating half the elements requires knowing all elements to the left are smaller and to the right are larger.",
+  "post_quiz": "If an array has 64 sorted elements, what is the maximum number of comparisons needed?",
+  "post_quiz_answer": "At most 6 or 7 comparisons because log2(64) equals 6."
+}

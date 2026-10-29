@@ -1,0 +1,9 @@
+{
+  "id": "hash_maps",
+  "topic": "Hash Maps and Collisions",
+  "ground_truth": "Key-value data structure mapping keys to bucket indices using a hash function, resolving collisions via chaining or open addressing for average O(1) lookups.",
+  "pre_quiz": "What happens when two different keys generate the identical hash index?",
+  "pre_quiz_answer": "A collision occurs, which must be resolved by techniques such as separate chaining in a list or linear probing.",
+  "post_quiz": "Why does a hash map degrade toward O(N) lookup time in the worst case?",
+  "post_quiz_answer": "When all keys hash to the exact same bucket, lookups become a linear search through N chained elements."
+}

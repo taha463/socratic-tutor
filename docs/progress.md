@@ -63,12 +63,12 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 7
 
 ## Step 8: Evaluation Harness
-- [ ] 4 Simulated Learner Personas (`beginner`, `frustrated`, `copier`, `strong`)
-- [ ] 10 Scenarios in `eval/scenarios/` with ground truth and pre/post quizzes
-- [ ] Independent LLM judge + rule-based leak detector
-- [ ] Metrics calculator (leak rate, learning gain, visual vs text-only, critic on vs off)
-- [ ] `eval/run.py` producing `eval/results/results.md` and JSON
-- [ ] Commit Step 8
+- [x] 4 Simulated Learner Personas (`beginner`, `frustrated`, `copier`, `strong`)
+- [x] 10 Scenarios in `eval/scenarios/` with ground truth and pre/post quizzes
+- [x] Independent LLM judge + rule-based leak detector (`eval/judge.py`)
+- [x] Metrics calculator (leak rate, learning gain, visual vs text-only, critic on vs off)
+- [x] `eval/run.py` producing `eval/results/results.md` and JSON
+- [x] Commit Step 8
 
 ## Step 9: Web Adapter
 - [ ] FastAPI backend (`adapters/web/backend.py`)

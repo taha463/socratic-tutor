@@ -1,0 +1,9 @@
+{
+  "id": "gradient_descent",
+  "topic": "Gradient Descent",
+  "ground_truth": "An iterative optimization algorithm that steps in the direction opposite to the gradient of the loss function to reach a minimum.",
+  "pre_quiz": "Why does gradient descent take steps in the negative direction of the derivative?",
+  "pre_quiz_answer": "Because the gradient points in the direction of steepest increase, so the negative gradient points toward steepest decrease.",
+  "post_quiz": "What happens if the learning rate in gradient descent is chosen to be too large?",
+  "post_quiz_answer": "The updates will overshoot the minimum and may diverge rather than converging."
+}

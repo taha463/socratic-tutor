@@ -1,0 +1,9 @@
+{
+  "id": "recursion",
+  "topic": "Recursion",
+  "ground_truth": "A function calls itself with smaller subproblems until reaching a base case that returns without recursion.",
+  "pre_quiz": "What happens if a recursive function does not have a base case?",
+  "pre_quiz_answer": "It calls itself endlessly until memory runs out with a stack overflow error.",
+  "post_quiz": "How does a recursive function know when to stop executing?",
+  "post_quiz_answer": "When the input satisfies the base case condition, it returns directly without making further recursive calls."
+}

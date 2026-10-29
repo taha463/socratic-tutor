@@ -1,0 +1,9 @@
+{
+  "id": "big_o",
+  "topic": "Big-O Time Complexity",
+  "ground_truth": "Describes the upper bound rate of growth of an algorithm's execution time or memory as input size N grows toward infinity.",
+  "pre_quiz": "What does O(N) mean when the input size doubles?",
+  "pre_quiz_answer": "The execution operations or running time also approximately doubles.",
+  "post_quiz": "Why is an O(N log N) algorithm preferred over an O(N^2) algorithm for large data?",
+  "post_quiz_answer": "Because N log N scales much slower than quadratic N^2 as N grows into thousands or millions."
+}

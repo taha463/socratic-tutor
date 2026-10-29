@@ -1,0 +1,9 @@
+{
+  "id": "binary_tree",
+  "topic": "Binary Search Tree",
+  "ground_truth": "A hierarchical tree data structure where each node has at most two children, with smaller elements on the left and larger on the right.",
+  "pre_quiz": "In a Binary Search Tree with root 15, on which side would you look for the value 8?",
+  "pre_quiz_answer": "On the left subtree because 8 is less than 15.",
+  "post_quiz": "What property must hold for every node in a valid Binary Search Tree?",
+  "post_quiz_answer": "All values in the left subtree must be less than the node, and all in the right subtree must be greater."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "pointers",
+  "topic": "Pointers and Memory References",
+  "ground_truth": "A pointer or reference holds the memory address of another variable rather than the actual value itself.",
+  "pre_quiz": "What is stored in a pointer variable?",
+  "pre_quiz_answer": "A memory address pointing to the location where data lives.",
+  "post_quiz": "What happens if two pointers reference the same memory address and one modifies the data?",
+  "post_quiz_answer": "Both pointers will observe the modified data because they point to the identical memory location."
+}

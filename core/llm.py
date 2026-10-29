@@ -281,6 +281,27 @@ class MockLLMProvider(BaseLLMProvider):
                     "reasoning": "Physical everyday analogy helps ground abstract logic.",
                 })
 
+        if target_schema_name == "LeakVerdict":
+            has_leak = "the answer is" in user_text or "here is the solution" in user_text
+            return json.dumps({
+                "leak_detected": has_leak,
+                "leak_score": 1.0 if has_leak else 0.0,
+                "pedagogical_value": 0.3 if has_leak else 0.9,
+                "reasoning": "Direct solution leaked." if has_leak else "Pedagogically sound Socratic guidance.",
+            })
+
+        if target_schema_name == "QuizScore":
+            if "no idea" in user_text or "not sure" in user_text or "copy and paste" in user_text:
+                score = 0.25
+            elif "stops" in user_text or "base" in user_text or "condition" in user_text or "invariant" in user_text:
+                score = 0.90
+            else:
+                score = 0.65
+            return json.dumps({
+                "score": score,
+                "rationale": "Conceptually assessed against expected ground truth rubric.",
+            })
+
         # 2. Fallbacks based on message content
         if "critic" in prompt_str or '"passed"' in prompt_str:
             return json.dumps({

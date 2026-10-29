@@ -1,0 +1,9 @@
+{
+  "id": "stacks_queues",
+  "topic": "Stacks and Queues",
+  "ground_truth": "Linear data structures operating on opposite ordering principles: Stacks follow Last-In-First-Out (LIFO), whereas Queues follow First-In-First-Out (FIFO).",
+  "pre_quiz": "In what order are elements removed from a stack compared to a queue?",
+  "pre_quiz_answer": "A stack removes the most recently added item (LIFO), while a queue removes the oldest added item (FIFO).",
+  "post_quiz": "Which data structure is naturally used to model function call returns in a CPU?",
+  "post_quiz_answer": "A call stack, because the most recently called function must finish before returning to the caller."
+}
