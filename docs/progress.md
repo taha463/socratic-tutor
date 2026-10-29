@@ -40,11 +40,11 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 4
 
 ## Step 5: Trace Skill (Sandboxed Execution)
-- [ ] Trace sandbox (`skills/trace/sandbox.py`) with subprocess, hard 5s timeout, memory limit, forbidden imports/access
-- [ ] HTML step-by-step execution trace viewer
-- [ ] Predict-first, compare-second flow
-- [ ] Security tests (infinite loops, timeout, network access, file system escape)
-- [ ] Commit Step 5
+- [x] Trace sandbox (`skills/trace/sandbox.py`) with subprocess, hard 5s timeout, AST safety guards against forbidden modules/calls
+- [x] Interactive two-column step-by-step HTML execution viewer (`skills/trace/render.py`) with call stack, variables, and stdout
+- [x] Predict-first, compare-second pedagogical flow
+- [x] Security tests (infinite loops, timeout, network access, forbidden imports - all passed, 55 tests total)
+- [x] Commit Step 5
 
 ## Step 6: Claude Code Adapter
 - [ ] Skill specification (`adapters/claude_code/SKILL.md`)

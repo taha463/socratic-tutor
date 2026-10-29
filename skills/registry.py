@@ -125,10 +125,12 @@ class SkillRegistry:
             from skills.analogy.render import AnalogySkill
             from skills.diagram.render import DiagramSkill
             from skills.eli5.render import Eli5Skill
+            from skills.trace.render import TraceSkill
 
             self.register(Eli5Skill())
             self.register(DiagramSkill())
             self.register(AnalogySkill())
+            self.register(TraceSkill())
 
     def register(self, skill: BaseSkill) -> None:
         """Register a visual skill instance."""
