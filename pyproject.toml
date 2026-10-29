@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "socratic-tutor"
+version = "2.0.0"
+description = "A pedagogical Socratic tutor with adaptive hint ladder, multimodal skills, and behavioral signals."
+readme = "README.md"
+authors = [{ name = "Socratic Tutor Team" }]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "httpx>=0.24.0",
+    "python-dotenv>=1.0.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+]
+plugins = [
+    "manim>=0.17.0",
+]
+
+[project.scripts]
+socratic = "core.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+    "legacy",
+    ".venv",
+    ".socratic",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --strict-markers"
