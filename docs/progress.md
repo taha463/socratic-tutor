@@ -12,13 +12,13 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 1
 
 ## Step 2: Core Loop
-- [ ] Hint Ladder (`core/ladder.py`)
-- [ ] Teacher Agent (`core/agents/teacher.py`, `core/agents/prompts/teacher.txt`)
-- [ ] Critic Agent (`core/agents/critic.py`, `core/agents/prompts/critic.txt`)
-- [ ] Orchestrator (`core/orchestrator.py`)
-- [ ] `python -m core.cli ask` end-to-end working on mock and real providers
-- [ ] Unit & integration tests: leak detection on 10 scripted turns, max 2 rewrites loop
-- [ ] Commit Step 2
+- [x] Hint Ladder (`core/ladder.py`) with 7 rungs and escalation/de-escalation logic
+- [x] Teacher Agent (`core/agents/teacher.py`, `core/agents/prompts/teacher.txt`)
+- [x] Critic Agent (`core/agents/critic.py`, `core/agents/prompts/critic.txt`) with heuristic + semantic leak gates
+- [x] Orchestrator (`core/orchestrator.py`) with max 2 rewrites loop and turn persistence
+- [x] `python -m core.cli ask` end-to-end working on mock and real providers
+- [x] Unit & integration tests: leak detection on 10 scripted turns, max 2 rewrites loop (all 35 tests passed)
+- [x] Commit Step 2
 
 ## Step 3: Diagnostician + Learner Model
 - [ ] Diagnostician Agent (`core/agents/diagnostician.py`, `core/agents/prompts/diagnostician.txt`)

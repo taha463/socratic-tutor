@@ -52,18 +52,22 @@ class BaseLLMProvider(ABC):
         max_tokens: int = 1024,
     ) -> T:
         """Generate a completion and validate it against a Pydantic schema."""
-        system_suffix = (
-            f"\n\nYou must respond strictly with valid JSON conforming to the following schema:\n"
-            f"{json.dumps(schema.model_json_schema(), indent=2)}\n"
-            f"Do not include markdown code block backticks (like ```json), just the raw JSON object."
-        )
-        full_system = (system or "") + system_suffix
-        resp = self.complete(
-            messages=messages,
-            system=full_system,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
+        # Check if provider is MockLLMProvider and has schema-aware generation
+        if isinstance(self, MockLLMProvider):
+            resp = self.complete_for_schema(schema, messages, system, temperature, max_tokens)
+        else:
+            system_suffix = (
+                f"\n\nYou must respond strictly with valid JSON conforming to the following schema:\n"
+                f"{json.dumps(schema.model_json_schema(), indent=2)}\n"
+                f"Do not include markdown code block backticks (like ```json), just the raw JSON object."
+            )
+            full_system = (system or "") + system_suffix
+            resp = self.complete(
+                messages=messages,
+                system=full_system,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
 
         text = resp.content.strip()
         # Clean potential markdown wrapping if returned by LLM
@@ -100,6 +104,38 @@ class MockLLMProvider(BaseLLMProvider):
         else:
             self.response_queue.append(str(text_or_data))
 
+    def complete_for_schema(
+        self,
+        schema: Type[T],
+        messages: List[Dict[str, str]],
+        system: Optional[str] = None,
+        temperature: float = 0.2,
+        max_tokens: int = 1024,
+    ) -> LLMResponse:
+        """Generate response tailored for a requested schema."""
+        self.call_history.append({
+            "schema": schema.__name__,
+            "messages": messages,
+            "system": system,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        })
+
+        # Check if there is an item in the queue that matches this schema
+        for i, item in enumerate(self.response_queue):
+            try:
+                # Test if valid JSON that parses into this schema
+                parsed = json.loads(item)
+                schema.model_validate(parsed)
+                # Matches! Pop this item
+                return LLMResponse(content=self.response_queue.pop(i), model="mock-model", provider="mock")
+            except Exception:
+                continue
+
+        # If not matching queued items, generate contextual default for this schema
+        content = self._generate_contextual_mock(messages, system, target_schema_name=schema.__name__)
+        return LLMResponse(content=content, model="mock-model", provider="mock")
+
     def complete(
         self,
         messages: List[Dict[str, str]],
@@ -126,19 +162,66 @@ class MockLLMProvider(BaseLLMProvider):
         return LLMResponse(content=content, model="mock-model", provider="mock")
 
     def _generate_contextual_mock(
-        self, messages: List[Dict[str, str]], system: Optional[str]
+        self,
+        messages: List[Dict[str, str]],
+        system: Optional[str],
+        target_schema_name: Optional[str] = None,
     ) -> str:
         prompt_str = ((system or "") + " " + " ".join(m.get("content", "") for m in messages)).lower()
+        user_text = " ".join(m.get("content", "") for m in messages).lower()
 
-        # Diagnostician request
-        if "diagnostician" in prompt_str or '"recommended_rung"' in prompt_str:
+        # 1. Prioritize explicit target schema if provided
+        if target_schema_name == "TeacherDraft":
+            return json.dumps({
+                "reply_text": "What do you think happens when a function calls itself?",
+                "single_question": "What do you think happens when a function calls itself?",
+                "needs_visual": False,
+                "visual_concept": None,
+                "visual_type": None,
+            })
+
+        if target_schema_name == "CriticVerdict":
+            if (
+                "the answer is" in user_text
+                or "here is the code:" in user_text
+                or "solution:" in user_text
+                or "here is the solution" in user_text
+                or "you can solve this by writing:" in user_text
+            ):
+                return json.dumps({
+                    "passed": False,
+                    "issues": ["Draft provides direct answer instead of guiding the learner."],
+                    "leak_detected": True,
+                    "multiple_questions": False,
+                    "code_dump": False,
+                    "rewrite_instructions": "Remove the solution. Ask a single question about the base case.",
+                })
+            if user_text.count("?") > 1:
+                return json.dumps({
+                    "passed": False,
+                    "issues": ["Draft asks multiple questions in a single turn."],
+                    "leak_detected": False,
+                    "multiple_questions": True,
+                    "code_dump": False,
+                    "rewrite_instructions": "Consolidate into exactly one focused question.",
+                })
+            return json.dumps({
+                "passed": True,
+                "issues": [],
+                "leak_detected": False,
+                "multiple_questions": False,
+                "code_dump": False,
+                "rewrite_instructions": "",
+            })
+
+        if target_schema_name == "DiagnosticResult" or "diagnostician" in prompt_str or '"recommended_rung"' in prompt_str:
             if "stuck" in prompt_str or "i don't get it" in prompt_str or "confused" in prompt_str:
                 return json.dumps({
                     "level": "beginner",
                     "frustration": 0.75,
                     "state": "STUCK",
                     "recommended_rung": 4,
-                    "reasoning": "Learner expressed confusion; stepping up to visual explanation."
+                    "reasoning": "Learner expressed confusion; stepping up to visual explanation.",
                 })
             elif "paste" in prompt_str or "copier" in prompt_str:
                 return json.dumps({
@@ -146,7 +229,7 @@ class MockLLMProvider(BaseLLMProvider):
                     "frustration": 0.1,
                     "state": "COPYING_SUSPECTED",
                     "recommended_rung": 1,
-                    "reasoning": "Large unformatted paste detected; probe for conceptual understanding."
+                    "reasoning": "Large unformatted paste detected; probe for conceptual understanding.",
                 })
             elif "mastery" in prompt_str or "got it" in prompt_str:
                 return json.dumps({
@@ -154,7 +237,7 @@ class MockLLMProvider(BaseLLMProvider):
                     "frustration": 0.0,
                     "state": "MASTERY",
                     "recommended_rung": 1,
-                    "reasoning": "Learner demonstrated mastery of the core concept."
+                    "reasoning": "Learner demonstrated mastery of the core concept.",
                 })
             else:
                 return json.dumps({
@@ -162,48 +245,19 @@ class MockLLMProvider(BaseLLMProvider):
                     "frustration": 0.2,
                     "state": "LEARNING",
                     "recommended_rung": 1,
-                    "reasoning": "Initial inquiry; probing prior knowledge."
+                    "reasoning": "Initial inquiry; probing prior knowledge.",
                 })
 
-        # Critic request
-        if "critic" in prompt_str or '"passed"' in prompt_str:
-            # If the draft contains an obvious leak
-            if "the answer is" in prompt_str or "here is the code:" in prompt_str or "solution:" in prompt_str:
-                return json.dumps({
-                    "passed": False,
-                    "issues": ["Draft provides the direct answer instead of guiding the learner."],
-                    "leak_detected": True,
-                    "multiple_questions": False,
-                    "rewrite_instructions": "Remove the solution. Ask a single question about the base case."
-                })
-            # If draft has multiple question marks
-            if prompt_str.count("?") > 1:
-                return json.dumps({
-                    "passed": False,
-                    "issues": ["Draft asks multiple questions in a single turn."],
-                    "leak_detected": False,
-                    "multiple_questions": True,
-                    "rewrite_instructions": "Consolidate into exactly one focused question."
-                })
-            return json.dumps({
-                "passed": True,
-                "issues": [],
-                "leak_detected": False,
-                "multiple_questions": False,
-                "rewrite_instructions": ""
-            })
-
-        # Visualizer request
-        if "visualizer" in prompt_str or '"chosen_skill"' in prompt_str or '"visual_spec"' in prompt_str:
+        if target_schema_name == "VisualizerDecision":
             if "trace" in prompt_str or "code" in prompt_str:
                 return json.dumps({
                     "chosen_skill": "trace",
                     "concept": "recursion",
                     "visual_spec": {
                         "code": "def countdown(n):\n    if n <= 0: return\n    print(n)\n    countdown(n - 1)",
-                        "prediction_prompt": "What gets printed first when countdown(3) is called?"
+                        "prediction_prompt": "What gets printed first when countdown(3) is called?",
                     },
-                    "reasoning": "Execution trace helps visualize call stack frames."
+                    "reasoning": "Execution trace helps visualize call stack frames.",
                 })
             elif "hierarchy" in prompt_str or "tree" in prompt_str or "flow" in prompt_str:
                 return json.dumps({
@@ -212,9 +266,9 @@ class MockLLMProvider(BaseLLMProvider):
                     "visual_spec": {
                         "mermaid_source": "graph TD\n    A[Root: 10] --> B[Left: 5]\n    A --> C[Right: ?BLANK?]",
                         "blanks": ["?BLANK?"],
-                        "prompt": "If elements greater than 10 go to the right, what belongs in ?BLANK?"
+                        "prompt": "If elements greater than 10 go to the right, what belongs in ?BLANK?",
                     },
-                    "reasoning": "Mermaid diagram with blanks tests BST invariant."
+                    "reasoning": "Mermaid diagram with blanks tests BST invariant.",
                 })
             else:
                 return json.dumps({
@@ -222,18 +276,38 @@ class MockLLMProvider(BaseLLMProvider):
                     "concept": "general",
                     "visual_spec": {
                         "analogy": "Imagine a stack of plates at a buffet.",
-                        "mapping_question": "Which plate do you remove first: the top one or the bottom one?"
+                        "mapping_question": "Which plate do you remove first: the top one or the bottom one?",
                     },
-                    "reasoning": "Physical everyday analogy helps ground abstract logic."
+                    "reasoning": "Physical everyday analogy helps ground abstract logic.",
                 })
 
+        # 2. Fallbacks based on message content
+        if "critic" in prompt_str or '"passed"' in prompt_str:
+            return json.dumps({
+                "passed": True,
+                "issues": [],
+                "leak_detected": False,
+                "multiple_questions": False,
+                "code_dump": False,
+                "rewrite_instructions": "",
+            })
+
+        if "teacher" in prompt_str or '"reply_text"' in prompt_str:
+            return json.dumps({
+                "reply_text": "What do you think happens when a function calls itself?",
+                "single_question": "What do you think happens when a function calls itself?",
+                "needs_visual": False,
+                "visual_concept": None,
+                "visual_type": None,
+            })
+
         # Eval Judge request
-        if "eval judge" in prompt_str or '"leak_score"' in prompt_str or "ground_truth" in prompt_str:
+        if "eval judge" in prompt_str or '"leak_score"' in prompt_str:
             return json.dumps({
                 "leak_score": 0.0,
                 "leak_detected": False,
                 "pedagogical_value": 0.9,
-                "reasoning": "Tutor guided student through Socratic questioning without revealing the final answer."
+                "reasoning": "Tutor guided student through Socratic questioning without revealing the final answer.",
             })
 
         # Simulated Persona request
@@ -247,7 +321,7 @@ class MockLLMProvider(BaseLLMProvider):
             else:
                 return "I think it has something to do with calling the same function again?"
 
-        # Teacher default
+        # Default fallback
         return "What do you think happens to a function call while it waits for another function to complete?"
 
 
