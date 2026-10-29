@@ -56,3 +56,4 @@ class CurriculumStore:
 
     def list_concepts(self) -> List[str]:
         return list(self._cache.keys())
+

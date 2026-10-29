@@ -81,3 +81,4 @@ def test_orchestrator_visual_request_end_to_end():
         assert Path(reply.visual_path).exists()
         assert reply.visual_html is not None
         assert "mermaid" in reply.visual_html.lower()
+

@@ -22,3 +22,4 @@ description: Execute Python code in a secure sandbox and render an interactive s
 
 ## Outputs
 - Self-contained HTML interactive trace debugger with code line highlighter, call stack tracker, variables viewer, and step controls
+

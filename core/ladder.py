@@ -148,3 +148,4 @@ class HintLadder:
         self.current_rung = max(1, min(7, rung))
         self.consecutive_failures = 0
         self.turns_on_current_rung = 0
+

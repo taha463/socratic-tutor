@@ -17,3 +17,4 @@ description: Render interactive Mermaid diagrams with blank nodes requiring acti
 
 ## Outputs
 - Self-contained HTML page loading Mermaid.js with dark-mode styling and prediction card
+

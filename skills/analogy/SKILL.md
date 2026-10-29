@@ -16,3 +16,4 @@ description: Provide grounded real-world analogies drawn from curriculum or gene
 
 ## Outputs
 - Self-contained HTML card highlighting the mental model and the transfer question
+

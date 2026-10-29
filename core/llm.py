@@ -270,6 +270,29 @@ class MockLLMProvider(BaseLLMProvider):
                     },
                     "reasoning": "Mermaid diagram with blanks tests BST invariant.",
                 })
+            elif "plot" in prompt_str or "complexity" in prompt_str or "gradient" in prompt_str:
+                return json.dumps({
+                    "chosen_skill": "plot",
+                    "concept": "big_o",
+                    "visual_spec": {
+                        "concept": "big_o",
+                        "plot_type": "big_o",
+                        "blank_target": "O(n log n)",
+                        "prediction_prompt": "Which curve represents O(n log n)?",
+                    },
+                    "reasoning": "Matplotlib curve helps visualize algorithmic scaling.",
+                })
+            elif "3d" in prompt_str or "spatial" in prompt_str or "three_d" in prompt_str:
+                return json.dumps({
+                    "chosen_skill": "three_d",
+                    "concept": "3d_vectors",
+                    "visual_spec": {
+                        "concept": "3d_vectors",
+                        "blank_target": "[0, 1, 0]",
+                        "prediction_prompt": "Orbit the scene and identify the transformed vector.",
+                    },
+                    "reasoning": "Three.js 3D spatial interactive model.",
+                })
             else:
                 return json.dumps({
                     "chosen_skill": "eli5",

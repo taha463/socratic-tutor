@@ -7,3 +7,4 @@
   "post_quiz": "What happens if the learning rate in gradient descent is chosen to be too large?",
   "post_quiz_answer": "The updates will overshoot the minimum and may diverge rather than converging."
 }
+

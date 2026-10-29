@@ -14,3 +14,4 @@ When the learner is on Rungs 1 through 6:
 - For diagrams, at least one critical node must be labeled `?BLANK?` or `[ ? ]`.
 - Never reveal the complete, unbroken, solved state.
 - Formulate a clear prediction prompt asking the learner what belongs in the blank.
+

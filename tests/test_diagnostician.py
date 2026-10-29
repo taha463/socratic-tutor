@@ -71,3 +71,4 @@ def test_diagnostician_rapid_attempts_stuck():
         prior_turns_count=4,
     )
     assert res.state == "STUCK"
+

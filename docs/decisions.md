@@ -16,3 +16,4 @@ This document records key decisions made during the design and implementation of
 - **Context**: The test suite, CI, and local evaluation must run reliably without requiring paid API keys or exposing developers to network failures.
 - **Decision**: `core/llm.py` supports Anthropic (default), Gemini, OpenAI, and a built-in deterministic `MockLLMProvider` that can simulate realistic agent interactions, critic reviews, and learner personas.
 - **Consequences**: 100% test coverage in CI without external secrets.
+

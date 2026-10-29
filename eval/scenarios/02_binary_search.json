@@ -7,3 +7,4 @@
   "post_quiz": "If an array has 64 sorted elements, what is the maximum number of comparisons needed?",
   "post_quiz_answer": "At most 6 or 7 comparisons because log2(64) equals 6."
 }
+

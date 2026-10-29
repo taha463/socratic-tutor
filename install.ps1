@@ -49,3 +49,4 @@ Write-Host "Usage in Claude Code:   /socratic teach me recursion"
 Write-Host "Usage in Terminal:      python -m core.cli ask 'teach me recursion'"
 Write-Host "Usage in Web Browser:   python -m adapters.web"
 Write-Host "=================================================" -ForegroundColor Cyan
+

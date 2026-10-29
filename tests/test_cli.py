@@ -39,3 +39,4 @@ def test_cli_no_args(capsys):
     assert code == 0
     captured = capsys.readouterr()
     assert "Socratic Tutor v2" in captured.out
+

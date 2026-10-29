@@ -80,11 +80,11 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 9
 
 ## Step 10: Plugins & Extra Skills
-- [ ] `plot` skill (Matplotlib/SVG plots for algorithms, complexity, ML)
-- [ ] `three_d` plugin (Three.js / SVG isometric for spatial concepts)
-- [ ] `manim` plugin (`plugins/manim/`, optional, disabled by default)
-- [ ] Unit tests for plugins
-- [ ] Commit Step 10
+- [x] `plot` skill (Matplotlib/SVG plots for algorithms, complexity, ML)
+- [x] `three_d` plugin (Three.js / SVG isometric for spatial concepts)
+- [x] `manim` plugin (`plugins/manim/`, optional, disabled by default)
+- [x] Unit tests for plugins
+- [x] Commit Step 10
 
 ## Step 11: Polish & Verification Gate
 - [ ] Comprehensive README with hero visual, 30-second quickstart, architecture diagram, eval results table, privacy section, legacy note

@@ -26,3 +26,4 @@ DIAGNOSTIC HEURISTICS:
    - If the learner accurately explains the underlying mechanism and predicts edge cases, state = "MASTERY" and frustration = 0.0.
 4. First-Session Calibration:
    - For complete beginners, recommend starting at Rung 3 (Analogy) or Rung 4 (Visual) rather than abstract probing.
+

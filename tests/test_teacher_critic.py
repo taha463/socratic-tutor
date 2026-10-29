@@ -139,3 +139,4 @@ def test_orchestrator_rewrite_loop_on_critic_failure():
         assert reply.rewrites_done == 1
         assert "The answer is" not in reply.text
         assert "?" in reply.text
+

@@ -113,3 +113,4 @@ def test_cli_dashboard_command():
     res = subprocess.run([sys.executable, "-m", "core.cli", "dashboard"], capture_output=True, text=True)
     assert res.returncode == 0
     assert "Dashboard generated: file://" in res.stdout
+

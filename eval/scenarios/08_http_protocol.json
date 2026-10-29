@@ -7,3 +7,4 @@
   "post_quiz": "What is the difference in intended idempotency between GET and POST?",
   "post_quiz_answer": "GET is safe and idempotent (retrieves without changing server state), while POST typically creates or mutates server resources."
 }
+

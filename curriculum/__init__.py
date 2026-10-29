@@ -3,3 +3,4 @@
 from curriculum.store import CurriculumStore
 
 __all__ = ["CurriculumStore"]
+

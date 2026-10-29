@@ -53,3 +53,4 @@ class DiagramSkill(BaseSkill):
             has_blanks=has_blanks,
             metadata={"mermaid_source": mermaid_source, "prompt": prompt, "blanks": blanks},
         )
+

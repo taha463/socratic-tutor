@@ -72,3 +72,4 @@ CREATE INDEX IF NOT EXISTS idx_sessions_learner ON sessions(learner_id);
 CREATE INDEX IF NOT EXISTS idx_turns_session ON turns(session_id);
 CREATE INDEX IF NOT EXISTS idx_signals_session ON signals(session_id);
 CREATE INDEX IF NOT EXISTS idx_mastery_learner ON mastery(learner_id);
+

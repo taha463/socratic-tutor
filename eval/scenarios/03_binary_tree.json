@@ -7,3 +7,4 @@
   "post_quiz": "What property must hold for every node in a valid Binary Search Tree?",
   "post_quiz_answer": "All values in the left subtree must be less than the node, and all in the right subtree must be greater."
 }
+

@@ -61,3 +61,4 @@ echo "Usage in Claude Code:   /socratic teach me recursion"
 echo "Usage in Terminal:      python -m core.cli ask 'teach me recursion'"
 echo "Usage in Web Browser:   python -m adapters.web"
 echo "================================================="
+

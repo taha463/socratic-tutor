@@ -46,3 +46,4 @@ def test_cli_teach_recursion_invocation():
     assert res.returncode == 0
     assert "Socratic Tutor" in res.stdout
     assert "?" in res.stdout
+

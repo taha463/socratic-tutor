@@ -187,3 +187,4 @@ def test_cli_web_parser():
     assert args.subcommand == "web"
     assert args.port == 9090
     assert args.host == "0.0.0.0"
+

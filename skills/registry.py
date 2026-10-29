@@ -125,16 +125,36 @@ class SkillRegistry:
             from skills.analogy.render import AnalogySkill
             from skills.diagram.render import DiagramSkill
             from skills.eli5.render import Eli5Skill
+            from skills.plot.render import PlotSkill
             from skills.trace.render import TraceSkill
 
             self.register(Eli5Skill())
             self.register(DiagramSkill())
             self.register(AnalogySkill())
             self.register(TraceSkill())
+            self.register(PlotSkill())
 
     def register(self, skill: BaseSkill) -> None:
         """Register a visual skill instance."""
         self._skills[skill.name.lower()] = skill
+
+    def load_plugins(self) -> List[str]:
+        """Discover and register optional plugins (three_d, manim)."""
+        loaded = []
+        try:
+            from plugins.three_d.render import ThreeDSkill
+            self.register(ThreeDSkill())
+            loaded.append("three_d")
+        except Exception:
+            pass
+
+        try:
+            from plugins.manim.render import ManimSkill
+            self.register(ManimSkill())
+            loaded.append("manim")
+        except Exception:
+            pass
+        return loaded
 
     def get(self, name: str) -> Optional[BaseSkill]:
         """Look up skill by name."""
@@ -173,13 +193,6 @@ def get_skill_registry() -> SkillRegistry:
     """Return singleton global skill registry with core skills registered."""
     global _GLOBAL_REGISTRY
     if _GLOBAL_REGISTRY is None:
-        _GLOBAL_REGISTRY = SkillRegistry()
-        # Register core skills
-        from skills.analogy.render import AnalogySkill
-        from skills.diagram.render import DiagramSkill
-        from skills.eli5.render import Eli5Skill
-
-        _GLOBAL_REGISTRY.register(Eli5Skill())
-        _GLOBAL_REGISTRY.register(DiagramSkill())
-        _GLOBAL_REGISTRY.register(AnalogySkill())
+        _GLOBAL_REGISTRY = SkillRegistry(auto_register_core=True)
+        _GLOBAL_REGISTRY.load_plugins()
     return _GLOBAL_REGISTRY

@@ -72,3 +72,4 @@ def test_skill_registry_file_persistence():
         assert p.suffix == ".html"
         content = p.read_text(encoding="utf-8")
         assert "cinema" in content
+

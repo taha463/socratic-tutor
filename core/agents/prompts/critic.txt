@@ -16,3 +16,4 @@ EVALUATION CRITERIA:
    - If a visual or code snippet is included on rungs 1-6, does it maintain blanks or predictions? If it gives away the answer, it MUST fail.
 
 If any criterion fails, provide precise, actionable `rewrite_instructions` directing the Teacher how to fix the issue.
+

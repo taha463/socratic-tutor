@@ -7,3 +7,4 @@
   "post_quiz": "What happens if two pointers reference the same memory address and one modifies the data?",
   "post_quiz_answer": "Both pointers will observe the modified data because they point to the identical memory location."
 }
+

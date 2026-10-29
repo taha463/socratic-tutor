@@ -83,3 +83,4 @@ def test_ladder_diagnostician_recommendation():
     ladder = HintLadder(current_rung=1)
     new_rung = ladder.update(is_success=False, recommended_rung=3)
     assert new_rung == 3
+

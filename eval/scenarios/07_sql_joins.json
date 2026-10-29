@@ -7,3 +7,4 @@
   "post_quiz": "If an employee has no assigned department, will they appear in an INNER JOIN or a LEFT JOIN with the departments table?",
   "post_quiz_answer": "They will appear in the LEFT JOIN (with NULL department values) but be omitted from the INNER JOIN."
 }
+

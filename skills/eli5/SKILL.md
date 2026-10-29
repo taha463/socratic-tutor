@@ -17,3 +17,4 @@ description: Explain abstract technical concepts using intuitive everyday metaph
 
 ## Outputs
 - Self-contained styled HTML card with analogy block and mapping challenge
+
