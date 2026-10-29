@@ -25,7 +25,8 @@ def build_parser() -> argparse.ArgumentParser:
     ask_parser.add_argument("--topic", "-t", type=str, default="general", help="Topic to learn.")
 
     # Dashboard subcommand
-    subparsers.add_parser("dashboard", help="Build or display the learner mastery dashboard.")
+    dash_parser = subparsers.add_parser("dashboard", help="Build or display the learner mastery dashboard.")
+    dash_parser.add_argument("--learner", "-l", type=str, default="learner-default", help="Learner ID.")
 
     # Review subcommand
     review_parser = subparsers.add_parser("review", help="Review weak topics and decayed concepts.")
@@ -73,7 +74,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     elif args.subcommand == "dashboard":
         try:
             from dashboard.build import build_dashboard
-            path = build_dashboard()
+            path = build_dashboard(learner_id=args.learner)
             print(f"Dashboard generated: file://{path}")
         except ImportError:
             print("[Dashboard]: Dashboard builder module ready for Step 7.")

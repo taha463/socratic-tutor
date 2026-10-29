@@ -54,11 +54,13 @@ This document tracks autonomous progress across the 11 build steps specified in 
 - [x] Commit Step 6
 
 ## Step 7: Dashboard Generator
-- [ ] Static HTML generator (`dashboard/build.py`) from SQLite
-- [ ] Monthly mastery chart, streak tracker, weak topics, rung-usage trend
-- [ ] Visual replay support
-- [ ] CLI command `/socratic dashboard` and tests
-- [ ] Commit Step 7
+- [x] Static HTML generator (`dashboard/build.py`) from SQLite
+- [x] Monthly concept mastery progression, consecutive day streaks, and sessions per week
+- [x] Weak topics list with recommended next practice and mistake patterns
+- [x] Hint ladder usage trend (fading scaffolding metric)
+- [x] Visual and execution trace replay gallery
+- [x] CLI command `/socratic dashboard` and tests (all 63 tests passed)
+- [x] Commit Step 7
 
 ## Step 8: Evaluation Harness
 - [ ] 4 Simulated Learner Personas (`beginner`, `frustrated`, `copier`, `strong`)
