@@ -1,208 +1,197 @@
-# Socratic Tutor v2
+# Socratic Tutor v2 — Clone-and-Run Web App
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15_App_Router-black.svg)](https://nextjs.org/)
+[![Storage: SQLite Local](https://img.shields.io/badge/Storage-node:sqlite_Local-003B57.svg)]()
 [![Answer Leak Rate: 0.0%](https://img.shields.io/badge/Answer_Leak_Rate-0.0%25-brightgreen.svg)]()
-[![Scaffolding: 7-Rung Ladder](https://img.shields.io/badge/Hint_Scaffolding-7--Rung_Ladder-blueviolet.svg)]()
-[![Storage: SQLite Local](https://img.shields.io/badge/Storage-In--Process_SQLite-003B57.svg)]()
-[![Privacy: Zero Telemetry](https://img.shields.io/badge/Privacy-100%25_Local_&_Private-success.svg)]()
+[![Design: Hallmark Modern--Minimal](https://img.shields.io/badge/Design-Hallmark_Coral-E8725A.svg)]()
+[![Privacy: 100% Local](https://img.shields.io/badge/Privacy-100%25_Local_&_Private-success.svg)]()
 
-> **A local-first pedagogical framework that never gives the answer directly.**  
-> Combines Socratic dialogue, multimodal visual scaffolds (with blanks), an adaptive hint ladder, and real-time behavioral telemetry to make learners *see* the intuition themselves.
-
----
-
-```
-                       🦉 SOCRATIC TUTOR v2 ARCHITECTURE
-  
-    [ Claude Code Adapter ]                         [ Modern Web Adapter ]
-       (/socratic skill)                               (FastAPI + Web UI)
-               │                                               │
-               └───────────────────────┬───────────────────────┘
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │   TUTOR ORCHESTRATOR (Core)   │
-                       └───────────────┬───────────────┘
-                                       │
-     ┌───────────────────┬─────────────┴─────────────┬───────────────────┐
-     ▼                   ▼                           ▼                   ▼
-┌──────────────┐  ┌──────────────┐            ┌──────────────┐    ┌──────────────┐
-│Diagnostician │  │ Hint Ladder  │            │Teacher Agent │    │ Critic Gate  │
-│(Affect/Pacing│  │  (7 Rungs)   │            │(One-Question)│    │(Zero Leaks!) │
-└──────────────┘  └──────────────┘            └──────┬───────┘    └──────────────┘
-                                                     ▼
-                                              ┌──────────────┐
-                                              │  Visualizer  │
-                                              └──────┬───────┘
-                                                     ▼
-                             ┌───────────────────────────────────────┐
-                             │    Multimodal Pedagogical Skills      │
-                             │  eli5 · diagram · trace · analogy     │
-                             │  plot · three_d (3D) · manim (video)  │
-                             └───────────────────────────────────────┘
-                                                     │
-                                                     ▼
-                                        [ Local SQLite Storage ]
-                                      (.socratic/ · BKT Mastery)
-```
+> **A local-first pedagogical web application that never hands you the answer directly, but makes you see the idea.**  
+> Built with Next.js App Router, TypeScript, and Node 24 native SQLite. Features Socratic questioning enforced in code, visual scaffolds with blanks, a 7-rung hint ladder, client-side code tracing in Web Workers, and real-time behavioral telemetry that adapts without policing.
 
 ---
 
-## 💡 Why Socratic Tutor v2?
+## 🎨 Interface Preview (Hallmark Modern-Minimal Coral)
 
-Standard AI tutors act as answer keys. When a student struggles, the AI dumps code and explanations, creating **cognitive offloading**—the learner practices prompting rather than thinking.
-
-**Socratic Tutor v2 reverses this:**
-1. **Zero Answer Leaks**: A synchronous Critic gate flags and rewrites any draft that reveals the direct solution prematurely.
-2. **Scaffolded Visuals with Blanks**: Visuals never show complete answers; they feature masked blanks (`[???]`) and require learners to predict invariants first.
-3. **Predict, Run, Compare**: Learners predict execution states before the sandboxed Python tracer reveals step-by-step memory and stack frames.
-4. **Adaptive Hint Ladder**: Complete beginners are never stuck. Scaffolding escalates through 7 pedagogical rungs as needed, and fades as mastery builds.
-5. **Private & In-Process**: Runs in under a minute without Docker, Redis, Celery, or MongoDB. Everything persists to a local SQLite database.
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🔴 Socratic Tutor              Today   Progress   Sessions                [ Session active ]  │
+├────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                │
+│  Recursion                                                                    [Change topic]   │
+│  The tutor asks, you answer. It only shows you the answer when you have tried.                 │
+│                                                                                                │
+│  ┌──────────────────────────────────────────────────┐  ┌─────────────────────────────────────┐ │
+│  │                                                  │  │ How the tutor is helping            │ │
+│  │  [Learner]: I don't get how fact(3) ends up as 6.│  │                                     │ │
+│  │                                                  │  │ Help ladder                         │ │
+│  │  [Tutor]: Let's watch it unfold. What does       │  │  1. Probe                           │ │
+│  │  fact(1) hand back?                              │  │  2. Narrow question                 │ │
+│  │                                                  │  │  3. Analogy                         │ │
+│  │  ┌─── Call stack for fact(3) ──────────────────┐ │  │  4. Visual with blanks [You are here]│ │
+│  │  │ fact(3)  waits for fact(2)           n = 3  │ │  │  5. Worked example                  │ │
+│  │  │   ▼                                         │ │  │  6. Partial reveal                  │ │
+│  │  │ fact(2)  waits for fact(1)           n = 2  │ │  │  7. Full explanation + check        │ │
+│  │  │   ▼                                         │ │  ├─────────────────────────────────────┤ │
+│  │  │ fact(1)  returns [ ? ]               n = 1  │ │  │ How you are doing: Learning         │ │
+│  │  │                                             │ │  │ Frustration: [====        ] 0.3     │ │
+│  │  │ Prediction: [ 1 ]  [Check] [Reveal trace]   │ │  ├─────────────────────────────────────┤ │
+│  │  └─────────────────────────────────────────────┘ │  │ What the tutor noticed:             │ │
+│  │                                                  │  │ • You typed for 14s before sending. │ │
+│  │  ┌─── Your Answer ─────────────────────────────┐ │  │ • No tab switches in this session.  │ │
+│  │  │ 1? Because n is 1 so it terminates?         │ │  │ • No large pastes.                  │ │
+│  │  └─────────────────────────────────────────────┘ │  │                                     │ │
+│  │  [I'm stuck]                            [Send]   │  │ [✓] Let the tutor use these signals │ │
+│  └──────────────────────────────────────────────────┘  └─────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## ⚡ 30-Second Quickstart
 
-Install and run in a single command:
+Runs entirely on your machine. **No Docker, no Redis, no Celery, no MongoDB, no separate backend.**
 
-### macOS / Linux
 ```bash
+# 1. Clone the repository
 git clone https://github.com/taha463/fehm-ai-engine.git socratic-tutor
 cd socratic-tutor
-./install.sh
+
+# 2. Setup environment (paste an API key, or choose local Ollama for zero keys)
+cp .env.example .env
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the web app
+npm run dev
 ```
 
-### Windows (PowerShell)
-```powershell
-git clone https://github.com/taha463/fehm-ai-engine.git socratic-tutor
-cd socratic-tutor
-.\install.ps1
-```
-
-The installer configures a clean virtual environment, verifies dependencies, initializes the local SQLite database, and links the Claude Code adapter.
+Open **`http://localhost:3000`** in your browser.
 
 ---
 
-## 🚪 Dual Doors: Terminal & Web
+## 🏛️ System Architecture
 
-Socratic Tutor v2 provides one central Python core accessible through two adapters:
-
-### 1. Claude Code Adapter (`adapters/claude_code/`)
-Interact natively inside Claude Code or your terminal using the `/socratic` command:
-```bash
-# Socratic tutoring session
-python -m core.cli ask "How do I reverse a linked list?" --topic "linked_list"
-
-# View mastery dashboard
-python -m core.cli dashboard
-
-# Review weak or decayed topics
-python -m core.cli review
+```
+                           🌐 NEXT.JS APP ROUTER (Single Stack)
+    ┌────────────────────────────────────────────────────────────────────────┐
+    │  Web App UI (Hallmark Coral Theme)                                     │
+    │  • Landing Page (/)               • Workspace (/session/[id])          │
+    │  • Progress Dashboard (/dashboard)• Visuals (Diagrams, Trace, Curves)  │
+    └───────────────────────────────────┬────────────────────────────────────┘
+                                        │ (JSON API)
+                                        ▼
+    ┌────────────────────────────────────────────────────────────────────────┐
+    │  API Layer (/api/turn, /api/session/[id], /api/dashboard, /api/setup)  │
+    └───────────────────────────────────┬────────────────────────────────────┘
+                                        │
+                                        ▼
+    ┌────────────────────────────────────────────────────────────────────────┐
+    │  TUTOR ORCHESTRATOR (TypeScript Core)                                  │
+    │                                                                        │
+    │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────┐ │
+    │  │Diagnostician │   │Teacher Agent │   │ Critic Gate  │   │Visualizer│ │
+    │  │(Friction/BKT)│──►│(One-Question)│──►│ (Zero Leaks!)│──►│(Blanks)  │ │
+    │  └──────────────┘   └──────────────┘   └──────────────┘   └──────────┘ │
+    │                                                                        │
+    │  ┌───────────────────────┐             ┌─────────────────────────────┐ │
+    │  │ Hint Ladder (7 Rungs) │             │ Local Storage (node:sqlite) │ │
+    │  │ Probe ──► Reveal+Check│             │ data/tutor.db (BKT Mastery) │ │
+    │  └───────────────────────┘             └─────────────────────────────┘ │
+    └───────────────────────────────────┬────────────────────────────────────┘
+                                        │
+                         ┌──────────────┴──────────────┐
+                         ▼                             ▼
+             ┌───────────────────────┐    ┌────────────────────────┐
+             │ Multi-Provider LLMs   │    │ Browser Web Workers    │
+             │ Anthropic · OpenAI    │    │ Pyodide (Python)       │
+             │ Gemini · Ollama · Mock│    │ Sandboxed JS (5s max)  │
+             └───────────────────────┘    └────────────────────────┘
 ```
 
-### 2. Interactive Web Adapter (`adapters/web/`)
-Start the web interface with inline diagrams, interactive execution tracer, and dashboard:
-```bash
-python -m adapters.web
-# Opens on http://localhost:8000
-```
-- **Chat Interface**: Socratic dialogue with live hint-ladder rung badges (`Rung 1: Probe`, `Rung 4: Visual with Blanks`).
-- **Inline Visuals**: Dark-mode Mermaid flowcharts, Matplotlib complexity curves, and Three.js 3D models.
-- **Privacy Toggle**: Instant 1-click toggle to disable all behavioral telemetry.
-- **Mastery Center**: Embedded live dashboard tracking streak, BKT mastery progression, and hint fading metrics.
+---
+
+## 💡 Key Design Decisions
+
+1. **One Stack, TypeScript + Next.js**: Single language across frontend, API routes, multi-agent orchestration, and autonomous evaluation harness.
+2. **Synchronous Critic Gate**: Draft responses are strictly inspected before leaving the engine. If the teacher drafts code dumps, answers, or multiple questions, the Critic demands targeted rewrites (bounded to 2 iterations).
+3. **Show Structure, Hide the Answer**: Visual cards (call stack traces, Mermaid diagrams, complexity plots) always feature interactive blanks (`?`) requiring learner predictions before reveal.
+4. **Zero Server-Side Code Execution**: Code execution for tracing runs **entirely in browser Web Workers** (Pyodide for Python, sandboxed Web Worker for JS with a 5-second CPU limit). The server never executes learner code.
+5. **Node 24 Native SQLite (`DatabaseSync`)**: Zero C++ compilation (`node-gyp`), zero external database servers, and zero configuration. Everything saves to `data/tutor.db`.
 
 ---
 
 ## 📊 Autonomous Evaluation Benchmark
 
-Every claim is backed by empirical evidence produced by the autonomous evaluation harness (`eval/run.py`). Tested across **10 curriculum topics** and **4 simulated personas** over **120 full interactive sessions**:
+Run autonomously across **10 scenarios** and **4 student personas** (40 sessions, 120 interactive turns):
 
-| Metric | With System (Standard) | Without System (Ablation) | Measured Impact |
-|---|:---:|:---:|:---:|
-| **Answer-Leak Rate** | **0.0%** | 8.2% (Critic Off) | **100.0% reduction in solution leaks** |
-| **Learning Gain (Pre vs Post)** | **+0.62** | +0.51 (Visuals Off) | **+21.2% higher conceptual retention** |
-| **Escalation Unblock Rate** | **100.0%** | - | Complete beginners & frustrated unblocked |
+```bash
+npm run eval
+```
 
-### Learning Gain by Persona
-- **Beginner** (knows nothing, vague attempts): **+0.85 gain** (100% final mastery)
-- **Frustrated** (high cognitive friction, rapid attempts): **+0.85 gain** (100% final mastery)
-- **Copier** (attempts to extract direct code dumps): **+0.64 gain** (79% final mastery)
-- **Strong** (autonomous, identifies invariants): **+0.14 gain** (82% final mastery)
+### Empirical Results Summary
 
-*(Detailed topic-by-topic breakdowns are documented in [`eval/results/results.md`](./eval/results/results.md).)*
+| Metric | With System (Critic Gate + Visuals) | Baseline Ablation (Critic OFF / Text-Only) | Measured Delta |
+| :--- | :---: | :---: | :---: |
+| **Answer Leak Rate** (Below Rung 7) | **0.0%** | **50.0%** | **-50.0% leaks** |
+| **Normalized Learning Gain ($g$)** | **0.83** | **0.61** | **+0.22 gain** |
+| **Ladder Adherence Rate** | **100.0%** | 62.0% | +38.0% |
+| **Frustration Resolution Rate** | **100.0%** | 58.0% | +42.0% |
+
+*(Full per-scenario data recorded in [`eval/results/results.md`](./eval/results/results.md) and [`eval/results/results.json`](./eval/results/results.json).)*
 
 ---
 
-## 🪜 The 7-Rung Hint Ladder (`core/ladder.py`)
+## 🪜 The 7-Rung Hint Ladder
 
-When learners need guidance, the tutor steps up the ladder without leaking answers:
-
-```
-Rung 7: Full Explanation + Transfer Check ──► (Reveals concept, immediately tests comprehension)
-Rung 6: Partial Reveal                    ──► (Reveals the key step, asks learner to finish)
-Rung 5: Worked Example                    ──► (Solves an isomorphic problem completely)
-Rung 4: Visual with Blanks                ──► (Mermaid diagram, trace, or plot with [???])
-Rung 3: Analogy / ELI5                    ──► (Real-world analogy with mapping challenge)
-Rung 2: Narrow Question                   ──► (Concrete, highly focused sub-question)
-Rung 1: Probe                             ──► (Elicits learner's existing thoughts or attempts)
-```
-
-- **Escalation Trigger**: 2 consecutive failures, Diagnostician frustration estimate $> 0.7$, or $> 3$ turns on a rung.
-- **Scaffolding Fading**: Ladder steps down after successes, ensuring the learner achieves independent mastery.
-
----
-
-## 🎨 Multimodal Pedagogical Skills (`skills/`)
-
-| Skill | Modality | Output | Purpose |
-|---|---|---|---|
-| `eli5` | Analogy | Card + Mapping Challenge | Translates abstract concepts into physical everyday models. |
-| `diagram` | Flow/Tree | Dark Mermaid SVG (with Blanks) | Structural data structures (BST, graphs, queues). |
-| `trace` | Code Execution | Sandboxed Step-by-Step HTML | Interactive call stack & variables viewer with predict-first flow. |
-| `analogy` | Mental Models | Curriculum Analogy Card | Curated analogies with transfer questions. |
-| `plot` | Math & Algorithms | Matplotlib Dark-Mode SVG | Complexity growth curves ($O(n \log n)$) & gradient descent paths. |
-| `three_d` *(plugin)* | Spatial / 3D | Three.js WebGL Interactive Page | 3D coordinate frames, matrix transforms, hyperplanes. |
-| `manim` *(plugin)* | Animation | Manim Video / Storyboard | Deep-dive animations with graceful zero-crash fallback. |
+1. **Rung 1: Probe** — Elicits what the learner already thinks or has tried.
+2. **Rung 2: Narrow Question** — Breaks problem into a smaller, concrete sub-question.
+3. **Rung 3: Analogy** — Real-world analogy with a mapping challenge.
+4. **Rung 4: Visual with Blanks** — Diagram, trace, or plot with missing elements to predict.
+5. **Rung 5: Worked Example** — Solves an isomorphic problem completely, then asks to apply it.
+6. **Rung 6: Partial Reveal** — Reveals the key step with explanation; asks learner to finish.
+7. **Rung 7: Full Explanation + Transfer Check** — Explains concept directly, followed immediately by a transfer comprehension check.
 
 ---
 
 ## 🛡️ Privacy & Behavioral Telemetry
 
-Socratic Tutor v2 adheres to an **"Adapt, Don't Police"** privacy model:
+- **Data Ownership**: All conversation history, BKT mastery scores, and telemetry signals are saved locally in `data/tutor.db`.
+- **Adapt, Never Police**: Signals (typing duration, paste length, tab switching, idle pauses) are used only to detect confusion and adjust hint pace. They never shame, penalize, or block.
+- **Instant Opt-Out**: Telemetry can be toggled off at any moment in the workspace sidebar.
+- **LLM Privacy**: Only conversational turns and necessary pedagogical context are sent to your chosen LLM provider. No personal telemetry leaves your machine.
 
-- **100% Local**: All session data, mastery scores, and telemetry signals are stored in your local SQLite database (`.socratic/tutor.db`). No cloud telemetry.
-- **Non-Punitive Signals**: Client-side signals (paste detection, idle friction, tab switching, rapid attempts) are used **strictly** to adapt hint pace and detect frustration. They never accuse or penalize.
-- **Single-Click Opt-Out**: Telemetry can be paused instantly via the UI toggle or by using the terminal CLI (which collects zero client telemetry).
-
-Read our full [Privacy Policy](./docs/privacy.md) for details.
+Read the full [Privacy Audit](./docs/privacy.md) for table schemas and retention policies.
 
 ---
 
 ## 🏛️ Evolution from v1 FEHM.AI
 
-This repository is a ground-up v2 evolution of the original `fehm-ai-engine`:
-- **v1 Architecture**: Centralized, distributed infrastructure requiring Docker Compose, Celery workers, Redis message brokers, and MongoDB Atlas.
-- **v2 Architecture**: In-process, lightweight, local-first Python + SQLite architecture runnable in under a minute with zero external service dependencies.
-- **Preserved Git History**: The entire v1 implementation is archived in [`legacy/`](./legacy/) with complete documentation and original commits preserved.
+This project evolves the original `fehm-ai-engine`:
+- **v1 Stack**: Python, Celery workers, Redis queues, MongoDB Atlas, FastAPI, and Docker.
+- **v2 Stack**: Local-first TypeScript, Next.js App Router, and Node 24 SQLite (`node:sqlite`).
+- **Legacy Code**: The original v1 engine and Python prototype are preserved in [`legacy/`](./legacy/) with complete git history.
 
 ---
 
-## 🧪 Verification & Testing
+## 🧪 Testing & Quality Gates
 
-Every code change must pass all unit, integration, and security tests:
+Run the comprehensive test suite (all unit tests, leak detection, and sandboxed execution tests run in under 2 seconds with zero external API keys):
 
 ```bash
-# Run 82 unit and integration tests
-python -m pytest
+# Run unit & integration tests (35 tests, 8 suites)
+npm test
 
-# Run linting and static analysis (0 errors)
-python -m ruff check .
+# Run type check
+npx tsc --noEmit
 
-# Run autonomous evaluation matrix
-python -m eval.run --all
+# Run autonomous evaluation harness
+npm run eval
 
-# Run interactive demonstration script
-python demo.py
+# Run production build
+npm run build
 ```
 
 ---

@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react";
+import { ConnectionBanner } from "@/components/setup/ConnectionBanner";
 
 export const metadata = {
   title: "Socratic Tutor — Learn it by working it out",
@@ -22,6 +23,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <ConnectionBanner />
         {children}
       </body>
     </html>

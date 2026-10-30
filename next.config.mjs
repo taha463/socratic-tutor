@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    serverComponentsExternalPackages: ["node:sqlite"],
-  },
+  serverExternalPackages: ["node:sqlite"],
 };
 
 export default nextConfig;

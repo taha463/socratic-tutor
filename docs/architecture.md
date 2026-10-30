@@ -1,178 +1,279 @@
 # Socratic Tutor v2: Architecture Specification
 
-Socratic Tutor v2 is a local-first, multi-agent pedagogical framework built in Python and backed by SQLite. Its foundational invariant is: **never give the answer directly, but actively structure dialogue and visual intuition until the learner sees it.**
+Socratic Tutor v2 is a local-first, multi-agent pedagogical web application built in **TypeScript and Next.js (App Router)** and backed by **Node 24 native SQLite (`node:sqlite`)**.
+
+Its foundational invariant is: **never give the answer directly below Rung 7, but actively scaffold mental models through dialogue and interactive visual blanks until the learner sees the insight.**
 
 ---
 
 ## 1. High-Level System Architecture
 
-Socratic Tutor v2 provides one shared, deterministic Python core accessible through two distinct doors:
+Socratic Tutor v2 unifies the user interface, API endpoints, multi-agent pedagogical loop, visual skills registry, and autonomous evaluation harness within a single TypeScript codebase:
 
 ```mermaid
 graph TD
-    subgraph Adapters ["Adapters (Doors)"]
-        CC["Claude Code Adapter<br/>(/socratic)"]
-        WEB["Web Adapter<br/>(FastAPI + Vanilla JS)"]
+    subgraph Client ["Browser Client (Hallmark Modern-Minimal Theme)"]
+        UI_HOME["Landing Page (/)"]
+        UI_SESS["Session Workspace (/session/[id])"]
+        UI_DASH["Mastery Dashboard (/dashboard)"]
+        WORKER_PY["Pyodide Web Worker (Python Tracer)"]
+        WORKER_JS["Sandboxed Web Worker (JS Tracer)"]
+        TELEM["Client Telemetry Collector (Paste/Idle/Blur)"]
     end
 
-    subgraph Core ["Socratic Core (In-Process)"]
-        ORCH["Tutor Orchestrator"]
-        LADDER["7-Rung Hint Ladder"]
-        LEARNER["Learner Model (BKT + Ebbinghaus)"]
-        LLM["LLM Client Abstraction<br/>(Anthropic / Gemini / OpenAI / Mock)"]
+    subgraph Server ["Next.js App Router (Node 24 LTS)"]
+        API_TURN["POST /api/turn"]
+        API_SESS["GET /api/session/[id]"]
+        API_DASH["GET /api/dashboard"]
+        API_SETUP["GET /api/setup"]
 
-        subgraph Agents ["Cooperating Multi-Agent Loop"]
-            DIAG["Diagnostician Agent<br/>(Affect & Telemetry)"]
-            TEACH["Teacher Agent<br/>(One-Question Rule)"]
-            VIS["Visualizer Agent<br/>(Skills Dispatcher)"]
-            CRITIC["Critic Quality Gate<br/>(Synchronous Leak & Rule Gate)"]
+        subgraph Core ["Socratic In-Process Core"]
+            ORCH["Orchestrator Loop"]
+            LADDER["7-Rung Hint Ladder"]
+            LEARNER["Learner Model (BKT + Ebbinghaus)"]
+            LLM["Multi-Provider LLM Abstraction<br/>(Anthropic / OpenAI / Gemini / Ollama / Mock)"]
+
+            subgraph Agents ["Four Cooperating Agents"]
+                DIAG["Diagnostician Agent<br/>(Frustration & Cognitive State)"]
+                TEACH["Teacher Agent<br/>(Socratic Questioning & Scaffolding)"]
+                VIS["Visualizer Agent<br/>(Visual Artifact Generation)"]
+                CRITIC["Critic Quality Gate<br/>(Synchronous Leak & Rule Gate)"]
+            end
+
+            subgraph Skills ["Multimodal Visual Skills Registry"]
+                ELI5["ELI5 Everyday Analogies"]
+                DIAG_SKILL["Mermaid Diagrams (with Blanks)"]
+                TRACE["Execution Trace Predictor"]
+                ANALOGY["Mental Models"]
+                PLOT["Complexity Curves (SVG)"]
+                ANIM["Step Animation Engine"]
+                THREE_D["Spatial 3D Model Plugin"]
+            end
         end
 
-        subgraph Skills ["Multimodal Skills & Sandbox"]
-            ELI5["ELI5 Everyday Analogies"]
-            DIAG_SKILL["Mermaid Diagrams (with Blanks)"]
-            TRACE["Python Sandboxed Execution Tracer"]
-            ANALOGY["Curriculum Mental Models"]
-            PLOT["Matplotlib Complexity Curves"]
-            THREE_D["Three.js 3D Spatial Plugin"]
-            MANIM["Manim Animation Plugin (Optional)"]
+        subgraph Storage ["Local-First Persistence"]
+            SQLITE[("Node 24 native node:sqlite<br/>(data/tutor.db)")]
         end
     end
 
-    subgraph Storage ["Local Storage"]
-        SQLITE[("SQLite Database<br/>(Local & Private)")]
-        DASH["Static Mastery Dashboard"]
-    end
-
-    CC -->|CLI: ask / dashboard| ORCH
-    WEB -->|POST /api/chat + signals| ORCH
+    UI_SESS -->|POST message + telemetry| API_TURN
+    UI_SESS -->|Client-side tracing| WORKER_PY
+    UI_SESS -->|Client-side tracing| WORKER_JS
+    API_TURN --> ORCH
     ORCH --> DIAG
     DIAG --> LADDER
     LADDER --> TEACH
-    TEACH -->|Optional Visual Request| VIS
+    TEACH -->|Visual Request| VIS
     VIS --> Skills
     TEACH --> CRITIC
     CRITIC -->|Rewrite Feedback (Max 2)| TEACH
-    CRITIC -->|Approved Output| ORCH
+    CRITIC -->|Approved Response| ORCH
     ORCH --> LEARNER
     LEARNER --> SQLITE
-    SQLITE --> DASH
-    WEB -.->|Embeds| DASH
+    API_DASH --> SQLITE
+    API_SESS --> SQLITE
 ```
 
 ---
 
-## 2. The Turn Lifecycle
+## 2. Multi-Agent Turn Lifecycle
 
-For every turn submitted by a learner, the system executes an automated 6-step loop:
+Every interaction turn is processed through a strict multi-agent coordination loop:
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Learner
-    participant Adapter as Web / Claude Code Adapter
-    participant Orch as Tutor Orchestrator
+    participant UI as Workspace UI
+    participant API as POST /api/turn
+    participant Orch as Orchestrator
     participant Diag as Diagnostician Agent
     participant Ladder as 7-Rung Hint Ladder
     participant Teach as Teacher Agent
     participant Vis as Visualizer Agent
     participant Critic as Critic Gate
-    participant Store as SQLite Learner Store
+    participant LearnerModel as Learner Model (BKT)
+    participant DB as SQLite Storage
 
-    Learner->>Adapter: Submits message (+ telemetry signals)
-    Adapter->>Orch: handle_turn(session_id, message, signals)
-    Orch->>Store: Persist incoming turn & telemetry signals
-    Orch->>Diag: diagnose(message, signals, history, prior_mastery)
-    Diag-->>Orch: DiagnosticResult(state, frustration, rec_rung)
-    Orch->>Ladder: update(is_success, frustration, rec_rung)
-    Ladder-->>Orch: Active Rung (1 - 7)
+    Learner->>UI: Types message / clicks "I'm stuck"
+    UI->>API: Submits message + behavioral signals (idle, paste, blur)
+    API->>Orch: handleTurn(session, message, signals)
+    Orch->>DB: Persist user turn & telemetry record
+    Orch->>Diag: diagnose(message, signals, history, currentMastery)
+    Diag-->>Orch: DiagnosticResult(state, frustration, recommendedRung)
+    Orch->>Ladder: update(isSuccess, frustration, recommendedRung)
+    Ladder-->>Orch: activeRung (1-7)
 
-    loop Teacher-Critic Feedback Loop (Max 2 Rewrites)
-        Orch->>Teach: draft(topic, message, rung, frustration, state)
-        opt Visual Aid Required
-            Teach->>Vis: decide(concept, skill_type, rung)
-            Vis-->>Teach: VisualOutput (SVG / HTML with blanks)
+    loop Teacher-Critic Iterative Loop (Max 2 Rewrites)
+        Orch->>Teach: draft(topic, message, activeRung, frustration, history)
+        opt Visual Scaffold Needed
+            Teach->>Vis: createVisual(topic, concept, rung, skillType)
+            Vis-->>Teach: VisualArtifact (with interactive blanks)
         end
-        Teach-->>Orch: TeacherDraft(reply_text, single_question)
-        Orch->>Critic: evaluate(draft_text, visual, rung, ground_truth)
-        Critic-->>Orch: CriticVerdict(passed, issues, rewrite_instructions)
+        Teach-->>Orch: TeacherDraft(replyText, singleQuestion, visual)
+        Orch->>Critic: review(draftText, visual, activeRung, groundTruth)
+        alt Passed
+            Critic-->>Orch: CriticVerdict(passed=true)
+        else Failed (Leak, Multi-Question, or Lecture Detected)
+            Critic-->>Orch: CriticVerdict(passed=false, issues, rewriteInstructions)
+        end
     end
 
-    Orch->>Store: Update BKT mastery score & log approved turn
-    Orch-->>Adapter: TutorReply(text, rung, visual_path, state)
-    Adapter-->>Learner: Render Socratic guidance + visual scaffold
+    Orch->>LearnerModel: updateMastery(concept, isCorrect, elapsedSeconds)
+    LearnerModel->>DB: Save updated BKT probability & retention curve
+    Orch->>DB: Persist assistant turn & active rung
+    Orch-->>API: TurnResponse(replyText, visual, rung, frustration)
+    API-->>UI: Render message + interactive visual blanks
 ```
 
 ---
 
-## 3. The 7-Rung Hint Ladder
+## 3. The 7-Rung Hint Ladder State Machine
 
-The hint ladder prevents learners from getting permanently trapped while guaranteeing that the answer is never leaked prematurely:
+The Hint Ladder guarantees that a learner is never trapped in an unhelpful loop. It adapts dynamically according to mastery, frustration, and consecutive failures:
 
-| Rung | Name | Pedagogical Purpose | Direct Answer Permitted? |
-|---|---|---|:---:|
-| **1** | **Probe** | Elicits existing mental model. "What do you think happens first?" | ❌ Strictly Forbidden |
-| **2** | **Narrow Question** | Decomposes problem into a smaller, concrete sub-step. | ❌ Strictly Forbidden |
-| **3** | **Analogy / ELI5** | Relates concept to everyday life (e.g., Russian dolls, plate stacks). | ❌ Strictly Forbidden |
-| **4** | **Visual with Blanks** | Structured diagram, plot, or execution trace containing `[???]` blanks. | ❌ Strictly Forbidden |
-| **5** | **Worked Example** | Fully solves a *different* but structurally isomorphic problem. | ❌ Strictly Forbidden |
-| **6** | **Partial Reveal** | Reveals the key invariant or formula step; asks learner to complete it. | ❌ Strictly Forbidden |
-| **7** | **Full Explanation + Check** | Direct explanation, followed *immediately* by a transfer check question. | ✅ Permitted with Check |
+```
+[Rung 1: Probe]
+   │  (2 consecutive wrong answers OR frustration > 0.7)
+   ▼
+[Rung 2: Narrow Question]
+   │
+   ▼
+[Rung 3: Analogy]
+   │
+   ▼
+[Rung 4: Visual Scaffold with Blanks]
+   │
+   ▼
+[Rung 5: Worked Example (with partial blank)]
+   │
+   ▼
+[Rung 6: Partial Reveal (answer with key blank)]
+   │
+   ▼
+[Rung 7: Full Explanation + Immediate Transfer Check]
+```
 
-### Escalation & De-escalation Rules
-1. **Escalation**: The ladder advances by +1 rung if:
-   - The learner fails 2 consecutive attempts on the same rung.
-   - The Diagnostician detects frustration $> 0.7$.
-   - The session has remained on the current rung for $> 3$ turns.
-2. **De-escalation**: After successful comprehension, the ladder steps back down (-1 rung) to fade scaffolding and foster self-reliance.
-
----
-
-## 4. Cooperating Agents
-
-1. **Diagnostician Agent (`core/agents/diagnostician.py`)**:
-   - Assesses learner mental state: `LEARNING`, `STUCK`, `MASTERY`, `COPYING_SUSPECTED`.
-   - Computes cognitive frustration on a continuous scale $[0.0, 1.0]$.
-   - Runs a 3-question conceptual diagnostic on a learner's first session.
-   - Employs deterministic heuristics for behavioral signals (paste length, idle latency, tab switching).
-
-2. **Teacher Agent (`core/agents/teacher.py`)**:
-   - Formulates pedagogical responses strictly respecting the active ladder rung.
-   - Strictly enforces the **One-Question Rule**: exactly one question per turn.
-   - Forbids code dumps; supplies skeletons with blanks.
-
-3. **Visualizer Agent (`core/agents/visualizer.py`)**:
-   - Consults curated curriculum templates (`curriculum/`) or synthesizes visuals dynamically.
-   - Dispatches rendering to skills: `eli5`, `diagram`, `trace`, `analogy`, `plot`, `three_d`, `manim`.
-   - Invariant: all visuals below Rung 7 must contain missing pieces or prediction prompts.
-
-4. **Critic Agent (`core/agents/critic.py`)**:
-   - Acts as an uncompromising synchronous gate on every teacher reply.
-   - Employs hybrid checking:
-     - Deterministic regex/heuristic filters (code dumps, multiple `?`, forbidden reveal phrases).
-     - Semantic LLM verification with ground-truth comparison.
-   - Rejects drafts that leak solutions before Rung 7, supplying actionable rewrite instructions.
+### State Transition Invariants
+1. **Escalation Trigger**: Active rung increases by +1 when:
+   - Learner commits 2 consecutive incorrect attempts.
+   - Diagnostician measures frustration $> 0.70$.
+   - More than 3 turns have elapsed on the current rung without concept progression.
+   - Learner explicitly clicks the *"I'm stuck"* rescue button.
+2. **De-escalation Trigger**: Active rung steps down by -1 upon a correct answer to maintain productive struggle.
+3. **Leak Gate Invariant**: Below Rung 7, the Critic Gate rejects any response that states the direct answer. On Rung 7, the full explanation is paired with a mandatory transfer check question.
 
 ---
 
-## 5. Sandboxed Python Execution Tracer (`skills/trace/`)
+## 4. Learner Model: BKT & Ebbinghaus Forgetting Curve
 
-The trace skill allows learners to run Python code step-by-step:
-- **Process Isolation**: Executes in a dedicated subprocess with a strict 5.0s timeout.
-- **AST Pre-Execution Validation**: Rejects dangerous imports (`os`, `sys`, `subprocess`, `socket`, `urllib`, `requests`) and dangerous built-ins (`eval`, `exec`, `compile`, `open`, `__import__`).
-- **Interactive UI**: Generates self-contained HTML highlighting line numbers, call stack depth, local variables, and stdout with a predict-first card.
+Student knowledge is modeled dynamically using Bayesian Knowledge Tracing (BKT) combined with an Ebbinghaus retention decay function.
+
+### Bayesian Knowledge Tracing (BKT)
+
+The probability that a learner has mastered concept $k$ at turn $t$, denoted $P(L_t)$, is updated as follows:
+
+1. **Observation Update**:
+   $$P(L_{t|\text{obs}}) = \begin{cases} \frac{P(L_{t-1}) \cdot (1 - P(S))}{P(L_{t-1}) \cdot (1 - P(S)) + (1 - P(L_{t-1})) \cdot P(G)}, & \text{if response is correct} \\ \frac{P(L_{t-1}) \cdot P(S)}{P(L_{t-1}) \cdot P(S) + (1 - P(L_{t-1})) \cdot (1 - P(G))}, & \text{if response is incorrect} \end{cases}$$
+   Where:
+   - $P(L_0) = 0.10$ (Initial prior probability of mastery)
+   - $P(T) = 0.20$ (Probability of learning transition per turn)
+   - $P(G) = 0.25$ (Probability of guessing correctly without mastery)
+   - $P(S) = 0.10$ (Probability of slipping: incorrect despite mastery)
+
+2. **Transition Update**:
+   $$P(L_t) = P(L_{t|\text{obs}}) + (1 - P(L_{t|\text{obs}})) \cdot P(T)$$
+
+### Ebbinghaus Memory Retention Decay
+
+Between practice sessions, concept mastery decays according to memory stability $S$:
+
+$$R(\Delta t) = e^{-\frac{\Delta t}{S}}$$
+
+Where $\Delta t$ is elapsed time in days, and $S$ increases with repeated successful recall sessions:
+
+$$S = S_0 \cdot (1 + \text{rehearsal\_count} \cdot 0.5)$$
 
 ---
 
-## 6. Learner Model & Spaced Mastery
+## 5. Sandboxed Client-Side Execution Tracing
 
-The learner store (`core/learner.py`) combines:
-1. **Bayesian Knowledge Tracing (BKT)**:
-   - Prior knowledge $P(L_0) = 0.2$
-   - Transition probability $P(T) = 0.15$
-   - Guess probability $P(G) = 0.20$
-   - Slip probability $P(S) = 0.10$
-2. **Ebbinghaus Forgetting Decay**:
-   $$\text{Mastery}(t) = \text{Score} \times e^{-\frac{\Delta t}{S}}$$
-   Allows the system to identify decayed concepts requiring spaced repetition.
+To provide safe, real-time code execution tracing without exposing the server to Remote Code Execution (RCE), all execution runs entirely inside browser Web Workers:
 
+1. **Python Tracer (`public/workers/pyodide-worker.js`)**:
+   - Loads WebAssembly-compiled Pyodide inside a background Web Worker.
+   - Implements `sys.settrace()` to capture local variables, line numbers, and call stack frames at each execution step.
+   - Outputs structured stack frames with interactive blanks (`?`) for user prediction.
+   - Runs in isolated browser sandbox with zero network or filesystem privileges.
+2. **JavaScript Tracer (`public/workers/js-worker.js`)**:
+   - Executes code inside a sandboxed Web Worker.
+   - Instruments AST nodes to record call depth and variable state changes.
+   - Implements a strict **5-second execution timeout** (`setTimeout` worker termination) to neutralize infinite loops.
+3. **Zero-Server Execution Guarantee**:
+   - The Next.js Node.js server never executes untrusted code under any circumstances.
+
+---
+
+## 6. Database Schema (`storage/schema.sql`)
+
+Persistence uses Node 24 native SQLite (`DatabaseSync`):
+
+```sql
+CREATE TABLE IF NOT EXISTS learners (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT PRIMARY KEY,
+  learner_id TEXT NOT NULL,
+  topic TEXT NOT NULL,
+  current_rung INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (learner_id) REFERENCES learners(id)
+);
+
+CREATE TABLE IF NOT EXISTS turns (
+  id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  turn_number INTEGER NOT NULL,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  visual_artifact TEXT,
+  critic_verdict TEXT,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (session_id) REFERENCES sessions(id)
+);
+
+CREATE TABLE IF NOT EXISTS mastery (
+  learner_id TEXT NOT NULL,
+  topic TEXT NOT NULL,
+  concept TEXT NOT NULL,
+  p_mastery REAL NOT NULL DEFAULT 0.1,
+  last_practiced INTEGER NOT NULL,
+  practice_count INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (learner_id, concept),
+  FOREIGN KEY (learner_id) REFERENCES learners(id)
+);
+
+CREATE TABLE IF NOT EXISTS mistakes (
+  id TEXT PRIMARY KEY,
+  learner_id TEXT NOT NULL,
+  topic TEXT NOT NULL,
+  misconception TEXT NOT NULL,
+  occurred_at INTEGER NOT NULL,
+  resolved INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (learner_id) REFERENCES learners(id)
+);
+
+CREATE TABLE IF NOT EXISTS signals (
+  id TEXT PRIMARY KEY,
+  turn_id TEXT NOT NULL,
+  signal_type TEXT NOT NULL,
+  signal_value TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (turn_id) REFERENCES turns(id)
+);
+```
