@@ -1,124 +1,136 @@
-# Socratic Tutor v2: Full Project Spec
+# Socratic Tutor v2: Full Project Spec (Clone-and-Run Web App)
 
-> Hand this file to a coding agent (Claude Code). Read all of it first, then build the whole system in the order given in section 14. Work autonomously: one task at a time, run what you build, commit after each task, never leave fake-green or placeholder code.
+> Hand this file to a coding agent (Claude Code). Read all of it, then build the whole system in the order in section 15. Work autonomously: one task at a time, run what you build, commit after each task, no placeholders, no fake-green.
 
 ---
 
 ## 1. Vision
 
-A Socratic tutor that **never gives the answer directly** but still makes the learner *see* the idea. It combines:
+A Socratic tutor web app that **never hands over the answer directly** but still makes the learner *see* the idea. It combines:
 
-- Socratic questioning (core behavior)
-- Visual explanations (diagrams, ELI5, code execution traces, analogies, optional 3D/animation)
+- Socratic questioning (core behavior), enforced in code, not only in prompts
+- Rich visual explanations: diagrams with blanks, ELI5, analogies, code execution traces, plots, 3D, step animations
 - A hint ladder so complete beginners are never stuck in a loop
 - Four cooperating agents with distinct jobs
-- Behavioral signals (typing, paste, tab switching) used to adapt teaching, not to punish
+- Behavioral signals (typing, paste, tab switching) used to adapt teaching, never to punish
 - A progress dashboard (monthly mastery, streaks, weak topics)
 - An evaluation harness with simulated students that produces real numbers
 
-It must be **installable and runnable in under a minute**:
+### The only setup the user does
 
 ```
-git clone <repo> && cd socratic-tutor && ./install.sh
+git clone <repo> && cd socratic-tutor
+cp .env.example .env      # paste an API key (or choose local Ollama, no key)
+npm install
+npm run dev               # open http://localhost:3000
 ```
 
-Then either use it inside Claude Code (`/socratic teach me recursion`) or open the web UI. No Docker, no Redis, no Celery, no MongoDB. Python + SQLite only.
+Nothing else. No Docker, no Redis, no Celery, no MongoDB, no Python install, no separate services. Everything runs locally on the user's machine and data stays local.
 
-This repo is an evolution of the existing `fehm-ai-engine` (Celery/Redis/Mongo multi-agent tutor). Move the old code into `legacy/` and keep its git history so the evolution is visible. State this in the README.
+This repo evolves the old `fehm-ai-engine` (Celery/Redis/Mongo/FastAPI). Move the old code to `legacy/` with git history kept, and say so in the README.
 
-## 2. Design principles
+## 2. Scope decisions (final)
 
-1. **Show structure, hide the answer.** Visuals contain blanks, predictions, or partial states. The learner fills them in.
-2. **Predict, run, compare.** For code and processes: ask the learner to predict first, then reveal the real result.
-3. **Never leave a learner stuck.** Escalate through the hint ladder; the final rungs reveal progressively more, but always with an explanation and a follow-up check.
-4. **Adapt, don't police.** Behavioral signals change the teaching strategy. They never block, accuse, or shame.
-5. **Local and private.** All learner data in a local SQLite file. No telemetry. Say exactly what is tracked in the README.
-6. **Simple core, optional extras.** Manim and 3D are plugins and must not be required for core to run.
-7. **Measurable.** Every claim ("doesn't leak answers", "visuals help") must be backed by the eval harness.
+- **One stack: TypeScript + Next.js** (App Router). One language for UI, API, agents, eval.
+- **One door: the web app.** No MCP server, no Claude Code skill, no CLI-agent adapters.
+- **One command to run:** `npm run dev`. Also `npm run build && npm start` for production-style local run.
+- **Storage:** local SQLite file under `data/`. Pick a driver that installs with plain `npm install` and no compiler (e.g. `@libsql/client` in file mode, or Node's built-in `node:sqlite` if the supported Node version allows). Document the choice in `docs/decisions.md`.
+- **Models:** provider chosen in `.env`: Anthropic, OpenAI, Gemini, or **Ollama** (local, free, no key). Plus a **mock provider** so tests and CI run with no key.
+- **Code execution for tracing:** Python via **Pyodide in a Web Worker** (runs in the browser, isolated from the server, no server-side code execution) and JavaScript via a sandboxed Worker.
+- **Manim:** cannot run in a browser and needs heavy installs, so it is NOT core. Core has a built-in **step-animation player** (Manim-style: animated, step by step, driven by JSON scenes). Real Manim is an optional plugin, off by default, documented only.
 
-## 3. Non-goals
+## 3. Design principles
 
-- Not a proctoring or surveillance tool. No webcam, no screen recording, no blocking.
+1. **Show structure, hide the answer.** Visuals contain blanks, predictions, or partial states; the learner fills them in.
+2. **Predict, run, compare.** For code and processes: learner predicts first, then sees the real trace.
+3. **Never leave a learner stuck.** Escalate through the hint ladder; final rungs reveal progressively more, always with explanation and a follow-up check.
+4. **Adapt, don't police.** Signals change teaching strategy. Never block, accuse, or shame.
+5. **Hard enforcement.** The Critic gates every reply in code. A reply that leaks the answer cannot reach the learner.
+6. **Local and private.** No telemetry. README states exactly what is tracked.
+7. **Measurable.** Every claim is backed by the eval harness.
+
+## 4. Non-goals
+
+- Not a proctoring tool: no webcam, no screen recording, no blocking.
 - Not a general chatbot. Teaching sessions only.
-- No distributed infrastructure.
+- No hosted multi-user service in v2 (single local user; learner profiles are local).
 
-## 4. Architecture
-
-One Python core, two adapters (doors).
+## 5. Architecture
 
 ```
-            ┌────────────────────────────────────────────┐
-            │                   core/                    │
- Claude ───►│  orchestrator ─► Diagnostician              │
- Code       │        │         Teacher ◄─► Visualizer ─► skills/
- adapter    │        │         Critic (gate on every reply)│
-            │        ▼                                     │
- Web   ────►│  hint ladder · learner model · llm client   │
- adapter    └──────────────┬─────────────────────────────┘
-                           ▼
-                  storage/ (SQLite) ─► dashboard/
+Browser (Next.js UI)
+  ├─ Chat UI + visual renderer (Mermaid, SVG, HTML, Three.js, step-animation player)
+  ├─ Pyodide/JS Workers (code trace sandbox)
+  ├─ Behavior signal collector
+  └─ Dashboard pages
+        │  HTTP / streaming
+Next.js API routes
+  └─ core/ (pure TypeScript, no framework imports)
+       ├─ orchestrator
+       ├─ agents: diagnostician, teacher, visualizer, critic
+       ├─ ladder, learner model, skills registry
+       └─ llm client (anthropic | openai | gemini | ollama | mock)
+        │
+   SQLite (data/tutor.db)
 ```
+
+`core/` must be framework-independent so `eval/` can import it directly.
 
 ### Turn flow (every learner message)
 
-1. Adapter sends `{session_id, learner_message, signals}` to the orchestrator.
-2. **Diagnostician** reads message + signals + learner model, outputs: `level`, `frustration` (0-1), `state` (LEARNING / STUCK / MASTERY / COPYING_SUSPECTED), `recommended_rung` on the hint ladder.
-3. **Teacher** drafts a reply using the recommended rung. If a visual would help, it asks the Visualizer.
-4. **Visualizer** picks the best skill for this concept and returns a visual (with blanks) or none.
-5. **Critic** reviews the draft: does it leak the answer? Is it more than one question? Is the visual correct and does it hide what it should? If it fails, return feedback to the Teacher for one rewrite (max 2 rewrites), then send.
-6. Orchestrator updates the learner model, logs the turn, returns the reply to the adapter.
+1. UI sends `{sessionId, message, signals}` to `/api/turn`.
+2. **Diagnostician** reads message + signals + learner model and outputs: `level`, `frustration` (0 to 1), `state` (LEARNING, STUCK, MASTERY, COPYING_SUSPECTED), `recommendedRung`.
+3. **Teacher** drafts a reply for that rung; may request a visual.
+4. **Visualizer** picks the best skill for this concept and returns a visual spec (with blanks/predictions unless on the final rungs).
+5. **Critic** reviews text and visual: leak? more than one question? tone vs frustration? visual correct and hiding what it should? On failure it returns rewrite instructions; Teacher rewrites (max 2), then the reply is sent. Every verdict is logged.
+6. Orchestrator updates learner model, stores the turn, streams the reply and visual to the UI.
 
-## 5. Agents
+## 6. Agents
 
-All agents are defined as prompt files in `core/agents/prompts/` plus a thin Python class. Output of each agent is validated JSON (use pydantic).
+Each agent = a prompt file in `core/agents/prompts/` + a TypeScript module. Outputs are validated with **zod** schemas; invalid output triggers one retry.
 
 | Agent | Input | Output | Rules |
 |---|---|---|---|
-| **Diagnostician** | message, signals, history, learner model | level, frustration, state, recommended_rung, reasoning | Cheap and fast. Runs every turn. First session: runs a 3-question diagnostic. |
-| **Teacher** | diagnosis, topic, history, learner model | reply text, optional visual request | One question per reply. No code dumps. No direct final answers until the final rung. Warm tone, adapts to frustration. |
-| **Visualizer** | concept, learner level, what must stay hidden | chosen skill + rendered visual | Chooses among skills (section 7). Must output visuals with at least one blank/prediction when the learner is not on the final rungs. |
-| **Critic** | draft reply, visual, ground truth answer (if known) | pass/fail, issues, rewrite instructions | Checks: answer leak, multiple questions, tone vs frustration, visual correctness, visual hides what it should. Logs every verdict for eval. |
+| **Diagnostician** | message, signals, history, learner model | level, frustration, state, recommendedRung, reasoning | Runs every turn, cheap. First session runs a 3-question diagnostic. |
+| **Teacher** | diagnosis, topic, history, learner model | reply text, optional visual request | One question per reply. No code dumps. No direct final answer before the final rung. Warm tone, adapts to frustration. |
+| **Visualizer** | concept, level, what must stay hidden | chosen skill + visual spec | Chooses among skills (section 7). Visuals must contain a blank/prediction unless on final rungs. |
+| **Critic** | draft reply, visual spec, ground truth (if known) | pass/fail, issues, rewrite instructions | Checks leak (rule-based + LLM judge), single-question rule, tone, visual correctness. Logs every verdict. |
 
-Librarian from v1 is **not an agent**. It becomes `curriculum/` (a folder of concepts, tested analogies and visual templates as markdown/JSON) that the Teacher and Visualizer read.
+The old Librarian becomes `curriculum/`: concepts, tested analogies, visual templates as JSON/markdown, read by Teacher and Visualizer.
 
-## 6. Hint ladder (`core/ladder.py`)
+## 7. Hint ladder (`core/ladder.ts`)
 
-Rungs, in order:
-
-1. **Probe**: ask what the learner already thinks or tried.
-2. **Narrow question**: a smaller, more concrete question.
+1. **Probe**: ask what the learner thinks or tried.
+2. **Narrow question**: smaller, more concrete.
 3. **Analogy / ELI5**: everyday analogy, then ask them to map it back.
 4. **Visual with blanks**: diagram or trace with missing pieces.
-5. **Worked example of a similar problem**: solve a *different* problem fully, then ask them to apply it.
-6. **Partial reveal**: reveal the key step with explanation, ask them to finish.
-7. **Full explanation + check**: only after repeated failure; then immediately ask a transfer question to verify understanding.
+5. **Worked example of a similar problem**: solve a different problem fully, then ask them to apply it.
+6. **Partial reveal**: reveal the key step with explanation; they finish it.
+7. **Full explanation + transfer check**: only after repeated failure; immediately ask a transfer question.
 
-Rules:
-- Start at the rung suggested by the Diagnostician (complete beginners may start at 3 or 4).
-- Escalate after N failed attempts (default 2, configurable) or when frustration > 0.7.
-- De-escalate (fade scaffolding) after successes.
-- Never stay on the same rung more than 3 turns.
+Rules: start at the Diagnostician's rung (complete beginners may start at 3 or 4); escalate after N failed attempts (default 2, configurable) or frustration > 0.7; fade scaffolding after successes; never stay on one rung more than 3 turns.
 
-## 7. Skills (`skills/`)
+## 8. Visual skills (`skills/`)
 
-Each skill is a self-contained module with a `SKILL.md` (when to use, inputs, outputs, examples) and a Python function `render(spec) -> Visual`. A registry (`skills/registry.py`) lets the Visualizer choose by concept type.
+Each skill: folder with `skill.md` (when to use, inputs, outputs, examples), a `render` function producing a **visual spec** (JSON), and a React renderer component. Registry in `skills/registry.ts`. All visuals render **inline in the chat**.
 
-| Skill | Use for | Output | Core or plugin |
+| Skill | Use for | Output | Tier |
 |---|---|---|---|
-| `eli5` | Any concept, simple analogy | Short text with analogy + a mapping question | core |
-| `diagram` | Flows, hierarchies, data structures, architectures | Mermaid or SVG, with blank nodes | core |
-| `trace` | Code questions | Runs the learner's code in a sandbox, generates an HTML step-by-step execution trace (call stack, variables). Learner predicts first, then trace is revealed. | core |
-| `analogy` | Abstract concepts | Picks from `curriculum/` analogies or generates one | core |
-| `plot` | Math / ML / algorithms | Matplotlib or SVG plots (e.g. gradient descent steps, complexity curves) | core |
-| `three_d` | Spatial concepts (matrices, transforms, geometry) | Three.js HTML or SVG isometric | optional plugin |
-| `manim` | Deep-dive animations | Rendered video/GIF | optional plugin (`plugins/manim/`), needs ffmpeg/Cairo/LaTeX, disabled by default |
+| `eli5` | Any concept | Short analogy + a mapping question | core |
+| `diagram` | Flows, hierarchies, data structures, architectures | Mermaid or SVG with blank nodes the learner can fill | core |
+| `trace` | Code questions | Pyodide/JS Worker runs code with a step tracer; UI shows call stack, variables, line highlight. Learner predicts first, then reveals. | core |
+| `analogy` | Abstract concepts | Picks from `curriculum/` or generates one | core |
+| `plot` | Math, ML, complexity | Charts via a lightweight chart lib or SVG (gradient descent steps, Big-O curves) | core |
+| `animate` | Processes over time (sorting, recursion unfolding, backprop, packet flow) | JSON scene played by a built-in step-animation player (play, pause, step, scrub); Manim-style but runs in the browser | core |
+| `three_d` | Spatial concepts (matrices, transforms, geometry) | Three.js scene | core, lazy-loaded |
+| `manim` | Polished video deep dives | Rendered video | optional plugin, off by default, needs local ffmpeg/Cairo/LaTeX |
 
 Requirements:
-- Visuals must render in the browser (web adapter) **and** be openable as local HTML files from Claude Code (write to `.socratic/visuals/` and print the path).
-- The `trace` sandbox: subprocess, hard timeout (5s), memory limit, no network, no file writes outside a temp dir. Python first; JavaScript later.
-- Every skill has unit tests.
+- Sandboxed rendering: HTML visuals in sandboxed iframes; validate every visual spec against a zod schema before rendering.
+- Trace sandbox: Worker with hard timeout (5s), step limit, no network, output size cap. Server never executes learner code.
+- Every skill has unit tests; renderers have smoke tests.
 
-## 8. Learner model (`core/learner.py`, SQLite)
+## 9. Learner model (SQLite)
 
 Tables (minimum):
 
@@ -126,144 +138,121 @@ Tables (minimum):
 - `sessions(id, learner_id, topic, started_at, ended_at)`
 - `turns(id, session_id, role, text, rung, skill_used, signals_json, critic_verdict, ts)`
 - `concepts(id, name, parent_id)`
-- `mastery(learner_id, concept_id, score 0-1, attempts, last_seen, updated_at)`
+- `mastery(learner_id, concept_id, score, attempts, last_seen, updated_at)`
 - `mistakes(learner_id, concept_id, pattern, count, last_seen)`
 - `signals(session_id, ts, type, value)`
 
-Mastery update: simple Elo-style or Bayesian knowledge tracing; keep it small and documented. Spaced-review suggestion: surface concepts with decayed mastery.
+Mastery update: simple Elo-style or Bayesian knowledge tracing, small and documented. Surface decayed concepts for spaced review. Use migrations; DB file auto-created on first run (no manual setup step).
 
-## 9. Behavioral signals (web adapter only)
+## 10. Behavioral signals (browser)
 
-Collected client-side in the browser, sent with each message. Used **only** to adapt teaching.
+Collected client-side, sent with each message, used **only** to adapt teaching.
 
 | Signal | How | Teaching response |
 |---|---|---|
-| Large paste (> N chars, no typing) | `paste` event | Teacher asks: "Explain this in your own words" |
-| Instant hint request with no attempt | time-to-first-keystroke + hint button | Diagnostician steps rung back; asks for a first attempt |
-| Tab switch / blur then fast polished answer | `visibilitychange`, timing | Teacher asks a follow-up "why does this work?" transfer question |
+| Large paste with little typing | `paste` event + keystroke count | Teacher asks "explain this in your own words" |
+| Instant hint request with no attempt | time-to-first-keystroke + hint button | Rung steps back; ask for a first attempt |
+| Tab switch then fast polished answer | `visibilitychange`, timing | Follow-up "why does this work?" transfer question |
 | Typing speed collapse / long idle | keystroke timing | Frustration estimate up; offer smaller question or visual |
-| Rapid-fire wrong attempts | attempt timing | Escalate rung |
+| Rapid wrong attempts | attempt timing | Escalate rung |
 
-Rules:
-- A single signal never produces an accusation. Language is always neutral and supportive.
-- Signals are stored per session, shown to the learner in their own dashboard, and can be disabled with one toggle.
-- README includes a "What is tracked and why" privacy section.
-- Claude Code adapter has no behavioral signals (terminal cannot provide them); it uses only text-based cues (e.g., long pasted blocks).
+Rules: one signal never causes an accusation; language is always neutral and supportive; signals are visible to the learner in their own dashboard; one settings toggle disables all collection; README has a "What is tracked and why" section.
 
-## 10. Dashboard (`dashboard/`)
+## 11. Dashboard (`/dashboard`)
 
-Static HTML generated from SQLite (no server needed); also served by the web adapter.
-
-- Monthly mastery chart per concept/topic
-- Streak and sessions per week
-- Weak topics list with recommended next practice
-- Rung usage over time (are they needing fewer hints? that is the real progress metric)
+- Monthly mastery chart per topic
+- Streaks and sessions per week
+- Weak topics with recommended next practice
+- Rung-usage trend (needing fewer hints over time is the real progress metric)
 - Session history with replay of visuals
-- Command: `python -m dashboard.build` and `/socratic dashboard` in Claude Code
+- Export progress as JSON
 
-## 11. Evaluation harness (`eval/`), most important for credibility
+## 12. Evaluation harness (`eval/`), most important for credibility
 
-Simulated learners (LLM-driven personas):
-
-- `beginner` (knows nothing, vague answers)
-- `frustrated` (gives up quickly, emotional)
-- `copier` (tries to extract the answer or paste solutions)
-- `strong` (fast, needs less scaffolding)
+Simulated learners (LLM personas): `beginner`, `frustrated`, `copier` (tries to extract answers or paste solutions), `strong`.
 
 Metrics:
-
-1. **Answer-leak rate**: % of tutor turns that reveal the final answer before the final rung. Judged by an independent LLM judge with the ground truth plus a rule-based check.
-2. **Learning gain**: pre-test vs post-test score on the concept, per persona.
-3. **Visual vs text-only**: same personas and topics run with visuals disabled vs enabled; compare learning gain.
-4. **Escalation quality**: does a stuck learner get unstuck without the tutor dumping the answer early?
+1. **Answer-leak rate**: % of tutor turns revealing the final answer before the final rung (independent LLM judge + rule-based check against ground truth).
+2. **Learning gain**: pre-test vs post-test per persona.
+3. **Visual vs text-only**: same personas and topics with visuals off vs on.
+4. **Escalation quality**: stuck learners get unstuck without early answer dumps.
 5. **Critic value**: leak rate with Critic on vs off.
 
-Deliverables:
-- `eval/scenarios/` with at least 10 topics (recursion, binary trees, big-O, pointers, gradient descent, SQL joins, HTTP, etc.) each with ground truth, pre/post quizzes
-- `python -m eval.run --all` produces `eval/results/results.md` and JSON
-- Results table pasted into the README
-- Run with a fixed seed and record model versions for reproducibility
+Deliverables: `eval/scenarios/` with at least 10 topics (recursion, binary trees, Big-O, pointers, gradient descent, SQL joins, HTTP, etc.) each with ground truth and pre/post quizzes; `npm run eval` writes `eval/results/results.md` + JSON; results table in the README; fixed seeds and recorded model versions. Eval must support Ollama so anyone can reproduce it for free.
 
-## 12. Adapters
+## 13. UI requirements
 
-### Claude Code adapter (`adapters/claude_code/`)
-- A skill (`SKILL.md`) and slash commands: `/socratic <topic or question>`, `/socratic dashboard`, `/socratic review`
-- The skill instructs Claude Code to call the local Python core (CLI: `python -m core.cli ask "..."`) so that Teacher/Critic/ladder logic is enforced in code and not only in prompts
-- Also provide `AGENTS.md` so Cursor/Codex-style agents can use the same CLI
-- `install.sh` copies the skill into `~/.claude/skills/` (or the project `.claude/`) and sets up the venv
+- Clean chat layout; visuals inline; collapsible "thinking strategy" panel (current rung, state, frustration) so learners and reviewers see the pedagogy.
+- Topic picker + free-form question box; "I'm stuck" button (a deliberate escalation, distinct from the instant-hint signal).
+- Light/dark mode, responsive, keyboard accessible.
+- First-run screen: detects missing API key and shows exactly what to put in `.env` (or how to select Ollama), with a connection test button.
+- No login, no accounts.
 
-### Web adapter (`adapters/web/`)
-- FastAPI backend, simple frontend (vanilla JS or small React/Vite; keep it minimal)
-- Chat UI with inline visual rendering (Mermaid, SVG, HTML trace in sandboxed iframe)
-- Behavioral signal collector
-- Dashboard page
-- Run: `python -m adapters.web` then open `localhost:8000`
+## 14. Tech stack and repo layout
 
-## 13. Tech stack and repo layout
-
-- Python 3.11+, FastAPI, pydantic, SQLite (`sqlite3` or SQLModel), pytest, ruff
-- LLM client in `core/llm.py` with providers: Anthropic (default), Gemini, OpenAI; selected by env var; includes a **mock provider** so tests and CI run without keys
-- Config in `.env` (example provided), sensible defaults
+- Node 20+, TypeScript, Next.js (App Router), zod, Vitest, Playwright (a few e2e tests), ESLint/Prettier
+- Mermaid, Three.js, a small chart lib, Pyodide (loaded in a Worker, lazy)
+- Config via `.env` (`.env.example` provided with comments for each provider)
 
 ```
 socratic-tutor/
+├── app/                # Next.js routes: /, /session/[id], /dashboard, /settings, /api/*
+├── components/         # chat, visual renderers, dashboard widgets
 ├── core/
-│   ├── agents/ (diagnostician.py, teacher.py, visualizer.py, critic.py, prompts/)
-│   ├── orchestrator.py
-│   ├── ladder.py
-│   ├── learner.py
-│   ├── llm.py
-│   └── cli.py
-├── skills/ (eli5/, diagram/, trace/, analogy/, plot/, registry.py)
-├── plugins/ (manim/, three_d/)
-├── curriculum/ (concepts, analogies, visual templates)
-├── adapters/ (claude_code/, web/)
-├── dashboard/
-├── storage/ (schema.sql, migrations)
-├── eval/ (personas/, scenarios/, run.py, results/)
+│   ├── agents/ (diagnostician.ts, teacher.ts, visualizer.ts, critic.ts, prompts/)
+│   ├── orchestrator.ts
+│   ├── ladder.ts
+│   ├── learner.ts
+│   └── llm/ (anthropic.ts, openai.ts, gemini.ts, ollama.ts, mock.ts)
+├── skills/             # eli5, diagram, trace, analogy, plot, animate, three_d, registry.ts
+├── plugins/manim/      # optional, off by default
+├── curriculum/         # concepts, analogies, visual templates
+├── workers/            # pyodide + js trace sandboxes
+├── storage/            # schema + migrations
+├── eval/               # personas, scenarios, run.ts, results/
 ├── tests/
-├── legacy/ (old fehm-ai-engine)
-├── docs/ (architecture.md with diagram, privacy.md)
-├── install.sh
-├── pyproject.toml
+├── legacy/             # old fehm-ai-engine
+├── docs/               # architecture.md, privacy.md, decisions.md, progress.md
+├── .env.example
+├── package.json
 ├── README.md
 └── SPEC.md
 ```
 
-## 14. Build order (do all of it, in this order)
+## 15. Build order (do all of it, in order)
 
-Each step ends with something that runs and has tests. Commit after each step with a clear message. Update `docs/progress.md` with what is done.
+Each step ends with something that runs and has tests. Commit after each step with a clear message. Keep `docs/progress.md` updated.
 
-1. **Foundation**: move old code to `legacy/`, set up `pyproject`, `llm.py` with mock + real providers, SQLite schema, CLI skeleton, CI (pytest + ruff).
-2. **Core loop**: Teacher + Critic + hint ladder + orchestrator. `python -m core.cli ask` works end to end on the mock and real provider. Test: leak detection on 10 scripted turns.
-3. **Diagnostician + learner model**: first-session diagnostic, mastery updates, rung recommendation. Tests for ladder escalation/de-escalation.
-4. **Skills v1**: `eli5`, `diagram` (Mermaid blanks), `analogy`, registry, Visualizer agent. Visuals written to `.socratic/visuals/`.
-5. **Trace skill**: sandboxed execution tracer + HTML trace viewer + predict/compare flow. Security tests (timeout, infinite loop, file/network access blocked).
-6. **Claude Code adapter**: skill, commands, `install.sh`, `AGENTS.md`. Verify `/socratic teach me recursion` works in a fresh clone.
-7. **Dashboard**: HTML generation from SQLite, monthly mastery, streaks, weak topics, rung-usage trend.
-8. **Eval harness**: personas, scenarios, judge, metrics, results report. Run and record real numbers.
-9. **Web adapter**: FastAPI, chat UI, visual rendering, behavioral signals + signal-driven teaching rules, dashboard page, privacy toggle.
-10. **Plugins and extra skills**: `plot`, `three_d`, `manim` (optional, documented, disabled by default).
-11. **Polish**: README (hero GIF, 30-second quickstart, architecture diagram, eval results table, privacy section, legacy note), `docs/architecture.md`, demo script, final full eval run.
+1. **Foundation**: move old code to `legacy/`, scaffold Next.js + TS, `.env.example`, LLM clients (including mock and Ollama), SQLite schema + migrations, lint/test/CI. `npm install && npm run dev` must already boot.
+2. **Core loop**: Teacher + Critic + hint ladder + orchestrator, minimal chat UI with streaming. Test: leak detection on 10 scripted turns.
+3. **Diagnostician + learner model**: first-session diagnostic, mastery updates, rung recommendation. Ladder escalation/de-escalation tests.
+4. **Skills v1**: `eli5`, `diagram` (Mermaid blanks), `analogy`, registry, Visualizer agent, inline rendering with schema validation.
+5. **Trace skill**: Pyodide/JS Worker tracer, trace viewer, predict-then-reveal flow. Security tests (infinite loop, huge output, network/file access).
+6. **Dashboard**: monthly mastery, streaks, weak topics, rung trend, session replay.
+7. **Behavior signals**: collectors, signal-driven teaching rules, learner-visible log, privacy toggle.
+8. **More skills**: `plot`, `animate` (step-animation player), `three_d`.
+9. **Eval harness**: personas, scenarios, judge, metrics, report. Run it and record real numbers.
+10. **First-run experience and polish**: missing-key screen, connection test, "I'm stuck" button, thinking-strategy panel, accessibility pass.
+11. **Docs and demo**: README (hero GIF, 30-second quickstart, architecture diagram, eval results table, privacy section, legacy note), `docs/architecture.md`, optional `plugins/manim/` documentation, final full eval run.
 
-## 15. Definition of done (whole project)
+## 16. Definition of done
 
-- Fresh clone, `./install.sh`, then `/socratic teach me recursion` works with no extra services
-- Web UI runs with one command, shows visuals inline, and records behavioral signals with a toggle
-- Four agents implemented, each with tests; Critic is in the loop on every reply
-- At least 5 working skills (eli5, diagram, trace, analogy, plot) plus optional manim/3D plugins
+- Fresh clone, copy `.env.example` to `.env`, add a key (or select Ollama), `npm install`, `npm run dev` gives a working tutor with no other setup
+- All four agents implemented and tested; Critic gates every reply
+- At least 6 working visual skills (eli5, diagram, trace, analogy, plot, animate), plus three_d
+- Code tracing runs entirely in the browser Worker; the server executes no learner code
+- Behavior signals work with a visible log and an off switch
 - Dashboard shows monthly progress, streaks, weak topics
-- `eval/results/results.md` exists with real numbers: leak rate (with/without Critic), learning gain (visual vs text-only) across at least 4 personas and 10 topics
+- `eval/results/results.md` exists with real numbers (leak rate with and without Critic, learning gain visual vs text-only) across at least 4 personas and 10 topics
 - README has a demo GIF, quickstart, results table, privacy section
-- All tests pass in CI without API keys (mock provider)
+- All tests pass in CI with the mock provider and no API keys
 
-## 16. Rules for the agent building this
+## 17. Rules for the agent building this
 
-- Implement the design; don't quietly change it. If something is infeasible, write the reason in `docs/decisions.md` and choose the nearest simple alternative.
+- Implement the design; do not quietly change it. If something is infeasible, record why in `docs/decisions.md` and pick the nearest simple alternative.
 - Run everything you build. Never mark a step done without executing its tests.
 - Never weaken, skip, or delete a test to make it pass.
-- Keep core dependencies minimal. Anything heavy goes in `plugins/` as optional.
+- Keep dependencies lean; heavy things are lazy-loaded or optional plugins.
 - Do not invent eval numbers. If a run was not executed, say so.
-- Keep code readable and commented where the logic is non-obvious (the owner must be able to explain every module in an interview).
+- Keep code readable and commented where the logic is non-obvious; the owner must be able to explain every module in an interview.
 - If blocked after 3 attempts on a task, stop, write the state to `docs/progress.md`, and report honestly.
-

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Session workspace</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+/* Hallmark · v2.0.0 · genre: modern-minimal · theme: Coral (lent: palette, radius, one coral signal) · shape: app screen · data: sample */
+:root {
+  --paper: #F8F5F2; --paper-2: #F0EBE6; --cotton: #FFFDFB;
+  --ink: #2B2320; --muted: #6B5F59; --rule: #E5DED7; --rule-2: #D6CCC3;
+  --coral-light: #F8CFC3; --coral: #E8725A; --coral-deep: #B93E29; --focus: #A5361F;
+  --font-body: "Onest", ui-sans-serif, system-ui, sans-serif;
+  --font-figure: "Geist Mono", ui-monospace, monospace;
+}
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+a { color: var(--coral-deep); } a:hover { color: var(--focus); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.card { background: var(--cotton); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 1px 2px rgba(60,40,30,0.05); box-sizing: border-box; min-width: 0; }
+.btn { min-height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--rule-2); background: var(--cotton); color: var(--ink); font: 500 14px var(--font-body); cursor: pointer; }
+.btn:hover { background: var(--paper-2); }
+.btn-primary { background: var(--coral-deep); border-color: var(--coral-deep); color: #fff; }
+.btn-primary:hover { background: var(--focus); }
+.fig { font-family: var(--font-figure); font-variant-numeric: tabular-nums; }
+h1, h2 { margin: 0; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</helmet>
+
+<div style="min-height: 100%; background: var(--paper)">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 0 32px; min-height: 64px; background: var(--cotton); border-bottom: 1px solid var(--rule)">
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 36px">
+    <a href="#home" style="display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 18px">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" stroke-width="2.5"></circle><circle cx="14" cy="14" r="4" fill="#E8725A"></circle></svg>
+      Socratic Tutor
+    </a>
+    <nav aria-label="Main" style="display: flex; flex-wrap: wrap">
+      <a href="#today" aria-current="page" style="display: flex; align-items: center; min-height: 64px; padding: 0 14px; box-sizing: border-box; color: var(--ink); text-decoration: none; font-weight: 600; border-bottom: 3px solid var(--coral-deep)">Today</a>
+      <a href="Main.dc.html" style="display: flex; align-items: center; min-height: 64px; padding: 0 14px; box-sizing: border-box; color: var(--muted); text-decoration: none; font-weight: 500">Progress</a>
+      <a href="#sessions" style="display: flex; align-items: center; min-height: 64px; padding: 0 14px; box-sizing: border-box; color: var(--muted); text-decoration: none; font-weight: 500">Sessions</a>
+      <a href="#settings" style="display: flex; align-items: center; min-height: 64px; padding: 0 14px; box-sizing: border-box; color: var(--muted); text-decoration: none; font-weight: 500">Settings</a>
+    </nav>
+  </div>
+  <span style="padding: 4px 10px; border: 1px solid var(--rule-2); border-radius: 6px; font-size: 13px; color: var(--muted)">Sample conversation</span>
+</header>
+
+<main style="max-width: 1280px; margin: 0 auto; padding: 32px 32px 64px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 16px">
+    <div>
+      <h1 style="font-size: 28px; line-height: 1.2">Recursion</h1>
+      <p style="margin: 4px 0 0; color: var(--muted); font-size: 16px">The tutor asks, you answer. It only shows you the answer when you have tried.</p>
+    </div>
+    <button class="btn" type="button">Change topic</button>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+    <!-- Conversation -->
+    <section aria-label="Conversation" class="card" style="flex: 2 1 600px; padding: 24px; display: flex; flex-direction: column; gap: 24px">
+
+      <div style="display: flex; justify-content: flex-end">
+        <p style="margin: 0; max-width: 460px; padding: 12px 16px; background: #F8CFC3; border-radius: 12px 12px 4px 12px; font-size: 16px">I don't get how fact(3) ends up as 6.</p>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <svg width="32" height="32" viewBox="0 0 28 28" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" stroke-width="2.5"></circle><circle cx="14" cy="14" r="4" fill="#E8725A"></circle></svg>
+        <div style="display: flex; flex-direction: column; gap: 14px; min-width: 0; flex: 1">
+          <p style="margin: 0; max-width: 560px; font-size: 16px">Let's watch it unfold. Each call waits for the one below it. I have hidden one answer in the stack. What does fact(1) hand back?</p>
+
+          <!-- Visual: call stack with a blank -->
+          <figure style="margin: 0; padding: 20px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); max-width: 560px; box-sizing: border-box">
+            <figcaption style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 16px">
+              <span style="font-weight: 600">Call stack for <span class="fig">fact(3)</span></span>
+              <span style="color: var(--muted); font-size: 13px">Predict the blank, then reveal</span>
+            </figcaption>
+            <div style="display: flex; flex-direction: column; align-items: stretch">
+              <div style="display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 12px; padding: 10px 14px; background: var(--cotton); border: 1px solid var(--rule-2); border-radius: 8px">
+                <span class="fig" style="font-weight: 500">fact(3)</span><span style="color: var(--muted)">waits for fact(2)</span><span class="fig" style="color: var(--muted)">n = 3</span>
+              </div>
+              <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" style="margin-left: 24px"><path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <div style="display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 12px; padding: 10px 14px; margin-left: 24px; background: var(--cotton); border: 1px solid var(--rule-2); border-radius: 8px">
+                <span class="fig" style="font-weight: 500">fact(2)</span><span style="color: var(--muted)">waits for fact(1)</span><span class="fig" style="color: var(--muted)">n = 2</span>
+              </div>
+              <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" style="margin-left: 48px"><path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <div style="display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 12px; padding: 10px 14px; margin-left: 48px; background: var(--cotton); border: 2px solid var(--coral); border-radius: 8px">
+                <span class="fig" style="font-weight: 500">fact(1)</span>
+                <span style="display: inline-flex; align-items: center; gap: 10px; color: var(--muted)">returns <span class="fig" aria-label="Hidden answer" style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 30px; border: 2px dashed var(--coral-deep); border-radius: 6px; color: var(--coral-deep); font-weight: 500; box-sizing: border-box">?</span></span>
+                <span class="fig" style="color: var(--muted)">n = 1</span>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px">
+              <label for="prediction" style="color: var(--muted); font-size: 13px">Your prediction</label>
+              <input id="prediction" type="text" value="1" class="fig" style="width: 72px; min-height: 40px; box-sizing: border-box; padding: 0 12px; border: 1px solid var(--muted); border-radius: 6px; background: var(--cotton); color: var(--ink); font-size: 14px">
+              <button class="btn" type="button">Check</button>
+              <button class="btn" type="button">Reveal the trace</button>
+            </div>
+          </figure>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end">
+        <p style="margin: 0; max-width: 460px; padding: 12px 16px; background: #F8CFC3; border-radius: 12px 12px 4px 12px; font-size: 16px">1? Because n is 1 so it stops?</p>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <svg width="32" height="32" viewBox="0 0 28 28" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" stroke-width="2.5"></circle><circle cx="14" cy="14" r="4" fill="#E8725A"></circle></svg>
+        <p style="margin: 0; max-width: 560px; font-size: 16px">You spotted why it stops, which is the hard part. Now fact(2) hears that answer back. What will it do with it before passing it up to fact(3)?</p>
+      </div>
+
+      <!-- Composer -->
+      <form style="display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--rule)" onsubmit="return false">
+        <label for="reply" style="color: var(--muted); font-size: 13px">Your answer</label>
+        <textarea id="reply" rows="3" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--muted); border-radius: 6px; background: var(--cotton); color: var(--ink); font: 400 16px var(--font-body); resize: vertical"></textarea>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+          <p style="margin: 0; color: var(--muted); font-size: 13px">Stuck is fine. The button below gives you a smaller step, not the answer.</p>
+          <div style="display: flex; gap: 12px">
+            <button class="btn" type="button">I'm stuck</button>
+            <button class="btn btn-primary" type="submit">Send</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- How the tutor is helping -->
+    <aside aria-label="How the tutor is helping" class="card" style="flex: 1 1 320px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 24px">
+
+      <div>
+        <h2 style="font-size: 18px">How the tutor is helping</h2>
+        <p style="margin: 4px 0 0; color: var(--muted)">So you can see why each question is asked.</p>
+      </div>
+
+      <div>
+        <div style="font-weight: 500; margin-bottom: 10px">Help ladder</div>
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{ladder}}" as="step" hint-placeholder-count="7">
+            <li style="display: flex; align-items: center; gap: 12px; color: {{step.color}}; font-weight: {{step.weight}}">
+              <span class="fig" style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 13px; box-sizing: border-box; font-size: 12px; flex-shrink: 0; background: {{step.bg}}; color: {{step.numColor}}; border: {{step.border}}">{{step.n}}</span>
+              <span>{{step.name}}</span>
+              <span style="margin-left: auto; font-size: 13px; color: var(--coral-deep); font-weight: 600">{{step.tag}}</span>
+            </li>
+          </sc-for>
+        </ol>
+      </div>
+
+      <div style="border-top: 1px solid var(--rule); padding-top: 20px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px">
+          <span style="font-weight: 500">How you are doing</span>
+          <span style="font-weight: 600; color: var(--coral-deep)">Learning</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 6px"><span>Frustration estimate</span><span class="fig" style="color: var(--ink)">0.3</span></div>
+        <div role="img" aria-label="Frustration estimate 0.3 out of 1" style="height: 10px; background: var(--paper-2); border-radius: 5px"><div style="width: 30%; height: 10px; background: #E8725A; border-radius: 5px"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 6px"><span>Calm</span><span>Frustrated</span></div>
+      </div>
+
+      <div style="border-top: 1px solid var(--rule); padding-top: 20px">
+        <div style="font-weight: 500; margin-bottom: 10px">What the tutor noticed</div>
+        <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 6px; color: var(--muted)">
+          <li>You typed for 14 seconds before sending.</li>
+          <li>No tab switches in this session.</li>
+          <li>No large pastes.</li>
+        </ul>
+        <p style="margin: 12px 0 14px; color: var(--muted); font-size: 13px">Only you can see this. It helps the tutor pick a gentler or harder question, and it never counts against you.</p>
+        <label style="display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer">
+          <input type="checkbox" checked="" style="width: 20px; height: 20px; accent-color: #B93E29; margin: 0">
+          <span>Let the tutor use these signals</span>
+        </label>
+      </div>
+    </aside>
+  </div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Probe', 'Narrow question', 'Analogy', 'Visual with blanks', 'Worked example', 'Partial reveal', 'Full explanation'];
+    const now = 4;
+    const ladder = names.map((name, i) => {
+      const n = i + 1;
+      if (n < now) return { n, name, tag: '', bg: '#B93E29', numColor: '#FFFFFF', border: '0', color: '#6B5F59', weight: '400' };
+      if (n === now) return { n, name, tag: 'You are here', bg: '#FFFDFB', numColor: '#B93E29', border: '2px solid #B93E29', color: '#2B2320', weight: '600' };
+      return { n, name, tag: '', bg: 'transparent', numColor: '#6B5F59', border: '1.5px solid #D6CCC3', color: '#6B5F59', weight: '400' };
+    });
+    return { ladder };
+  }
+}
+</script>
+</body>
+</html>

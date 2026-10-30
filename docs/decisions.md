@@ -4,7 +4,7 @@ This document records key decisions made during the design and implementation of
 
 ## ADR-001: Zero Distributed Dependencies (Local-First Architecture)
 - **Context**: Socratic Tutor v1 relied on Celery, Redis, and MongoDB Atlas, which incurred heavy setup overhead and operational fragility for a local-first tutor.
-- **Decision**: Replace Celery/Redis/MongoDB with an in-process Python orchestrator backed by SQLite (using standard library `sqlite3` or lightweight models). All data is local, private, and zero-config.
+- **Decision**: Replace Celery/Redis/MongoDB with an in-process local orchestrator backed by SQLite. All data is local, private, and zero-config.
 - **Consequences**: Tutor can be cloned and run instantly under a minute on any machine without Docker or external daemon services.
 
 ## ADR-002: Four-Agent Core with Synchronous Critic Gate
@@ -14,6 +14,20 @@ This document records key decisions made during the design and implementation of
 
 ## ADR-003: Multi-Provider LLM Client with Mock Provider for CI
 - **Context**: The test suite, CI, and local evaluation must run reliably without requiring paid API keys or exposing developers to network failures.
-- **Decision**: `core/llm.py` supports Anthropic (default), Gemini, OpenAI, and a built-in deterministic `MockLLMProvider` that can simulate realistic agent interactions, critic reviews, and learner personas.
+- **Decision**: `core/llm/` supports Anthropic (Claude 3.5 Sonnet), OpenAI (GPT-4o), Gemini (Gemini 2.5 Flash), Ollama (local free offline LLMs), and a built-in deterministic `MockLLMProvider` that simulates agent interactions, critic reviews, and learner personas.
 - **Consequences**: 100% test coverage in CI without external secrets.
 
+## ADR-004: TypeScript + Next.js App Router Single-Stack Architecture
+- **Context**: Maintaining separate Python backend and TypeScript/React frontend introduced cross-language glue, multiple runtime dependencies, and split developer workflows.
+- **Decision**: Unify the entire tutor system—UI, API routes, multi-agent orchestration, skills registry, and autonomous evaluation harness—in a single TypeScript repository powered by Next.js App Router.
+- **Consequences**: Single command to clone and run (`npm run dev`), single language across all layers, instant developer onboarding.
+
+## ADR-005: Local SQLite Storage via Node 24+ Native `node:sqlite`
+- **Context**: Traditional SQLite npm packages (`better-sqlite3`, `sqlite3`) require native C/C++ compilation (node-gyp, python, MSVC build tools), which frequently fail on Windows or minimal developer environments. Other packages (`@libsql/client`) introduce external networking or binary downloads.
+- **Decision**: Use Node 24's built-in `node:sqlite` module (`DatabaseSync`). It requires zero external packages, zero C++ compilation, and operates synchronously directly on `data/tutor.db` or `:memory:`.
+- **Consequences**: Guaranteed clean `npm install` on every operating system without native build toolchains.
+
+## ADR-006: Client-Side Execution Tracing via Web Workers
+- **Context**: Code execution tracers allow learners to predict call-stacks and inspect state. Running arbitrary learner code on the server introduces severe remote code execution (RCE) and container sandbox escape vulnerabilities.
+- **Decision**: Python execution is executed client-side via Pyodide in an isolated Web Worker. JavaScript execution is sandboxed in a Web Worker with a strict 5-second CPU timeout. The server never executes learner code.
+- **Consequences**: Immune to server-side code execution exploits; learner code never leaves their browser.

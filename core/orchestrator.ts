@@ -1,0 +1,221 @@
+/**
+ * Socratic Tutor Orchestrator: Coordinates Diagnostician, Teacher, Visualizer, Critic, and Ladder.
+ */
+
+import crypto from "node:crypto";
+import { DiagnosticianAgent, type DiagnosticResult } from "./agents/diagnostician";
+import { TeacherAgent, type TeacherDraft } from "./agents/teacher";
+import { CriticAgent, type CriticVerdict } from "./agents/critic";
+import { VisualizerAgent } from "./agents/visualizer";
+import { HintLadder, RUNG_DEFINITIONS } from "./ladder";
+import { LearnerStore } from "./learner";
+import type { BaseLLMProvider, ChatMessage } from "./llm/types";
+import { getLLMClient } from "./llm";
+
+export interface TutorResponse {
+  text: string;
+  sessionId: string;
+  learnerId: string;
+  rung: number;
+  rungName: string;
+  visualSpec?: Record<string, any> | null;
+  state: string;
+  frustration: number;
+  criticVerdict?: CriticVerdict;
+  criticPassed: boolean;
+  rewritesDone: number;
+}
+
+export class TutorOrchestrator {
+  private llm: BaseLLMProvider;
+  private diagnostician: DiagnosticianAgent;
+  private teacher: TeacherAgent;
+  private critic: CriticAgent;
+  private visualizer: VisualizerAgent;
+  private learnerStore: LearnerStore;
+
+  constructor(options?: {
+    llm?: BaseLLMProvider;
+    learnerStore?: LearnerStore;
+    diagnostician?: DiagnosticianAgent;
+    teacher?: TeacherAgent;
+    critic?: CriticAgent;
+    visualizer?: VisualizerAgent;
+  }) {
+    this.llm = options?.llm || getLLMClient();
+    this.learnerStore = options?.learnerStore || new LearnerStore();
+    this.diagnostician = options?.diagnostician || new DiagnosticianAgent(this.llm);
+    this.teacher = options?.teacher || new TeacherAgent(this.llm);
+    this.critic = options?.critic || new CriticAgent(this.llm);
+    this.visualizer = options?.visualizer || new VisualizerAgent(this.llm);
+  }
+
+  async handleTurn(params: {
+    sessionId: string;
+    learnerId: string;
+    message: string;
+    topic?: string;
+    signals?: Record<string, any>;
+    groundTruth?: string | null;
+  }): Promise<TutorResponse> {
+    const {
+      sessionId,
+      learnerId,
+      message,
+      topic = "general",
+      signals = {},
+      groundTruth = null,
+    } = params;
+
+    const now = new Date().toISOString();
+
+    // 1. Ensure records exist
+    this.learnerStore.ensureSession(sessionId, learnerId, topic);
+
+    // Record incoming telemetry signals
+    for (const [k, v] of Object.entries(signals)) {
+      if (typeof v === "number") {
+        this.learnerStore.recordSignal(sessionId, k, v);
+      }
+    }
+
+    // 2. Persist learner message
+    const learnerTurnId = crypto.randomUUID();
+    this.learnerStore.recordTurn({
+      id: learnerTurnId,
+      sessionId,
+      role: "learner",
+      text: message,
+      signalsJson: JSON.stringify(signals),
+      ts: now,
+    });
+
+    // 3. Retrieve conversation history
+    const priorTurns = this.learnerStore.getTurns(sessionId);
+    const history: ChatMessage[] = priorTurns.slice(0, -1).map((t) => ({
+      role: t.role === "learner" ? "user" : "assistant",
+      content: t.text,
+    }));
+
+    // Determine current active ladder rung
+    let lastTutorRung = 1;
+    for (let i = priorTurns.length - 2; i >= 0; i--) {
+      if (priorTurns[i].role === "tutor" && priorTurns[i].rung) {
+        lastTutorRung = priorTurns[i].rung!;
+        break;
+      }
+    }
+    const ladder = new HintLadder(lastTutorRung);
+
+    // 4. Diagnostician assessment
+    const priorMastery = this.learnerStore.getMastery(learnerId, topic);
+    const diag: DiagnosticResult = await this.diagnostician.diagnose({
+      message,
+      signals,
+      history,
+      priorMastery,
+      priorTurnsCount: history.length,
+    });
+
+    // Update ladder state
+    const isSuccess =
+      diag.state === "MASTERY" ||
+      message.toLowerCase().includes("got it") ||
+      message.toLowerCase().includes("i understand");
+
+    const activeRung = ladder.update({
+      isSuccess,
+      frustration: diag.frustration,
+      recommendedRung: diag.recommendedRung,
+    });
+
+    // Update BKT mastery
+    if (isSuccess) {
+      this.learnerStore.updateMastery(learnerId, topic, true);
+    } else if (diag.state === "STUCK") {
+      this.learnerStore.updateMastery(learnerId, topic, false);
+      this.learnerStore.recordMistake(learnerId, topic, "stuck_or_confused");
+    }
+
+    // 5. Teacher-Critic iterative drafting loop (max 2 rewrites)
+    const maxRewrites = 2;
+    let rewriteCount = 0;
+    let rewriteInstructions: string | null = null;
+    let finalDraft: TeacherDraft | null = null;
+    let finalVerdict: CriticVerdict | null = null;
+    let visualSpec: Record<string, any> | null = null;
+
+    while (rewriteCount <= maxRewrites) {
+      // Draft pedagogical reply
+      const draft = await this.teacher.draft({
+        topic,
+        learnerMessage: message,
+        history,
+        rung: activeRung,
+        frustration: diag.frustration,
+        learnerState: diag.state,
+        behavioralSignals: signals,
+        rewriteInstructions,
+        groundTruth,
+      });
+      finalDraft = draft;
+
+      // Handle visual aid if needed or if on Rung 4
+      if (draft.needsVisual || activeRung === 4) {
+        const visDecision = await this.visualizer.decide({
+          concept: draft.visualConcept || topic,
+          skillType: draft.visualType || null,
+          rung: activeRung,
+          learnerLevel: diag.level,
+        });
+        visualSpec = visDecision.visualSpec;
+      }
+
+      // Critic quality gate
+      const verdict = await this.critic.evaluate({
+        draftText: draft.replyText,
+        rung: activeRung,
+        groundTruth,
+        visualSpec,
+      });
+      finalVerdict = verdict;
+
+      if (verdict.passed) {
+        break;
+      }
+
+      rewriteCount += 1;
+      rewriteInstructions = verdict.rewriteInstructions || "Review and enforce Socratic zero answer leak invariants.";
+    }
+
+    // 6. Record tutor turn
+    const tutorTurnId = crypto.randomUUID();
+    const approvedText = finalDraft?.replyText || "What do you think happens next?";
+    this.learnerStore.recordTurn({
+      id: tutorTurnId,
+      sessionId,
+      role: "tutor",
+      text: approvedText,
+      rung: activeRung,
+      skillUsed: visualSpec ? (visualSpec.skill || "visual") : null,
+      criticVerdict: JSON.stringify(finalVerdict),
+      ts: new Date().toISOString(),
+    });
+
+    const rungName = RUNG_DEFINITIONS[activeRung]?.name || "Probe";
+
+    return {
+      text: approvedText,
+      sessionId,
+      learnerId,
+      rung: activeRung,
+      rungName,
+      visualSpec,
+      state: diag.state,
+      frustration: diag.frustration,
+      criticVerdict: finalVerdict ?? undefined,
+      criticPassed: finalVerdict?.passed ?? true,
+      rewritesDone: rewriteCount,
+    };
+  }
+}
