@@ -23,31 +23,13 @@ function SessionWorkspaceContent() {
   // State
   const initialTopic = searchParams?.get("topic") || "Recursion";
   const [topic, setTopic] = useState(initialTopic);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "msg-1",
-      role: "learner",
-      text: "I don't get how fact(3) ends up as 6.",
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: "msg-2",
-      role: "tutor",
-      text: "Let's watch it unfold. Each call waits for the one below it. I have hidden one answer in the stack. What does fact(1) hand back?",
-      rung: 4,
-      visualSpec: {
-        concept: "recursion",
-        type: "call_stack",
-        blankTarget: "1",
-      },
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
 
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [currentRung, setCurrentRung] = useState(4);
-  const [frustration, setFrustration] = useState(0.3);
+  const [currentRung, setCurrentRung] = useState(1);
+  const [frustration, setFrustration] = useState(0.1);
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
 
@@ -58,7 +40,7 @@ function SessionWorkspaceContent() {
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
-  const [typingSeconds, setTypingSeconds] = useState(14);
+  const [typingSeconds, setTypingSeconds] = useState(0);
   const [tabSwitches, setTabSwitches] = useState(0);
   const [pasteDetected, setPasteDetected] = useState(false);
   const [pastedLength, setPastedLength] = useState(0);
@@ -66,6 +48,46 @@ function SessionWorkspaceContent() {
 
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Load real session data from backend on mount
+  useEffect(() => {
+    let active = true;
+    setIsSessionLoading(true);
+
+    fetch(`/api/session/${sessionId}?topic=${encodeURIComponent(initialTopic)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load session");
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        if (data.topic) setTopic(data.topic);
+        if (data.currentRung) setCurrentRung(data.currentRung);
+        if (data.frustration !== undefined) setFrustration(data.frustration);
+        if (data.turns && data.turns.length > 0) {
+          setMessages(
+            data.turns.map((t: any) => ({
+              id: t.id,
+              role: t.role,
+              text: t.text,
+              rung: t.rung,
+              visualSpec: t.visualSpec,
+              timestamp: t.timestamp,
+            }))
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("[Session] Error fetching session details:", err);
+      })
+      .finally(() => {
+        if (active) setIsSessionLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [sessionId, initialTopic]);
 
   // Auto-scroll messages
   useEffect(() => {
@@ -105,7 +127,11 @@ function SessionWorkspaceContent() {
   // Keystroke handler for typing duration
   const handleKeyDown = () => {
     if (!typingStartTime) {
-      setTypingStartTime(Date.now());
+      const now = Date.now();
+      setTypingStartTime(now);
+      setTypingSeconds(1);
+    } else {
+      setTypingSeconds(Math.max(1, Math.round((Date.now() - typingStartTime) / 1000)));
     }
   };
 
@@ -200,14 +226,13 @@ function SessionWorkspaceContent() {
           : "Learning"
       );
     } catch (err: any) {
-      console.error(err);
-      // Graceful offline fallback message
+      console.error("[Session] Error processing turn:", err);
       setMessages((prev) => [
         ...prev,
         {
           id: `tutor-err-${Date.now()}`,
           role: "tutor",
-          text: "What do you think happens when the function invokes itself with a smaller input?",
+          text: `Let's step back and reflect on ${topic}. What is your intuition on what should happen next?`,
           rung: currentRung,
           timestamp: new Date().toISOString(),
         },

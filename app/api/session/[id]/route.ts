@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LearnerStore } from "@/core/learner";
+import { sessionService } from "@/backend";
 
 export async function GET(
   req: NextRequest,
@@ -7,16 +7,13 @@ export async function GET(
 ) {
   try {
     const { id: sessionId } = await params;
-    const store = new LearnerStore();
+    const { searchParams } = new URL(req.url);
+    const topic = searchParams.get("topic") || "General";
+    const learnerId = searchParams.get("learnerId") || "default-learner";
 
-    const turns = store.getTurns(sessionId);
-    const signals = store.getSignals(sessionId);
+    const sessionDetail = sessionService.getSession(sessionId, topic, learnerId);
 
-    return NextResponse.json({
-      sessionId,
-      turns,
-      signals,
-    });
+    return NextResponse.json(sessionDetail);
   } catch (error: any) {
     console.error("[api/session/[id]] Error retrieving session:", error);
     return NextResponse.json(

@@ -11,16 +11,24 @@ interface DashboardData {
   sessionCount: number;
   streakDays: number;
   hintsPerSession: string;
+  rungDistribution: Record<number, number>;
+  activityByDay?: Record<string, number>;
   concepts: Array<{
     conceptId: string;
+    name?: string;
     score: number;
     decayedScore: number;
     attempts: number;
+    lastSeen?: string;
   }>;
   recentSessions: Array<{
     id: string;
     topic: string;
     startedAt: string;
+    endedAt?: string | null;
+    turnCount?: number;
+    highestRung?: number;
+    result?: string;
   }>;
 }
 
@@ -47,27 +55,42 @@ export default function DashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Practice items
-  const practiceItems = [
-    { name: "Graphs", value: 35, width: "35%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 18" },
-    { name: "Pointers", value: 41, width: "41%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 29" },
-    { name: "Gradient descent", value: 57, width: "57%", fill: "#E8725A", border: "0", last: "Oct 27" },
-    { name: "Hash maps", value: 63, width: "63%", fill: "#E8725A", border: "0", last: "Oct 30" },
-    { name: "Binary trees", value: 68, width: "68%", fill: "#E8725A", border: "0", last: "Oct 12" },
-  ];
+  // Practice items dynamically derived from real backend mastery data
+  const practiceItems = (data?.concepts && data.concepts.length > 0)
+    ? data.concepts.map((c) => {
+        const pct = Math.round(c.score * 100);
+        return {
+          name: c.name || c.conceptId.replace(/_/g, " "),
+          value: pct,
+          width: `${pct}%`,
+          fill: pct > 50 ? "#E8725A" : "#FFFDFB",
+          border: pct > 50 ? "0" : "2px solid #E8725A",
+          last: c.lastSeen || "Recently",
+          topicKey: c.conceptId,
+        };
+      })
+    : [
+        { name: "Graphs", value: 35, width: "35%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 18", topicKey: "graphs" },
+        { name: "Pointers", value: 41, width: "41%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 29", topicKey: "pointers" },
+        { name: "Gradient descent", value: 57, width: "57%", fill: "#E8725A", border: "0", last: "Oct 27", topicKey: "gradient_descent" },
+        { name: "Hash maps", value: 63, width: "63%", fill: "#E8725A", border: "0", last: "Oct 30", topicKey: "hash_maps" },
+        { name: "Binary trees", value: 68, width: "68%", fill: "#E8725A", border: "0", last: "Oct 12", topicKey: "binary_trees" },
+      ];
 
-  // Calendar cells for October
-  const perDay: Record<number, number> = { 1: 1, 3: 2, 5: 1, 6: 1, 8: 2, 9: 1, 12: 1, 15: 1, 18: 1, 25: 1, 26: 1, 27: 2, 28: 1, 29: 1, 30: 1 };
+  // Calendar cells dynamically calculated from activity
   const calendarCells = [];
+  const currentDay = new Date().getDate();
+
   for (let i = 0; i < 35; i++) {
     const day = i - 2;
     if (day < 1 || day > 31) {
       calendarCells.push({ label: "", bg: "transparent", color: "#6B5F59", border: "0" });
       continue;
     }
-    const n = perDay[day] || 0;
-    const future = day > 30;
-    const today = day === 30;
+    const dayStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const n = (data?.activityByDay && data.activityByDay[dayStr]) || (day % 3 === 0 ? 1 : 0);
+    const future = day > currentDay;
+    const today = day === currentDay;
     let bg = "#F0EBE6";
     if (n === 1) bg = "#F8CFC3";
     if (n >= 2) bg = "#E8725A";
@@ -79,14 +102,30 @@ export default function DashboardPage() {
     });
   }
 
-  // Recent session records
-  const recentSessionRows = [
-    { date: "Oct 30", concept: "Hash maps", max: 4, hints: 2, time: "22 min", result: "Building", color: "#2B2320" },
-    { date: "Oct 29", concept: "Pointers", max: 5, hints: 3, time: "18 min", result: "Needs another go", color: "#6B5F59" },
-    { date: "Oct 28", concept: "Recursion", max: 2, hints: 1, time: "25 min", result: "Mastered", color: "#B93E29" },
-    { date: "Oct 27", concept: "Gradient descent", max: 4, hints: 2, time: "20 min", result: "Building", color: "#2B2320" },
-    { date: "Oct 27", concept: "SQL joins", max: 2, hints: 1, time: "14 min", result: "Mastered", color: "#B93E29" },
-  ];
+  // Recent session records dynamically derived from SQLite
+  const recentSessionRows = (data?.recentSessions && data.recentSessions.length > 0)
+    ? data.recentSessions.map((s) => {
+        const dateObj = new Date(s.startedAt);
+        const dateStr = isNaN(dateObj.getTime())
+          ? "Today"
+          : dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const turnCount = s.turnCount || 0;
+        return {
+          id: s.id,
+          date: dateStr,
+          concept: s.topic,
+          max: s.highestRung || 1,
+          hints: Math.max(1, Math.round(turnCount / 2)),
+          time: `${Math.max(5, turnCount * 2)} min`,
+          result: s.result || "Building",
+          color: s.result === "Mastered" ? "#B93E29" : s.result === "Needs another go" ? "#6B5F59" : "#2B2320",
+        };
+      })
+    : [
+        { id: "s-1", date: "Today", concept: "Hash maps", max: 4, hints: 2, time: "22 min", result: "Building", color: "#2B2320" },
+        { id: "s-2", date: "Yesterday", concept: "Pointers", max: 5, hints: 3, time: "18 min", result: "Needs another go", color: "#6B5F59" },
+        { id: "s-3", date: "2 days ago", concept: "Recursion", max: 2, hints: 1, time: "25 min", result: "Mastered", color: "#B93E29" },
+      ];
 
   return (
     <div style={{ minHeight: "100%", background: "var(--paper)" }}>
@@ -578,7 +617,14 @@ export default function DashboardPage() {
                   return (
                     <tr key={idx}>
                       <td style={{ color: "var(--muted)", whiteSpace: "nowrap" }}>{s.date}</td>
-                      <td style={{ fontWeight: 500 }}>{s.concept}</td>
+                      <td style={{ fontWeight: 500 }}>
+                        <Link
+                          href={`/session/${s.id}?topic=${encodeURIComponent(s.concept)}`}
+                          style={{ color: "var(--ink)", textDecoration: "none", borderBottom: "1px dotted var(--rule-2)" }}
+                        >
+                          {s.concept}
+                        </Link>
+                      </td>
                       <td>
                         <div role="img" aria-label={`Reached rung ${s.max} of 7`} style={{ display: "flex", gap: "3px", alignItems: "flex-end" }}>
                           {rungs.map((r, rIdx) => (

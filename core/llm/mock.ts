@@ -82,11 +82,29 @@ export class MockLLMProvider implements BaseLLMProvider {
     // 3. Teacher schema
     if (name === "TeacherDraft" || system.includes("Teacher")) {
       const isRung4 = system.includes("Rung 4");
+      const topicMatch = system.match(/Topic:\s*"([^"]+)"/i) || system.match(/Topic:\s*([^\n,]+)/i);
+      const extractedTopic = topicMatch ? topicMatch[1].trim() : "this concept";
+
+      let replyQuestion = `To understand ${extractedTopic}, what do you predict happens first?`;
+      const lower = (lastMsg + " " + system).toLowerCase();
+
+      if (lower.includes("binary search") || lower.includes("search")) {
+        replyQuestion = "In binary search, if the target is smaller than the middle element, which half of the array can we safely eliminate?";
+      } else if (lower.includes("pointer") || lower.includes("reference")) {
+        replyQuestion = "If variable A stores the memory address of variable B, what value do you get when you dereference A?";
+      } else if (lower.includes("hash") || lower.includes("map")) {
+        replyQuestion = "How does the hash function determine the array index for a given key?";
+      } else if (lower.includes("tree")) {
+        replyQuestion = "In a binary tree, what is the maximum number of children any node can have?";
+      } else if (lower.includes("recursion") || lower.includes("fact")) {
+        replyQuestion = "What do you think happens when the function invokes itself with a smaller input?";
+      }
+
       const draftObj = {
-        replyText: "What do you think happens when the function invokes itself with a smaller input?",
-        singleQuestion: "What do you think happens when the function invokes itself with a smaller input?",
+        replyText: replyQuestion,
+        singleQuestion: replyQuestion,
         needsVisual: isRung4,
-        visualConcept: isRung4 ? "recursion" : undefined,
+        visualConcept: isRung4 ? (extractedTopic || "recursion") : undefined,
         visualType: isRung4 ? "diagram" : undefined,
       };
       return options.schema.parse(draftObj);

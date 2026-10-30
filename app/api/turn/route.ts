@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { TutorOrchestrator } from "@/core/orchestrator";
+import { turnService } from "@/backend";
 
 const TurnRequestSchema = z.object({
   sessionId: z.string().min(1, "sessionId is required"),
@@ -10,15 +10,6 @@ const TurnRequestSchema = z.object({
   signals: z.record(z.any()).optional().default({}),
   groundTruth: z.string().nullable().optional(),
 });
-
-let orchestratorInstance: TutorOrchestrator | null = null;
-
-function getOrchestrator(): TutorOrchestrator {
-  if (!orchestratorInstance) {
-    orchestratorInstance = new TutorOrchestrator();
-  }
-  return orchestratorInstance;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,9 +24,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { sessionId, learnerId, message, topic, signals, groundTruth } = validation.data;
-    const orchestrator = getOrchestrator();
 
-    const response = await orchestrator.handleTurn({
+    const response = await turnService.executeTurn({
       sessionId,
       learnerId,
       message,
