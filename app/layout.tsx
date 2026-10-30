@@ -5,6 +5,14 @@ import { ConnectionBanner } from "@/components/setup/ConnectionBanner";
 export const metadata = {
   title: "Socratic Tutor — Learn it by working it out",
   description: "A tutor that asks, shows, and never just hands you the answer.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({

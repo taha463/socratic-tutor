@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 256" width="880" height="256" role="img" aria-labelledby="title-lockup-b">
+  <title id="title-lockup-b">Socratic Tutor — Concept B Lockup</title>
+  <defs>
+    <style>
+      .brand-title { font-family: 'Onest', system-ui, -apple-system, sans-serif; font-size: 76px; font-weight: 700; fill: #2B2320; letter-spacing: -0.5px; }
+      .brand-accent { fill: #E8725A; }
+      .brand-tag { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 500; fill: #6B5F59; letter-spacing: 2.5px; }
+    </style>
+  </defs>
+  <!-- Symbol -->
+  <g transform="translate(24, 16) scale(0.875)">
+    <!-- Upper-left bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right bracket -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+  <!-- Wordmark -->
+  <text x="260" y="136" class="brand-title">Socratic <tspan class="brand-accent">Tutor</tspan></text>
+  <text x="264" y="184" class="brand-tag">LEARN BY WORKING IT OUT</text>
+</svg>

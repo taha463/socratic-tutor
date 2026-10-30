@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title-c">
+  <title id="title-c">Socratic Tutor — The Question Portal</title>
+  <g id="symbol">
+    <!-- Stepping Arch: Outer curve with 3 ascending ladder treads descending to center stem -->
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <!-- The Foundation Dot / Insight Blank -->
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+</svg>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { LogoSymbol } from "@/components/brand/Logo";
 
 export default function LandingPage() {
   const [prediction, setPrediction] = useState("");
@@ -46,10 +47,7 @@ export default function LandingPage() {
             fontSize: "20px",
           }}
         >
-          <svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true">
-            <circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" strokeWidth="2.5" />
-            <circle cx="14" cy="14" r="4" fill="#E8725A" />
-          </svg>
+          <LogoSymbol size={28} />
           Socratic Tutor
         </Link>
         <nav aria-label="Main" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px" }}>

@@ -32,3 +32,4 @@ self.onmessage = function (e) {
     console.log = originalLog;
   }
 };
+

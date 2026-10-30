@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LogoSymbol } from "@/components/brand/Logo";
 
 interface Message {
   id: string;
@@ -255,10 +256,7 @@ export default function SessionWorkspacePage({
               fontSize: "18px",
             }}
           >
-            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-              <circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" strokeWidth="2.5" />
-              <circle cx="14" cy="14" r="4" fill="#E8725A" />
-            </svg>
+            <LogoSymbol size={28} />
             Socratic Tutor
           </Link>
           <nav aria-label="Main" style={{ display: "flex", flexWrap: "wrap" }}>
@@ -739,3 +737,4 @@ export default function SessionWorkspacePage({
     </div>
   );
 }
+

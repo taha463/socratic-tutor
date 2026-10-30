@@ -1,0 +1,27 @@
+<svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title-b"><title>Socratic Tutor Logo</title>
+  <title id="title-b">Socratic Tutor — Dialogue Knot</title>
+  <g id="symbol">
+    <!-- Upper-left dialogue bracket -->
+    <path fill="#000000" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right dialogue bracket (180° rotational symmetry) -->
+    <path fill="#000000" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark (The Blank filled by discovery) -->
+    <circle cx="128" cy="128" r="24" fill="#000000" />
+  </g>
+</svg>

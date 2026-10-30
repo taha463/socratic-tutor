@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title-a">
+  <title id="title-a">Socratic Tutor — Concept A: S-Scaffold Monogram</title>
+  <!-- Geometry: Geometric "S" with ascending scaffold stepping bridge and central active-recall notch -->
+  <path fill="#2B2320" fill-rule="evenodd" d="
+    M 196,84
+    C 196,52 168,28 128,28
+    C 88,28 60,52 60,84
+    C 60,110 82,126 112,136
+    L 96,152
+    C 72,142 56,128 48,114
+    L 24,128
+    C 36,152 60,172 96,184
+    L 60,220
+    L 88,220
+    L 116,192
+    C 120,192 124,192 128,192
+    C 168,192 196,168 196,136
+    C 196,110 174,94 144,84
+    L 160,68
+    C 184,78 200,92 208,106
+    L 232,92
+    C 220,68 196,48 160,36
+    L 196,0
+    Z
+  "/>
+</svg>

@@ -1,0 +1,443 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="984" viewBox="0 0 1600 984"><rect width="1600" height="984" fill="#f7f7f4"/><text x="60" y="78" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="40" font-weight="700" fill="#161616">Socratic Tutor — Brand Identity Concepts</text><text x="60" y="116" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="20" fill="#6b6b6b">Local-first pedagogical framework · Hallmark modern-minimal aesthetic</text><rect x="60" y="150" width="474.667" height="774" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-a" viewBox="0 0 256 256" x="90" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <title id="c0-title-a">Socratic Tutor — S-Monogram Scaffold</title>
+  <g id="c0-symbol">
+    <!-- Top arc: sweeping from right terminal at (192, 92) up around (128, 24) to (64, 88) -->
+    <!-- Diagonal scaffold bridge descending through (128, 128) -->
+    <!-- Bottom arc: sweeping through (192, 168) down around (128, 232) to left terminal at (64, 164) -->
+    <path fill="#2B2320" fill-rule="evenodd" d="
+      M 192,88
+      A 32,32 0 0 0 160,56
+      H 116
+      A 32,32 0 0 0 84,88
+      C 84,106 98,118 120,126
+      L 148,136
+      C 176,146 196,164 196,192
+      A 40,40 0 0 1 156,232
+      H 100
+      A 40,40 0 0 1 60,192
+      H 96
+      A 16,16 0 0 0 112,208
+      H 144
+      A 16,16 0 0 0 160,192
+      C 160,178 150,168 132,160
+      L 104,150
+      C 76,140 56,122 56,94
+      A 40,40 0 0 1 96,54
+      H 152
+      A 40,40 0 0 1 192,94
+      Z
+      M 128,112
+      A 16,16 0 1 1 127.9,112
+      Z
+    "/>
+    <!-- Pedagogical Blank Spark: 16px focal dot in the upper chamber -->
+    <circle cx="128" cy="84" r="12" fill="#E8725A" />
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-lockup-a" viewBox="0 0 880 256" x="90" y="514" width="414.667" height="120" preserveAspectRatio="xMidYMid meet">
+  <title id="l0-title-lockup-a">Socratic Tutor — Concept A Lockup</title>
+  <defs>
+    <style>
+      .brand-title { font-family: 'Onest', system-ui, -apple-system, sans-serif; font-size: 76px; font-weight: 700; fill: #2B2320; letter-spacing: -0.5px; }
+      .brand-accent { fill: #B93E29; }
+      .brand-tag { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 500; fill: #6B5F59; letter-spacing: 2.5px; }
+    </style>
+  </defs>
+  <!-- Symbol -->
+  <g transform="translate(24, 16) scale(0.875)">
+    <path fill="#2B2320" fill-rule="evenodd" d="
+      M 192,88
+      A 32,32 0 0 0 160,56
+      H 116
+      A 32,32 0 0 0 84,88
+      C 84,106 98,118 120,126
+      L 148,136
+      C 176,146 196,164 196,192
+      A 40,40 0 0 1 156,232
+      H 100
+      A 40,40 0 0 1 60,192
+      H 96
+      A 16,16 0 0 0 112,208
+      H 144
+      A 16,16 0 0 0 160,192
+      C 160,178 150,168 132,160
+      L 104,150
+      C 76,140 56,122 56,94
+      A 40,40 0 0 1 96,54
+      H 152
+      A 40,40 0 0 1 192,94
+      Z
+      M 128,112
+      A 16,16 0 1 1 127.9,112
+      Z
+    "/>
+    <circle cx="128" cy="84" r="12" fill="#E8725A" />
+  </g>
+  <!-- Wordmark -->
+  <text x="260" y="136" class="brand-title">Socratic <tspan class="brand-accent">Tutor</tspan></text>
+  <text x="264" y="184" class="brand-tag">LEARN BY WORKING IT OUT</text>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-a" viewBox="0 0 256 256" x="90" y="660" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <title id="s064-title-a">Socratic Tutor — S-Monogram Scaffold</title>
+  <g id="s064-symbol">
+    <!-- Top arc: sweeping from right terminal at (192, 92) up around (128, 24) to (64, 88) -->
+    <!-- Diagonal scaffold bridge descending through (128, 128) -->
+    <!-- Bottom arc: sweeping through (192, 168) down around (128, 232) to left terminal at (64, 164) -->
+    <path fill="#2B2320" fill-rule="evenodd" d="
+      M 192,88
+      A 32,32 0 0 0 160,56
+      H 116
+      A 32,32 0 0 0 84,88
+      C 84,106 98,118 120,126
+      L 148,136
+      C 176,146 196,164 196,192
+      A 40,40 0 0 1 156,232
+      H 100
+      A 40,40 0 0 1 60,192
+      H 96
+      A 16,16 0 0 0 112,208
+      H 144
+      A 16,16 0 0 0 160,192
+      C 160,178 150,168 132,160
+      L 104,150
+      C 76,140 56,122 56,94
+      A 40,40 0 0 1 96,54
+      H 152
+      A 40,40 0 0 1 192,94
+      Z
+      M 128,112
+      A 16,16 0 1 1 127.9,112
+      Z
+    "/>
+    <!-- Pedagogical Blank Spark: 16px focal dot in the upper chamber -->
+    <circle cx="128" cy="84" r="12" fill="#E8725A" />
+  </g>
+</svg></g><text x="122" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-a" viewBox="0 0 256 256" x="180" y="692" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <title id="s032-title-a">Socratic Tutor — S-Monogram Scaffold</title>
+  <g id="s032-symbol">
+    <!-- Top arc: sweeping from right terminal at (192, 92) up around (128, 24) to (64, 88) -->
+    <!-- Diagonal scaffold bridge descending through (128, 128) -->
+    <!-- Bottom arc: sweeping through (192, 168) down around (128, 232) to left terminal at (64, 164) -->
+    <path fill="#2B2320" fill-rule="evenodd" d="
+      M 192,88
+      A 32,32 0 0 0 160,56
+      H 116
+      A 32,32 0 0 0 84,88
+      C 84,106 98,118 120,126
+      L 148,136
+      C 176,146 196,164 196,192
+      A 40,40 0 0 1 156,232
+      H 100
+      A 40,40 0 0 1 60,192
+      H 96
+      A 16,16 0 0 0 112,208
+      H 144
+      A 16,16 0 0 0 160,192
+      C 160,178 150,168 132,160
+      L 104,150
+      C 76,140 56,122 56,94
+      A 40,40 0 0 1 96,54
+      H 152
+      A 40,40 0 0 1 192,94
+      Z
+      M 128,112
+      A 16,16 0 1 1 127.9,112
+      Z
+    "/>
+    <!-- Pedagogical Blank Spark: 16px focal dot in the upper chamber -->
+    <circle cx="128" cy="84" r="12" fill="#E8725A" />
+  </g>
+</svg></g><text x="196" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-a" viewBox="0 0 256 256" x="238" y="708" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <title id="s016-title-a">Socratic Tutor — S-Monogram Scaffold</title>
+  <g id="s016-symbol">
+    <!-- Top arc: sweeping from right terminal at (192, 92) up around (128, 24) to (64, 88) -->
+    <!-- Diagonal scaffold bridge descending through (128, 128) -->
+    <!-- Bottom arc: sweeping through (192, 168) down around (128, 232) to left terminal at (64, 164) -->
+    <path fill="#2B2320" fill-rule="evenodd" d="
+      M 192,88
+      A 32,32 0 0 0 160,56
+      H 116
+      A 32,32 0 0 0 84,88
+      C 84,106 98,118 120,126
+      L 148,136
+      C 176,146 196,164 196,192
+      A 40,40 0 0 1 156,232
+      H 100
+      A 40,40 0 0 1 60,192
+      H 96
+      A 16,16 0 0 0 112,208
+      H 144
+      A 16,16 0 0 0 160,192
+      C 160,178 150,168 132,160
+      L 104,150
+      C 76,140 56,122 56,94
+      A 40,40 0 0 1 96,54
+      H 152
+      A 40,40 0 0 1 192,94
+      Z
+      M 128,112
+      A 16,16 0 1 1 127.9,112
+      Z
+    "/>
+    <!-- Pedagogical Blank Spark: 16px focal dot in the upper chamber -->
+    <circle cx="128" cy="84" r="12" fill="#E8725A" />
+  </g>
+</svg></g><text x="246" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="90.0" y="780" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">A · The S-Scaffold</text><text x="90.0" y="814" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">Geometric S letterform with scaffold</text><text x="90.0" y="840" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">stepping bridge and cognitive blank.</text><rect x="562.667" y="150" width="474.667" height="774" rx="18" fill="#fff" stroke="#161616" stroke-width="2"/><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-b" viewBox="0 0 256 256" x="592.667" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <title id="c1-title-b">Socratic Tutor — Dialogue Knot</title>
+  <g id="c1-symbol">
+    <!-- Upper-left dialogue bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right dialogue bracket (180° rotational symmetry) -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark (The Blank filled by discovery) -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-lockup-b" viewBox="0 0 880 256" x="592.667" y="514" width="414.667" height="120" preserveAspectRatio="xMidYMid meet">
+  <title id="l1-title-lockup-b">Socratic Tutor — Concept B Lockup</title>
+  <defs>
+    <style>
+      .brand-title { font-family: 'Onest', system-ui, -apple-system, sans-serif; font-size: 76px; font-weight: 700; fill: #2B2320; letter-spacing: -0.5px; }
+      .brand-accent { fill: #E8725A; }
+      .brand-tag { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 500; fill: #6B5F59; letter-spacing: 2.5px; }
+    </style>
+  </defs>
+  <!-- Symbol -->
+  <g transform="translate(24, 16) scale(0.875)">
+    <!-- Upper-left bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right bracket -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+  <!-- Wordmark -->
+  <text x="260" y="136" class="brand-title">Socratic <tspan class="brand-accent">Tutor</tspan></text>
+  <text x="264" y="184" class="brand-tag">LEARN BY WORKING IT OUT</text>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-b" viewBox="0 0 256 256" x="592.667" y="660" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <title id="s164-title-b">Socratic Tutor — Dialogue Knot</title>
+  <g id="s164-symbol">
+    <!-- Upper-left dialogue bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right dialogue bracket (180° rotational symmetry) -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark (The Blank filled by discovery) -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+</svg></g><text x="624.667" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-b" viewBox="0 0 256 256" x="682.667" y="692" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <title id="s132-title-b">Socratic Tutor — Dialogue Knot</title>
+  <g id="s132-symbol">
+    <!-- Upper-left dialogue bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right dialogue bracket (180° rotational symmetry) -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark (The Blank filled by discovery) -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+</svg></g><text x="698.667" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-b" viewBox="0 0 256 256" x="740.667" y="708" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <title id="s116-title-b">Socratic Tutor — Dialogue Knot</title>
+  <g id="s116-symbol">
+    <!-- Upper-left dialogue bracket -->
+    <path fill="#2B2320" d="
+      M 128,32
+      A 96,96 0 0 0 32,128
+      A 96,96 0 0 0 68,190
+      L 92,166
+      A 64,64 0 0 1 64,128
+      A 64,64 0 0 1 128,64
+      Z
+    "/>
+    <!-- Lower-right dialogue bracket (180° rotational symmetry) -->
+    <path fill="#2B2320" d="
+      M 128,224
+      A 96,96 0 0 0 224,128
+      A 96,96 0 0 0 188,66
+      L 164,90
+      A 64,64 0 0 1 192,128
+      A 64,64 0 0 1 128,192
+      Z
+    "/>
+    <!-- Central Insight Spark (The Blank filled by discovery) -->
+    <circle cx="128" cy="128" r="24" fill="#E8725A" />
+  </g>
+</svg></g><text x="748.667" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="592.6666666666667" y="780" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">B · The Dialogue Knot</text><text x="592.6666666666667" y="808" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#161616" letter-spacing="1.5">RECOMMENDED</text><text x="592.6666666666667" y="842" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">Two interlocking minds in inquiry embracing</text><text x="592.6666666666667" y="868" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">the central discovery spark.</text><rect x="1065.33" y="150" width="474.667" height="774" rx="18" fill="#fff" stroke="#e4e4e0" stroke-width="1"/><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-c" viewBox="0 0 256 256" x="1095.33" y="190" width="414.667" height="300" preserveAspectRatio="xMidYMid meet">
+  <title id="c2-title-c">Socratic Tutor — The Question Portal</title>
+  <g id="c2-symbol">
+    <!-- Stepping Arch: Outer curve with 3 ascending ladder treads descending to center stem -->
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <!-- The Foundation Dot / Insight Blank -->
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-lockup-c" viewBox="0 0 880 256" x="1095.33" y="514" width="414.667" height="120" preserveAspectRatio="xMidYMid meet">
+  <title id="l2-title-lockup-c">Socratic Tutor — Concept C Lockup</title>
+  <defs>
+    <style>
+      .brand-title { font-family: 'Onest', system-ui, -apple-system, sans-serif; font-size: 76px; font-weight: 700; fill: #2B2320; letter-spacing: -0.5px; }
+      .brand-accent { fill: #B93E29; }
+      .brand-tag { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 500; fill: #6B5F59; letter-spacing: 2.5px; }
+    </style>
+  </defs>
+  <!-- Symbol -->
+  <g transform="translate(24, 16) scale(0.875)">
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+  <!-- Wordmark -->
+  <text x="260" y="136" class="brand-title">Socratic <tspan class="brand-accent">Tutor</tspan></text>
+  <text x="264" y="184" class="brand-tag">LEARN BY WORKING IT OUT</text>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-c" viewBox="0 0 256 256" x="1095.33" y="660" width="64" height="64" preserveAspectRatio="xMidYMid meet">
+  <title id="s264-title-c">Socratic Tutor — The Question Portal</title>
+  <g id="s264-symbol">
+    <!-- Stepping Arch: Outer curve with 3 ascending ladder treads descending to center stem -->
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <!-- The Foundation Dot / Insight Blank -->
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+</svg></g><text x="1127.33" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">64px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-c" viewBox="0 0 256 256" x="1185.33" y="692" width="32" height="32" preserveAspectRatio="xMidYMid meet">
+  <title id="s232-title-c">Socratic Tutor — The Question Portal</title>
+  <g id="s232-symbol">
+    <!-- Stepping Arch: Outer curve with 3 ascending ladder treads descending to center stem -->
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <!-- The Foundation Dot / Insight Blank -->
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+</svg></g><text x="1201.33" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">32px</text><g><svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title-c" viewBox="0 0 256 256" x="1243.33" y="708" width="16" height="16" preserveAspectRatio="xMidYMid meet">
+  <title id="s216-title-c">Socratic Tutor — The Question Portal</title>
+  <g id="s216-symbol">
+    <!-- Stepping Arch: Outer curve with 3 ascending ladder treads descending to center stem -->
+    <path fill="#2B2320" d="
+      M 48,120
+      A 80,80 0 0 1 128,40
+      A 80,80 0 0 1 208,120
+      C 208,148 188,168 160,180
+      V 192
+      H 124
+      V 172
+      C 124,152 144,140 162,130
+      C 172,124 176,116 176,108
+      A 48,48 0 0 0 128,60
+      A 48,48 0 0 0 80,108
+      H 48
+      Z
+    "/>
+    <!-- The Foundation Dot / Insight Blank -->
+    <circle cx="142" cy="224" r="16" fill="#E8725A" />
+  </g>
+</svg></g><text x="1251.33" y="744" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12" fill="#8a8a8a" text-anchor="middle">16px</text><text x="1095.3333333333335" y="780" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="26" font-weight="700" fill="#161616">C · The Question Portal</text><text x="1095.3333333333335" y="814" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">Architectural agora archway stepping</text><text x="1095.3333333333335" y="840" font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="19" fill="#555">through the hint ladder rungs.</text></svg>
