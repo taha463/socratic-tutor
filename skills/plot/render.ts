@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { BaseSkill, VisualOutput } from "../registry";
+import type { BaseSkill, VisualOutput } from "../registry";
 
 export const PlotSpecSchema = z.object({
   concept: z.string(),

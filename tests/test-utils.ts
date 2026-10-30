@@ -57,6 +57,11 @@ export function expect(actual: any) {
         assert.ok(actual.includes(expected), `Expected array to contain item`);
       }
     },
+    toThrow() {
+      if (typeof actual === "function") {
+        assert.throws(actual);
+      }
+    },
     not: {
       toBe(expected: any) {
         assert.notStrictEqual(actual, expected);

@@ -3,6 +3,13 @@
  */
 
 import { z } from "zod";
+import { Eli5Skill } from "./eli5/render";
+import { DiagramSkill } from "./diagram/render";
+import { AnalogySkill } from "./analogy/render";
+import { PlotSkill } from "./plot/render";
+import { AnimateSkill } from "./animate/render";
+import { ThreeDSkill } from "./three_d/render";
+import { TraceSkill } from "./trace/render";
 
 export interface VisualOutput {
   skill: string;
@@ -52,7 +59,13 @@ let globalRegistry: SkillRegistry | null = null;
 export function getSkillRegistry(): SkillRegistry {
   if (!globalRegistry) {
     globalRegistry = new SkillRegistry();
-    // Core skills auto-registered
+    globalRegistry.register(new Eli5Skill());
+    globalRegistry.register(new DiagramSkill());
+    globalRegistry.register(new AnalogySkill());
+    globalRegistry.register(new PlotSkill());
+    globalRegistry.register(new AnimateSkill());
+    globalRegistry.register(new ThreeDSkill());
+    globalRegistry.register(new TraceSkill());
   }
   return globalRegistry;
 }

@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { BaseSkill, VisualOutput } from "../registry";
+import type { BaseSkill, VisualOutput } from "../registry";
 
 export const AnimateElementSchema = z.object({
   id: z.string(),
