@@ -79,3 +79,4 @@ describe("Advanced Visual Skills Tests (Plot, Animate, 3D)", () => {
     expect(output.visualSpec.sceneType).toBe("matrix_transform");
   });
 });
+

@@ -10,3 +10,4 @@ Use when a learner needs to see a process unfold over time without installing he
 
 ## Invariant
 Supports play, pause, next-step, and scrubber controls. Features at least one prediction step where elements are masked with blanks.
+

@@ -10,3 +10,4 @@ Use when a learner is on Rung 3 (Analogy) or struggling with the initial mental 
 
 ## Invariant
 Always pair the analogy with a mapping question requiring the student to connect the everyday object back to the domain.
+

@@ -7,3 +7,4 @@ import { getDb, closeDb } from "@/storage/db";
 
 export { getDb, closeDb };
 export default getDb;
+

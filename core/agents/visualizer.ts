@@ -36,8 +36,9 @@ export class VisualizerAgent {
     rung?: number;
     learnerLevel?: string;
     whatToHide?: string | null;
+    factualContext?: string | null;
   }): Promise<VisualizerDecision> {
-    const { concept, skillType, rung = 4, learnerLevel = "beginner", whatToHide } = params;
+    const { concept, skillType, rung = 4, learnerLevel = "beginner", whatToHide, factualContext } = params;
 
     // 1. Check curriculum store for pre-tested template
     const curated = this.curriculum.getConcept(concept);
@@ -91,7 +92,7 @@ export class VisualizerAgent {
     }
 
     // 2. Fall back to LLM visual design
-    const systemPrompt = `${this.basePrompt}
+    let systemPrompt = `${this.basePrompt}
 
 REQUEST CONSTRAINTS:
 - Concept to Visualize: ${concept}
@@ -99,6 +100,10 @@ REQUEST CONSTRAINTS:
 - Target Ladder Rung: Rung ${rung}
 - Learner Level: ${learnerLevel}
 - Element to Mask/Hide: ${whatToHide || "Final invariant / answer"}`;
+
+    if (factualContext) {
+      systemPrompt += `\n- Technical/Factual Context: ${factualContext}`;
+    }
 
     const messages: ChatMessage[] = [
       { role: "user", content: `Design a visual scaffold for "${concept}". Ensure at least one blank or prediction prompt.` },

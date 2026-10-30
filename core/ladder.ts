@@ -114,3 +114,4 @@ export class HintLadder {
     return RUNG_DEFINITIONS[rung]?.name || "Probe";
   }
 }
+

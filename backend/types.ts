@@ -82,3 +82,4 @@ export interface DashboardMetricDTO {
   }>;
   activityByDay: Record<string, number>;
 }
+

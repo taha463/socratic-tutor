@@ -10,3 +10,4 @@ Use when a learner is on Rung 4 (Visual) or needs structural clarity on trees, g
 
 ## Invariant
 Visuals must contain at least one blank node (`?BLANK?` or `[ ? ]`) so the learner is forced to predict before seeing the answer.
+

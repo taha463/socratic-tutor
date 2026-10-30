@@ -14,3 +14,4 @@ export interface Persona {
   generatePostQuizAnswer(scenario: any): string;
   respond(history: Array<{ role: string; text: string }>, topic: string): PersonaResponse;
 }
+

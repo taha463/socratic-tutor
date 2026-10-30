@@ -24,3 +24,4 @@ PEDAGOGICAL RULES:
 2. If the learner is idle for >30s or expresses distress, boost frustration and recommend Rung 4 (Visual) or Rung 2 (Narrow question).
 3. If rapid failed attempts occur, mark state STUCK and escalate rung.
 4. If learner demonstrates clear conceptual grasp, mark state MASTERY.
+

@@ -23,3 +23,4 @@ OUTPUT FORMAT (JSON ONLY):
   "visualConcept": string | null,
   "visualType": "diagram" | "trace" | "eli5" | "analogy" | "plot" | "animate" | "three_d" | null
 }
+

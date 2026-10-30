@@ -11,6 +11,7 @@ import { HintLadder, RUNG_DEFINITIONS } from "./ladder";
 import { LearnerStore } from "./learner";
 import type { BaseLLMProvider, ChatMessage } from "./llm/types";
 import { getLLMClient } from "./llm";
+import { ragService } from "../backend/services/ragService";
 
 export interface TutorResponse {
   text: string;
@@ -137,6 +138,19 @@ export class TutorOrchestrator {
       this.learnerStore.recordMistake(learnerId, topic, "stuck_or_confused");
     }
 
+    // Retrieve real-time external RAG grounding if message has substantial inquiry
+    let ragContext = "";
+    const cleanMsg = message.trim().toLowerCase();
+    const isTrivial = ["yes", "no", "got it", "i understand", "ok", "next", "continue"].includes(cleanMsg);
+    if (!isTrivial && message.length > 5) {
+      try {
+        const query = topic && topic !== "general" ? `${topic} ${message}` : message;
+        ragContext = await ragService.search(query);
+      } catch {
+        ragContext = "";
+      }
+    }
+
     // 5. Teacher-Critic iterative drafting loop (max 2 rewrites)
     const maxRewrites = 2;
     let rewriteCount = 0;
@@ -157,6 +171,7 @@ export class TutorOrchestrator {
         behavioralSignals: signals,
         rewriteInstructions,
         groundTruth,
+        factualGrounding: ragContext || null,
       });
       finalDraft = draft;
 
@@ -167,8 +182,13 @@ export class TutorOrchestrator {
           skillType: draft.visualType || null,
           rung: activeRung,
           learnerLevel: diag.level,
+          factualContext: ragContext || null,
         });
-        visualSpec = visDecision.visualSpec;
+        visualSpec = {
+          skill: visDecision.chosenSkill,
+          ...visDecision.visualSpec,
+          reasoning: visDecision.reasoning,
+        };
       }
 
       // Critic quality gate

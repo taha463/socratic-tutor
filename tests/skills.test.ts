@@ -61,3 +61,4 @@ describe("Skills Registry & Visual Schema Tests", () => {
     expect(output.hasBlanks).toBe(true);
   });
 });
+

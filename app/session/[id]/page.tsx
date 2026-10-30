@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
+import { VisualRenderer } from "@/components/visuals/VisualRenderer";
 
 interface Message {
   id: string;
@@ -32,11 +33,6 @@ function SessionWorkspaceContent() {
   const [frustration, setFrustration] = useState(0.1);
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
-
-  // Call stack prediction visual state
-  const [prediction, setPrediction] = useState("");
-  const [predictionFeedback, setPredictionFeedback] = useState<string | null>(null);
-  const [isRevealed, setIsRevealed] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -242,15 +238,6 @@ function SessionWorkspaceContent() {
     }
   };
 
-  const handleCheckPrediction = () => {
-    if (prediction.trim() === "1") {
-      setPredictionFeedback("Spot on! fact(1) returns 1.");
-      setIsRevealed(true);
-    } else {
-      setPredictionFeedback("Not quite. What is the base case check when n <= 1?");
-    }
-  };
-
   return (
     <div style={{ minHeight: "100%", background: "var(--paper)" }}>
       {/* Workspace Header */}
@@ -418,148 +405,12 @@ function SessionWorkspaceContent() {
                     <div style={{ display: "flex", flexDirection: "column", gap: "14px", minWidth: 0, flex: 1 }}>
                       <p style={{ margin: 0, maxWidth: "560px", fontSize: "16px" }}>{msg.text}</p>
 
-                      {/* Visual Blank Call Stack Component */}
+                      {/* Dynamic Visual Scaffold Component */}
                       {msg.visualSpec && (
-                        <figure
-                          style={{
-                            margin: 0,
-                            padding: "20px",
-                            border: "1px solid var(--rule)",
-                            borderRadius: "12px",
-                            background: "var(--paper)",
-                            maxWidth: "560px",
-                            boxSizing: "border-box",
-                          }}
-                        >
-                          <figcaption
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              justifyContent: "space-between",
-                              gap: "4px 12px",
-                              marginBottom: "16px",
-                            }}
-                          >
-                            <span style={{ fontWeight: 600 }}>
-                              Call stack for <span className="fig">fact(3)</span>
-                            </span>
-                            <span style={{ color: "var(--muted)", fontSize: "13px" }}>
-                              Predict the blank, then reveal
-                            </span>
-                          </figcaption>
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}>
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "90px 1fr auto",
-                                alignItems: "center",
-                                gap: "12px",
-                                padding: "10px 14px",
-                                background: "var(--cotton)",
-                                border: "1px solid var(--rule-2)",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              <span className="fig" style={{ fontWeight: 500 }}>fact(3)</span>
-                              <span style={{ color: "var(--muted)" }}>waits for fact(2)</span>
-                              <span className="fig" style={{ color: "var(--muted)" }}>n = 3</span>
-                            </div>
-                            <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" style={{ marginLeft: "24px" }}>
-                              <path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "90px 1fr auto",
-                                alignItems: "center",
-                                gap: "12px",
-                                padding: "10px 14px",
-                                marginLeft: "24px",
-                                background: "var(--cotton)",
-                                border: "1px solid var(--rule-2)",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              <span className="fig" style={{ fontWeight: 500 }}>fact(2)</span>
-                              <span style={{ color: "var(--muted)" }}>waits for fact(1)</span>
-                              <span className="fig" style={{ color: "var(--muted)" }}>n = 2</span>
-                            </div>
-                            <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" style={{ marginLeft: "48px" }}>
-                              <path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "90px 1fr auto",
-                                alignItems: "center",
-                                gap: "12px",
-                                padding: "10px 14px",
-                                marginLeft: "48px",
-                                background: "var(--cotton)",
-                                border: "2px solid var(--coral)",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              <span className="fig" style={{ fontWeight: 500 }}>fact(1)</span>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "10px", color: "var(--muted)" }}>
-                                returns{" "}
-                                <span
-                                  className="fig"
-                                  aria-label="Hidden answer"
-                                  style={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    width: "52px",
-                                    height: "30px",
-                                    border: "2px dashed var(--coral-deep)",
-                                    borderRadius: "6px",
-                                    color: "var(--coral-deep)",
-                                    fontWeight: 500,
-                                    boxSizing: "border-box",
-                                  }}
-                                >
-                                  {isRevealed ? "1" : "?"}
-                                </span>
-                              </span>
-                              <span className="fig" style={{ color: "var(--muted)" }}>n = 1</span>
-                            </div>
-                          </div>
-                          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginTop: "18px" }}>
-                            <label htmlFor="prediction" style={{ color: "var(--muted)", fontSize: "13px" }}>
-                              Your prediction
-                            </label>
-                            <input
-                              id="prediction"
-                              type="text"
-                              value={prediction}
-                              onChange={(e) => setPrediction(e.target.value)}
-                              className="fig"
-                              style={{
-                                width: "72px",
-                                minHeight: "40px",
-                                boxSizing: "border-box",
-                                padding: "0 12px",
-                                border: "1px solid var(--muted)",
-                                borderRadius: "6px",
-                                background: "var(--cotton)",
-                                color: "var(--ink)",
-                                fontSize: "14px",
-                              }}
-                            />
-                            <button className="btn" type="button" onClick={handleCheckPrediction}>
-                              Check
-                            </button>
-                            <button className="btn" type="button" onClick={() => setIsRevealed(true)}>
-                              Reveal the trace
-                            </button>
-                          </div>
-                          {predictionFeedback && (
-                            <p style={{ margin: "10px 0 0", color: "var(--coral-deep)", fontSize: "13px", fontWeight: 500 }}>
-                              {predictionFeedback}
-                            </p>
-                          )}
-                        </figure>
+                        <VisualRenderer
+                          visualSpec={msg.visualSpec}
+                          onPredictionSubmit={(p) => setInputMessage(p)}
+                        />
                       )}
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { strictEqual, ok } from "node:assert";
-import { sessionService, turnService, dashboardService, getDb } from "../backend/index";
+import { sessionService, turnService, dashboardService, ragService, getDb } from "../backend/index";
 
 describe("Backend Service Layer Tests", () => {
   it("initializes a new session with a tailored Socratic greeting for any topic", () => {
@@ -13,6 +13,25 @@ describe("Backend Service Layer Tests", () => {
     ok(detail.turns.length >= 1, "Session should have opening greeting turn");
     strictEqual(detail.turns[0].role, "tutor");
     ok(detail.turns[0].text.toLowerCase().includes("binary search") || detail.turns[0].text.toLowerCase().includes("phonebook"));
+  });
+
+  it("cleans and extracts real-time web context with RAG service", async () => {
+    // 1. Text cleaning
+    const raw = "<b>Test &amp; &#039;quotes&#x27;</b> &quot;value&quot;";
+    const cleaned = ragService.cleanText(raw);
+    strictEqual(cleaned, "Test & 'quotes' \"value\"");
+
+    // 2. Wikipedia search
+    const results = await ragService.searchWikipedia("Python programming", 1);
+    ok(Array.isArray(results));
+    if (results.length > 0) {
+      ok(results[0].title.toLowerCase().includes("python"));
+      ok(results[0].snippet.length > 0);
+    }
+
+    // 3. Overall search method
+    const searchContext = await ragService.search("Binary search algorithm");
+    ok(typeof searchContext === "string");
   });
 
   it("processes a real turn with behavioral signals and persists in SQLite", async () => {
@@ -51,3 +70,4 @@ describe("Backend Service Layer Tests", () => {
     ok(typeof metrics.rungDistribution === "object");
   });
 });
+

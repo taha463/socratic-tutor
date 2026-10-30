@@ -35,3 +35,4 @@ export class StrongPersona implements Persona {
     };
   }
 }
+

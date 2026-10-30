@@ -41,6 +41,7 @@ export class TeacherAgent {
     behavioralSignals?: Record<string, any>;
     rewriteInstructions?: string | null;
     groundTruth?: string | null;
+    factualGrounding?: string | null;
   }): Promise<TeacherDraft> {
     const {
       topic,
@@ -52,6 +53,7 @@ export class TeacherAgent {
       behavioralSignals = {},
       rewriteInstructions,
       groundTruth,
+      factualGrounding,
     } = params;
 
     let systemPrompt = `${this.basePrompt}
@@ -65,6 +67,10 @@ CURRENT CONTEXT:
 
     if (groundTruth) {
       systemPrompt += `\n- TARGET CONCEPT / GROUND TRUTH (DO NOT LEAK BEFORE RUNG 7): ${groundTruth}`;
+    }
+
+    if (factualGrounding) {
+      systemPrompt += `\n\nREAL-TIME FACTUAL GROUNDING (FROM WEB / RAG):\n${factualGrounding}\n(Use these facts to guide your Socratic inquiry with realistic context and constraints, but NEVER leak the final answer directly below Rung 7.)`;
     }
 
     if (rewriteInstructions) {

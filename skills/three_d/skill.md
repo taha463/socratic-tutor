@@ -10,3 +10,4 @@ Use when teaching 3D vector transformations, spatial matrices, or geometric coor
 
 ## Invariant
 Lazy-loaded in the browser with interactive orbit controls and prediction targets.
+

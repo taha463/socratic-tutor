@@ -19,3 +19,4 @@ OUTPUT FORMAT (JSON ONLY):
   "visualSpec": Record<string, any>,
   "reasoning": string
 }
+
