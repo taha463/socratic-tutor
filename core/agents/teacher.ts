@@ -77,12 +77,19 @@ CURRENT CONTEXT:
     ];
 
     try {
-      return await this.llm.completeStructured(messages, {
+      const draft = await this.llm.completeStructured(messages, {
         schema: TeacherDraftSchema,
         schemaName: "TeacherDraft",
         systemPrompt,
         temperature: 0.3,
       });
+      return {
+        replyText: draft.replyText,
+        singleQuestion: draft.singleQuestion,
+        needsVisual: Boolean(draft.needsVisual),
+        visualConcept: draft.visualConcept,
+        visualType: draft.visualType,
+      };
     } catch {
       // Safe fallback observing the One-Question Rule
       return {

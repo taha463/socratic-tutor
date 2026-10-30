@@ -107,14 +107,15 @@ OBSERVED CONTEXT & TELEMETRY:
         temperature: 0.2,
       });
 
-      // Apply deterministic overrides if present
-      if (heuristicState) result.state = heuristicState;
-      if (heuristicRung) result.recommendedRung = heuristicRung;
-      result.frustration = Math.min(1.0, result.frustration + heuristicFrustrationBoost);
-      result.isDiagnosticActive = isDiagnosticActive;
-      result.diagnosticStep = diagnosticStep;
-
-      return result;
+      return {
+        level: result.level || "beginner",
+        frustration: Math.min(1.0, (result.frustration ?? 0.1) + heuristicFrustrationBoost),
+        state: heuristicState || result.state || "LEARNING",
+        recommendedRung: heuristicRung || result.recommendedRung || 1,
+        reasoning: result.reasoning || "Assessment complete.",
+        isDiagnosticActive,
+        diagnosticStep,
+      };
     } catch {
       // Safe fallback
       return {

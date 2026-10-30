@@ -37,3 +37,5 @@ eval/results/*.json
 *.swo
 .DS_Store
 Thumbs.db
+
+*.tsbuildinfo

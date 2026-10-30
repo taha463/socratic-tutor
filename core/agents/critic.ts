@@ -119,7 +119,13 @@ EVALUATION CONTEXT:
         verdict.multipleQuestions = multipleQuestions;
       }
 
-      return verdict;
+      return {
+        passed: verdict.passed,
+        issues: verdict.issues || [],
+        rewriteInstructions: verdict.rewriteInstructions,
+        answerLeaked: Boolean(verdict.answerLeaked),
+        multipleQuestions: Boolean(verdict.multipleQuestions),
+      };
     } catch {
       // If LLM fails, deterministic checks passed so allow through
       return {

@@ -42,7 +42,7 @@ describe("LLM Provider & Structured Output Tests", () => {
 
     expect(verdict.passed).toBe(false);
     expect(verdict.answerLeaked).toBe(true);
-    expect(verdict.issues.length).toBeGreaterThan(0);
+    expect((verdict.issues?.length ?? 0)).toBeGreaterThan(0);
   });
 
   it("handles custom queued responses properly", async () => {
