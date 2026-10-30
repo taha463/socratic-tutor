@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, use } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
 
 interface Message {
@@ -14,16 +14,15 @@ interface Message {
   timestamp: string;
 }
 
-export default function SessionWorkspacePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id: sessionId } = use(params);
+function SessionWorkspaceContent() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const sessionId = (params?.id as string) || "session-default";
   const router = useRouter();
 
   // State
-  const [topic, setTopic] = useState("Recursion");
+  const initialTopic = searchParams?.get("topic") || "Recursion";
+  const [topic, setTopic] = useState(initialTopic);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "msg-1",
@@ -735,6 +734,22 @@ export default function SessionWorkspacePage({
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SessionWorkspacePage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--paper)" }}>
+          <p style={{ color: "var(--muted)", font: "500 16px var(--font-body)" }}>
+            Loading your learning session...
+          </p>
+        </div>
+      }
+    >
+      <SessionWorkspaceContent />
+    </Suspense>
   );
 }
 
