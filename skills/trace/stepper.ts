@@ -104,3 +104,4 @@ export function verifyStepPrediction(
     message: `Not quite. Your prediction was '${prediction}', but the runtime state evaluated to '${checkpoint.expectedValue}'. Note: ${checkpoint.explanation}`,
   };
 }
+

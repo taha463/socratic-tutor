@@ -48,7 +48,7 @@ export function VisualRenderer({ visualSpec, onPredictionSubmit }: VisualRendere
       setFeedback("Good attempt. Check the relationship and try revealing to verify.");
     }
 
-    if (onPredictionSubmit) {
+    if (typeof onPredictionSubmit === "function") {
       onPredictionSubmit(prediction);
     }
   };
@@ -67,7 +67,9 @@ export function VisualRenderer({ visualSpec, onPredictionSubmit }: VisualRendere
         initialData={visualSpec.rows ? (visualSpec as any) : undefined}
         conceptQuery={concept}
         onSolvePuzzle={(_idx, option) => {
-          onPredictionSubmit?.(option);
+          if (typeof onPredictionSubmit === "function") {
+            onPredictionSubmit(option);
+          }
         }}
       />
     );

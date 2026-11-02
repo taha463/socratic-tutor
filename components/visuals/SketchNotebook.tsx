@@ -110,7 +110,9 @@ export function SketchNotebook({
       setWrongAttempt(null);
       setCelebrationRow(rowIdx);
       setTimeout(() => setCelebrationRow(null), 2500);
-      onSolvePuzzle?.(rowIdx, option);
+      if (typeof onSolvePuzzle === "function") {
+        onSolvePuzzle(rowIdx, option);
+      }
     } else {
       setWrongAttempt(`"${option}" is not the missing link. Think about what invariant must hold!`);
     }
@@ -358,6 +360,7 @@ export function SketchNotebook({
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
+        onMouseLeave={handleCanvasMouseUp}
         className="sketch-canvas-grid"
         style={{
           padding: "32px 28px",
