@@ -42,6 +42,34 @@ export function SketchNotebook({
   const [celebrationRow, setCelebrationRow] = useState<number | null>(null);
   const [customInput, setCustomInput] = useState(conceptQuery);
 
+  // Bidirectional student annotation layer (Sketchboard 2.0)
+  const [penEnabled, setPenEnabled] = useState(false);
+  const [penColor, setPenColor] = useState("#C87A72");
+  const [strokes, setStrokes] = useState<Array<{ points: Array<{ x: number; y: number }>; color: string }>>([]);
+  const [currentStroke, setCurrentStroke] = useState<Array<{ x: number; y: number }> | null>(null);
+  const canvasRef = React.useRef<HTMLDivElement | null>(null);
+
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!penEnabled || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const pt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setCurrentStroke([pt]);
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!penEnabled || !currentStroke || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const pt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setCurrentStroke((prev) => (prev ? [...prev, pt] : [pt]));
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (currentStroke && currentStroke.length > 1) {
+      setStrokes((prev) => [...prev, { points: currentStroke, color: penColor }]);
+    }
+    setCurrentStroke(null);
+  };
+
   // Fetch from backend API
   const fetchBoard = async (query: string) => {
     setIsLoading(true);
@@ -233,25 +261,103 @@ export function SketchNotebook({
             }}
           />
         </div>
-        <button
-          onClick={() => fetchBoard(customInput)}
-          disabled={isLoading}
-          className="btn btn-sm font-sketch"
-          style={{
-            background: "#5B9BD5",
-            color: "#FFFFFF",
-            border: "1.5px solid #3E79B0",
-            fontWeight: 700,
-            borderRadius: "8px",
-            cursor: isLoading ? "wait" : "pointer",
-          }}
-        >
-          {isLoading ? "Drawing Board..." : "Draw Socratic Sketch"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            onClick={() => setPenEnabled((prev) => !prev)}
+            type="button"
+            className="btn btn-sm font-sketch"
+            style={{
+              background: penEnabled ? "#C87A72" : "#FFFDFB",
+              color: penEnabled ? "#FFFFFF" : "#5C5652",
+              border: "1.5px solid #C87A72",
+              fontWeight: 600,
+              borderRadius: "8px",
+            }}
+          >
+            {penEnabled ? "✏️ Pen Active" : "✏️ Draw & Annotate"}
+          </button>
+          {penEnabled && (
+            <>
+              <button
+                type="button"
+                onClick={() => setPenColor("#C87A72")}
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "50%",
+                  background: "#C87A72",
+                  border: penColor === "#C87A72" ? "2px solid #2C2C2C" : "1px solid #FFF",
+                  cursor: "pointer",
+                }}
+                title="Red Ink"
+              />
+              <button
+                type="button"
+                onClick={() => setPenColor("#5B9BD5")}
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "50%",
+                  background: "#5B9BD5",
+                  border: penColor === "#5B9BD5" ? "2px solid #2C2C2C" : "1px solid #FFF",
+                  cursor: "pointer",
+                }}
+                title="Blue Ink"
+              />
+              <button
+                type="button"
+                onClick={() => setPenColor("#F59E0B")}
+                style={{
+                  width: "22px",
+                  height: "22px",
+                  borderRadius: "50%",
+                  background: "#F59E0B",
+                  border: penColor === "#F59E0B" ? "2px solid #2C2C2C" : "1px solid #FFF",
+                  cursor: "pointer",
+                }}
+                title="Amber Highlighter"
+              />
+              <button
+                type="button"
+                onClick={() => setStrokes([])}
+                className="btn btn-sm font-sketch"
+                style={{
+                  fontSize: "12px",
+                  padding: "2px 8px",
+                  background: "#F9F6F0",
+                  color: "#7A7A7A",
+                  border: "1px solid #D6CCC3",
+                  borderRadius: "6px",
+                }}
+              >
+                Clear Ink
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => fetchBoard(customInput)}
+            disabled={isLoading}
+            className="btn btn-sm font-sketch"
+            style={{
+              background: "#5B9BD5",
+              color: "#FFFFFF",
+              border: "1.5px solid #3E79B0",
+              fontWeight: 700,
+              borderRadius: "8px",
+              cursor: isLoading ? "wait" : "pointer",
+            }}
+          >
+            {isLoading ? "Drawing Board..." : "Draw Socratic Sketch"}
+          </button>
+        </div>
       </div>
 
       {/* 2. Main Canvas Area with Notebook Grid Pattern */}
       <div
+        ref={canvasRef}
+        onMouseDown={handleCanvasMouseDown}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseUp={handleCanvasMouseUp}
         className="sketch-canvas-grid"
         style={{
           padding: "32px 28px",
@@ -260,8 +366,49 @@ export function SketchNotebook({
           display: "flex",
           flexDirection: "column",
           gap: "28px",
+          cursor: penEnabled ? "crosshair" : "default",
         }}
       >
+        {/* SVG Student Annotation Overlay */}
+        <svg
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 15,
+          }}
+        >
+          {strokes.map((s, idx) => {
+            if (s.points.length < 2) return null;
+            const d = s.points.reduce((acc, p, i) => `${acc} ${i === 0 ? "M" : "L"} ${p.x} ${p.y}`, "");
+            return (
+              <path
+                key={idx}
+                d={d}
+                fill="none"
+                stroke={s.color}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity="0.9"
+              />
+            );
+          })}
+          {currentStroke && currentStroke.length > 1 && (
+            <path
+              d={currentStroke.reduce((acc, p, i) => `${acc} ${i === 0 ? "M" : "L"} ${p.x} ${p.y}`, "")}
+              fill="none"
+              stroke={penColor}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.9"
+            />
+          )}
+        </svg>
         {isLoading ? (
           <div
             style={{

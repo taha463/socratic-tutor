@@ -1,12 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { LogoSymbol } from "@/components/brand/Logo";
 
 export default function LandingPage() {
   const [prediction, setPrediction] = useState("");
   const [revealed, setRevealed] = useState(false);
+  const [activeTab, setActiveTab] = useState<"feynman" | "sketch" | "stepper">("feynman");
+  
+  // Feynman demo state
+  const [feynmanInput, setFeynmanInput] = useState("");
+  const [feynmanResult, setFeynmanResult] = useState<string | null>(null);
+
+  // Stepper demo state
+  const [stepperVal, setStepperVal] = useState<string | null>(null);
+  const [stepperFeedback, setStepperFeedback] = useState<string | null>(null);
+
+  // Problem ingest quick launcher state
+  const [quickProblem, setQuickProblem] = useState("");
 
   const ladderSteps = [
     { n: 1, name: "Probe", line: "Asks what you already think.", bg: "#B93E29", numColor: "#FFFFFF" },
@@ -18,8 +30,54 @@ export default function LandingPage() {
     { n: 7, name: "Full explanation", line: "Explains it, then checks you got it.", bg: "#F8CFC3", numColor: "#2B2320" },
   ];
 
+  const handleTestFeynman = (textToTest?: string) => {
+    const text = textToTest || feynmanInput;
+    if (!text.trim()) return;
+    const lower = text.toLowerCase();
+    if (lower.includes("stack overflow") || lower.includes("memory") || lower.includes("terminate") || lower.includes("infinite")) {
+      setFeynmanResult("✅ Masterclass explanation! You spotted that without a base case, recursion fills the call stack until memory is exhausted.");
+    } else {
+      setFeynmanResult("💡 Good try! The peer is still confused: explain *why* memory runs out and what prevents an infinite loop.");
+    }
+  };
+
+  const handleStepperChoice = (val: string) => {
+    setStepperVal(val);
+    if (val === "2") {
+      setStepperFeedback("✅ Exact! Variable n decrements from 3 to 2 on this iteration.");
+    } else {
+      setStepperFeedback("❌ Notice: n = n - 1 takes the current value 3 and subtracts 1.");
+    }
+  };
+
   return (
     <div style={{ minHeight: "100%", background: "var(--paper)" }}>
+      {/* 2026 Kinetic Motion & Interaction Styles */}
+      <style>{`
+        @keyframes floatHero {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.85; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.06); }
+        }
+        @keyframes popIn {
+          0% { transform: scale(0.96); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .hero-float-card {
+          animation: floatHero 6s ease-in-out infinite;
+        }
+        .interactive-card-hover {
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+        }
+        .interactive-card-hover:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 14px 28px -6px rgba(43, 35, 32, 0.12);
+        }
+      `}</style>
+
       {/* Header */}
       <header
         style={{
@@ -81,173 +139,317 @@ export default function LandingPage() {
           }}
         >
           <div style={{ flex: "1 1 460px", minWidth: 0 }}>
-            <h1 style={{ fontSize: "64px", lineHeight: 1.04, letterSpacing: "-0.03em" }}>
-              Learn it by working it out
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 14px",
+                background: "#F8CFC3",
+                borderRadius: "20px",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "#78350F",
+                marginBottom: "20px",
+              }}
+            >
+              <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#B93E29", animation: "pulseGlow 2s infinite" }} />
+              2026 Pedagogical Engine · Spatial &amp; Reverse Socratic Active Learning
+            </div>
+            <h1 style={{ fontSize: "60px", lineHeight: 1.05, letterSpacing: "-0.03em", margin: "0 0 20px" }}>
+              Never memorise.<br />
+              <span style={{ color: "var(--coral-deep)" }}>Work it out.</span>
             </h1>
-            <p style={{ margin: "24px 0 0", maxWidth: "460px", fontSize: "20px", color: "var(--muted)" }}>
-              A tutor that asks, shows, and never just hands you the answer.
+            <p style={{ margin: "0 0 28px", maxWidth: "480px", fontSize: "19px", lineHeight: 1.5, color: "var(--muted)" }}>
+              A dual-pane Socratic gym that pairs hand-drawn sketchboards, execution stepping, and reverse Feynman checks. Zero answer leaks, guaranteed in code.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "32px" }}>
+
+            {/* Bring Your Own Problem / Quick Ingest Bar */}
+            <div
+              style={{
+                padding: "16px",
+                background: "var(--cotton)",
+                border: "1.5px solid var(--rule-2)",
+                borderRadius: "14px",
+                maxWidth: "480px",
+                marginBottom: "28px",
+              }}
+            >
+              <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink)", display: "block", marginBottom: "8px" }}>
+                📥 Bring Your Own Problem (Homework / LeetCode / Buggy Code)
+              </label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="e.g. Reverse Linked List, Two Sum, Binary Search..."
+                  value={quickProblem}
+                  onChange={(e) => setQuickProblem(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--muted)",
+                    background: "#FFFDFB",
+                    fontSize: "14px",
+                    color: "var(--ink)",
+                  }}
+                />
+                <Link
+                  className="btn btn-primary btn-sm"
+                  href={`/session/new?topic=${encodeURIComponent(quickProblem || "Recursion")}`}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Solve Socratic
+                </Link>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>Try:</span>
+                {["Reverse Linked List", "Binary Search Invariant", "Recursion Call Stack"].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setQuickProblem(p)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: "0",
+                      color: "var(--coral-deep)",
+                      fontSize: "12px",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
               <Link className="btn btn-primary" href="/session/new">
-                Start a session
+                Start a Free Session
               </Link>
-              <a className="btn" href="#how">
-                See how it works
-              </a>
+              <Link className="btn" href="/sketch">
+                Open Visual Sketchboard
+              </Link>
             </div>
           </div>
 
           <div
+            className="hero-float-card"
             style={{
               flex: "1 1 480px",
               minWidth: 0,
-              padding: "32px",
+              padding: "24px",
               background: "var(--paper-2)",
               borderRadius: "20px",
               boxSizing: "border-box",
+              border: "1px solid var(--rule)",
             }}
           >
-            <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div style={{ display: "flex", justifySelf: "flex-end", justifyContent: "flex-end" }}>
-                <p
-                  style={{
-                    margin: 0,
-                    maxWidth: "340px",
-                    padding: "10px 14px",
-                    background: "#F8CFC3",
-                    borderRadius: "12px 12px 4px 12px",
-                  }}
-                >
-                  I don&apos;t get how fact(3) ends up as 6.
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 28 28"
-                  aria-hidden="true"
-                  style={{ flexShrink: 0, marginTop: "2px" }}
-                >
-                  <circle cx="14" cy="14" r="12" fill="none" stroke="#B93E29" strokeWidth="2.5" />
-                  <circle cx="14" cy="14" r="4" fill="#E8725A" />
-                </svg>
-                <p style={{ margin: 0 }}>Let&apos;s watch it unfold. What does fact(1) hand back?</p>
-              </div>
-              <div style={{ padding: "16px", border: "1px solid var(--rule)", borderRadius: "10px", background: "var(--paper)" }}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "76px 1fr auto",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "8px 12px",
-                      background: "var(--cotton)",
-                      border: "1px solid var(--rule-2)",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <span className="fig" style={{ fontWeight: 500 }}>fact(3)</span>
-                    <span style={{ color: "var(--muted)" }}>waits for fact(2)</span>
-                    <span className="fig" style={{ color: "var(--muted)" }}>n = 3</span>
-                  </div>
-                  <svg width="20" height="14" viewBox="0 0 20 16" aria-hidden="true" style={{ marginLeft: "20px" }}>
-                    <path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "76px 1fr auto",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "8px 12px",
-                      marginLeft: "20px",
-                      background: "var(--cotton)",
-                      border: "1px solid var(--rule-2)",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <span className="fig" style={{ fontWeight: 500 }}>fact(2)</span>
-                    <span style={{ color: "var(--muted)" }}>waits for fact(1)</span>
-                    <span className="fig" style={{ color: "var(--muted)" }}>n = 2</span>
-                  </div>
-                  <svg width="20" height="14" viewBox="0 0 20 16" aria-hidden="true" style={{ marginLeft: "40px" }}>
-                    <path d="M10 1 V12 M5 8 L10 13 L15 8" fill="none" stroke="#6B5F59" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "76px 1fr auto",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "8px 12px",
-                      marginLeft: "40px",
-                      background: "var(--cotton)",
-                      border: "2px solid var(--coral)",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <span className="fig" style={{ fontWeight: 500 }}>fact(1)</span>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--muted)" }}>
-                      returns{" "}
-                      <span
-                        className="fig"
-                        aria-label="Hidden answer"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "48px",
-                          height: "28px",
-                          border: "2px dashed var(--coral-deep)",
-                          borderRadius: "6px",
-                          color: "var(--coral-deep)",
-                          fontWeight: 500,
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        {revealed ? "1" : "?"}
-                      </span>
-                    </span>
-                    <span className="fig" style={{ color: "var(--muted)" }}>n = 1</span>
-                  </div>
-                </div>
+            {/* Interactive 2026 Feature Switcher */}
+            <div style={{ display: "flex", gap: "6px", marginBottom: "16px", background: "var(--cotton)", padding: "4px", borderRadius: "10px", border: "1px solid var(--rule-2)" }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab("feynman")}
+                style={{
+                  flex: 1,
+                  padding: "6px 8px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: activeTab === "feynman" ? "#FFFDFB" : "transparent",
+                  color: activeTab === "feynman" ? "var(--coral-deep)" : "var(--muted)",
+                  boxShadow: activeTab === "feynman" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                }}
+              >
+                💡 Feynman Arena
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("sketch")}
+                style={{
+                  flex: 1,
+                  padding: "6px 8px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: activeTab === "sketch" ? "#FFFDFB" : "transparent",
+                  color: activeTab === "sketch" ? "var(--coral-deep)" : "var(--muted)",
+                  boxShadow: activeTab === "sketch" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                }}
+              >
+                ✏️ Mystery Sketch
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("stepper")}
+                style={{
+                  flex: 1,
+                  padding: "6px 8px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: activeTab === "stepper" ? "#FFFDFB" : "transparent",
+                  color: activeTab === "stepper" ? "var(--coral-deep)" : "var(--muted)",
+                  boxShadow: activeTab === "stepper" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                }}
+              >
+                ⚙️ Code Stepper
+              </button>
+            </div>
 
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "16px" }}>
-                  <input
-                    type="text"
-                    placeholder="Predict"
-                    value={prediction}
-                    onChange={(e) => setPrediction(e.target.value)}
-                    className="fig"
+            {/* TAB 1: FEYNMAN / REVERSE SOCRATIC */}
+            {activeTab === "feynman" && (
+              <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px", animation: "popIn 0.2s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#92400E", background: "#FEF3C7", padding: "2px 8px", borderRadius: "12px" }}>
+                    Simulated Peer Misconception
+                  </span>
+                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>Alex (Junior Intern)</span>
+                </div>
+                <div style={{ background: "#F8CFC3", padding: "12px 14px", borderRadius: "10px", fontSize: "14px", fontStyle: "italic", color: "#2B2320" }}>
+                  &ldquo;Why do we need a base case if we always pass (n - 1)? Won&apos;t it naturally reach 0 and stop on its own?&rdquo;
+                </div>
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--muted)", display: "block", marginBottom: "4px" }}>
+                    Your Explanation to the Peer:
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={feynmanInput}
+                    onChange={(e) => setFeynmanInput(e.target.value)}
+                    placeholder="Explain why execution fails without an explicit guard..."
                     style={{
-                      width: "80px",
-                      minHeight: "36px",
-                      padding: "0 8px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "8px 10px",
                       borderRadius: "6px",
                       border: "1px solid var(--rule-2)",
-                      background: "var(--cotton)",
+                      fontSize: "13px",
+                      fontFamily: "var(--font-body)",
                     }}
                   />
+                </div>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   <button
                     type="button"
                     className="btn btn-sm btn-primary"
-                    onClick={() => setRevealed(true)}
+                    onClick={() => handleTestFeynman()}
                   >
-                    Check
+                    Teach the Peer
                   </button>
-                  {revealed && (
-                    <span style={{ fontSize: "13px", color: "var(--coral-deep)", fontWeight: 500 }}>
-                      Correct! fact(1) returns 1.
-                    </span>
-                  )}
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={() => {
+                      const ans = "Without a base case, the function keeps calling itself forever until the call stack runs out of memory and crashes with Stack Overflow.";
+                      setFeynmanInput(ans);
+                      handleTestFeynman(ans);
+                    }}
+                  >
+                    Auto-Fill Strong Answer
+                  </button>
                 </div>
+                {feynmanResult && (
+                  <div style={{ padding: "10px 12px", background: "var(--cotton)", borderRadius: "8px", border: "1px solid var(--rule-2)", fontSize: "13px", lineHeight: 1.4 }}>
+                    {feynmanResult}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            {/* TAB 2: MYSTERY SKETCHBOARD */}
+            {activeTab === "sketch" && (
+              <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px", animation: "popIn 0.2s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#1D4ED8", background: "#DBEAFE", padding: "2px 8px", borderRadius: "12px" }}>
+                    Hand-Drawn Mystery Box (80/20 Rule)
+                  </span>
+                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>Click to Solve</span>
+                </div>
+                <div style={{ padding: "12px", background: "var(--cotton)", borderRadius: "10px", border: "1.5px dashed #D6CCC3" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "space-between" }}>
+                    <div style={{ background: "#D0E4F7", padding: "8px 12px", borderRadius: "6px", fontWeight: 600, fontSize: "13px", border: "1px solid #5B9BD5" }}>
+                      Recursive Call
+                    </div>
+                    <span style={{ fontSize: "18px", color: "#6B5F59" }}>➔</span>
+                    <button
+                      type="button"
+                      onClick={() => setRevealed((prev) => !prev)}
+                      style={{
+                        background: revealed ? "#D9EAD3" : "#FFF2CC",
+                        border: revealed ? "2px solid #6AA84F" : "2px dashed #E69138",
+                        padding: "8px 14px",
+                        borderRadius: "8px",
+                        fontWeight: 700,
+                        fontSize: "13px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {revealed ? "✓ Terminal Base Case Met" : "[ ? Mystery Target ]"}
+                    </button>
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)" }}>
+                  {revealed
+                    ? "🎉 Mystery solved! The student unlocks the next step of the lesson only by actively providing the missing link."
+                    : "The AI deliberately draws 80% of the diagram and leaves the critical mental leap for you to complete."}
+                </p>
+              </div>
+            )}
+
+            {/* TAB 3: CODE STEPPER & PREDICTION */}
+            {activeTab === "stepper" && (
+              <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px", animation: "popIn 0.2s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#047857", background: "#D1FAE5", padding: "2px 8px", borderRadius: "12px" }}>
+                    Execution Step Prediction
+                  </span>
+                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>Freeze &amp; Predict</span>
+                </div>
+                <div style={{ background: "#2B2320", color: "#F8CFC3", padding: "12px 14px", borderRadius: "8px", fontFamily: "var(--font-mono, monospace)", fontSize: "13px" }}>
+                  <div>line 3: while n &gt; 0:</div>
+                  <div style={{ color: "#FEF08A", fontWeight: 700 }}>➔ line 4: &nbsp; &nbsp;n = n - 1 &nbsp; &nbsp;# (Paused: n was 3)</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, marginBottom: "8px", color: "var(--ink)" }}>
+                    Predict: what will be the value of n immediately after line 4 runs?
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {["3", "2", "1", "0"].map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => handleStepperChoice(opt)}
+                        style={{
+                          flex: 1,
+                          padding: "6px",
+                          borderRadius: "6px",
+                          border: stepperVal === opt ? "2px solid var(--coral-deep)" : "1px solid var(--rule-2)",
+                          background: stepperVal === opt ? "#F8CFC3" : "var(--cotton)",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {stepperFeedback && (
+                  <div style={{ fontSize: "13px", color: stepperVal === "2" ? "#047857" : "#B93E29", fontWeight: 600 }}>
+                    {stepperFeedback}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

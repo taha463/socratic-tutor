@@ -12,6 +12,7 @@ import { LearnerStore } from "./learner";
 import type { BaseLLMProvider, ChatMessage } from "./llm/types";
 import { getLLMClient } from "./llm";
 import { ragService } from "../backend/services/ragService";
+import { detectAtomicMisconception } from "./misconceptions";
 
 export interface TutorResponse {
   text: string;
@@ -149,6 +150,18 @@ export class TutorOrchestrator {
       } catch {
         ragContext = "";
       }
+    }
+
+    // Detect atomic misconception and inject targeted provocative counterexample
+    const atomicMisconception = detectAtomicMisconception(topic, message);
+    if (atomicMisconception) {
+      this.learnerStore.recordMistake(learnerId, topic, `misconception:${atomicMisconception.id}`);
+      const counterHint = `[Detected Atomic Misconception: ${atomicMisconception.name}]\n` +
+        `The learner holds a misconception: "${atomicMisconception.description}".\n` +
+        `Do NOT give away the solution. Guide them with this targeted counterexample challenge:\n` +
+        `Provocative Question: "${atomicMisconception.provocativeQuestion}"\n` +
+        `Counterexample: ${atomicMisconception.counterexample}`;
+      ragContext = ragContext ? `${ragContext}\n\n${counterHint}` : counterHint;
     }
 
     // 5. Teacher-Critic iterative drafting loop (max 2 rewrites)

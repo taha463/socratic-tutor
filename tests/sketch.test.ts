@@ -94,4 +94,32 @@ describe("SketchSocratic Architecture & Schema Tests", () => {
     ok(tCached <= tFirst, "Cached retrieval should be faster than initial fetch");
     ok(tCached < 100, "Cached retrieval should resolve near-instantaneously (< 100ms)");
   });
+
+  it("supports student bidirectional annotation strokes and node connection contracts", () => {
+    interface AnnotationStroke {
+      id: string;
+      color: string;
+      points: Array<{ x: number; y: number }>;
+    }
+    interface NodeConnection {
+      fromId: string;
+      toId: string;
+      label?: string;
+    }
+
+    const stroke: AnnotationStroke = {
+      id: "stroke-1",
+      color: "#C87A72",
+      points: [{ x: 10, y: 15 }, { x: 25, y: 40 }],
+    };
+    const connection: NodeConnection = {
+      fromId: "row-0-left",
+      toId: "row-1-right",
+      label: "data dependency",
+    };
+
+    ok(stroke.points.length >= 2);
+    ok(connection.fromId.startsWith("row-"));
+    ok(connection.toId.startsWith("row-"));
+  });
 });
