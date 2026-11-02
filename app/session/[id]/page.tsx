@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
 import { VisualRenderer } from "@/components/visuals/VisualRenderer";
-import { SketchNotebook } from "@/components/visuals/SketchNotebook";
 
 interface Message {
   id: string;
@@ -23,7 +22,7 @@ function SessionWorkspaceContent() {
   const router = useRouter();
 
   // State
-  const initialTopic = searchParams?.get("topic") || "Recursion";
+  const initialTopic = searchParams?.get("topic") || "General";
   const [topic, setTopic] = useState(initialTopic);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
@@ -34,7 +33,6 @@ function SessionWorkspaceContent() {
   const [frustration, setFrustration] = useState(0.1);
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
-  const [showSketchboard, setShowSketchboard] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -366,19 +364,6 @@ function SessionWorkspaceContent() {
           </div>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
-              className="btn btn-sm font-sketch"
-              type="button"
-              onClick={() => setShowSketchboard((prev) => !prev)}
-              style={{
-                background: showSketchboard ? "#FFF2CC" : "var(--cotton)",
-                borderColor: showSketchboard ? "#D4A017" : "var(--rule-2)",
-                color: showSketchboard ? "#854D0E" : "var(--ink)",
-                fontWeight: 700,
-              }}
-            >
-              {showSketchboard ? "✕ Close Whiteboard" : "🎨 Open Sketchboard"}
-            </button>
-            <button
               className="btn btn-sm"
               type="button"
               onClick={() => {
@@ -390,12 +375,6 @@ function SessionWorkspaceContent() {
             </button>
           </div>
         </div>
-
-        {showSketchboard && (
-          <div style={{ marginBottom: "12px" }}>
-            <SketchNotebook conceptQuery={topic} />
-          </div>
-        )}
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
           {/* Conversation Column */}
@@ -502,7 +481,7 @@ function SessionWorkspaceContent() {
                   <button
                     className="btn"
                     type="button"
-                    onClick={() => handleSend("I'm feeling stuck on this step. Could you give me an analogy or a smaller question?", true)}
+                    onClick={() => handleSend("I'm feeling stuck on this step. Could you explain this visually with a sketchboard or diagram?", true)}
                   >
                     I&apos;m stuck
                   </button>

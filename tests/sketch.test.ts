@@ -64,4 +64,20 @@ describe("SketchSocratic Architecture & Schema Tests", () => {
     ok(data.footer_summary);
     ok(data.socratic_voice_prompt);
   });
+
+  it("visualizer agent chooses dynamic sketchboard with mystery box for Rung 4", async () => {
+    const { VisualizerAgent } = await import("../core/agents/visualizer");
+    const visualizer = new VisualizerAgent();
+
+    const decision = await visualizer.decide({
+      concept: "Hosting 7B Model on CPU",
+      rung: 4,
+    });
+
+    strictEqual(decision.chosenSkill, "sketch");
+    ok(decision.visualSpec);
+    ok(Array.isArray(decision.visualSpec.rows), "Visual spec must contain whiteboard rows");
+    ok(decision.visualSpec.rows.length >= 2, "Whiteboard must have at least 2 rows");
+    ok(decision.visualSpec.rows.some((r: any) => r.is_socratic_puzzle), "Must have Socratic mystery box");
+  });
 });

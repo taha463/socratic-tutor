@@ -54,10 +54,34 @@ export class DiagnosticianAgent {
       heuristicNotes.push("Large paste detected: probe conceptual comprehension.");
     }
 
-    // Signal: Instant hint request without attempt
+    // Signal: Instant hint request / learner stuck
     if (signals.instant_hint_request || signals.instantHint) {
-      heuristicRung = 1;
-      heuristicNotes.push("Instant hint requested without attempt: step back to initial probe.");
+      heuristicState = "STUCK";
+      heuristicFrustrationBoost += 0.4;
+      heuristicRung = 4; // Escalate directly to visual whiteboard scaffold
+      heuristicNotes.push("Instant hint requested / learner stuck: escalate to Rung 4 visual whiteboard scaffold.");
+    }
+
+    // Direct Linguistic Detection: Confusion / Need for Visual Sketchboard
+    const lowerMsg = message.toLowerCase();
+    const isStuckOrConfused =
+      /don['’]?t\s+understand|didn['’]?t\s+understand|not\s+understand|confused|i['’]?m\s+stuck|im\s+stuck|am\s+stuck|lost|no\s+idea|have\s+no\s+clue|explain\s+better|can['’]?t\s+get\s+it/i.test(
+        lowerMsg
+      );
+    const wantsVisual =
+      /draw|sketch|visual|diagram|whiteboard|show\s+me|picture|illustrat|notepad/i.test(
+        lowerMsg
+      );
+
+    if (isStuckOrConfused || wantsVisual) {
+      heuristicState = "STUCK";
+      heuristicFrustrationBoost += 0.35;
+      heuristicRung = 4;
+      heuristicNotes.push(
+        wantsVisual
+          ? "Learner explicitly requested visual/sketchboard: escalate to Rung 4 visual scaffold."
+          : "Learner expressed confusion/stuck: escalate to Rung 4 visual scaffold."
+      );
     }
 
     // Signal: Long idle / cognitive overload

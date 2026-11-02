@@ -54,6 +54,38 @@ describe("Diagnostician & Learner Model Tests", () => {
     expect(res.frustration).toBeGreaterThanOrEqual(0.3);
   });
 
+  it("escalates to Rung 4 visual when learner expresses confusion or asks for a drawing", async () => {
+    const diagnostician = new DiagnosticianAgent(mockLLM);
+
+    const resConfusion = await diagnostician.diagnose({
+      message: "I didn't understand that, could you explain it through sketch board?",
+    });
+
+    expect(resConfusion.recommendedRung).toBe(4);
+    expect(resConfusion.state).toBe("STUCK");
+    expect(resConfusion.frustration).toBeGreaterThanOrEqual(0.35);
+
+    const resDraw = await diagnostician.diagnose({
+      message: "Can you draw a visual diagram of this?",
+    });
+
+    expect(resDraw.recommendedRung).toBe(4);
+    expect(resDraw.state).toBe("STUCK");
+  });
+
+  it("escalates to Rung 4 visual when instant_hint_request is triggered", async () => {
+    const diagnostician = new DiagnosticianAgent(mockLLM);
+
+    const res = await diagnostician.diagnose({
+      message: "I am feeling stuck.",
+      signals: { instant_hint_request: true },
+    });
+
+    expect(res.recommendedRung).toBe(4);
+    expect(res.state).toBe("STUCK");
+    expect(res.frustration).toBeGreaterThanOrEqual(0.4);
+  });
+
   it("BKT updates correctly on success and failure", () => {
     store.ensureLearner("user-bkt");
     

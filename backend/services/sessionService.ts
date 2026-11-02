@@ -49,6 +49,9 @@ export class SessionService {
     }
 
     // Default universal Socratic opening
+    if (t === "general" || t === "computer science" || !topic) {
+      return "Welcome to your Socratic tutoring session! What topic, algorithm, or concept would you like to explore today?";
+    }
     const capitalizedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
     return `Welcome to your Socratic session on ${capitalizedTopic}! To start, what is your current understanding of this topic, or what specific problem are you trying to work through?`;
   }

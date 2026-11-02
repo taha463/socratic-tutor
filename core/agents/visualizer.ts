@@ -8,6 +8,7 @@ import path from "node:path";
 import type { BaseLLMProvider, ChatMessage } from "../llm/types";
 import { getLLMClient } from "../llm";
 import { CurriculumStore } from "../../curriculum/store";
+import { sketchService } from "../../backend/services/sketchService";
 
 export const VisualizerDecisionSchema = z.object({
   chosenSkill: z.enum(["diagram", "trace", "eli5", "analogy", "plot", "animate", "three_d", "sketch"]),
@@ -40,24 +41,47 @@ export class VisualizerAgent {
   }): Promise<VisualizerDecision> {
     const { concept, skillType, rung = 4, learnerLevel = "beginner", whatToHide, factualContext } = params;
 
-    // 1. Check curriculum store for pre-tested template
+    // 1. Dynamic Socratic Sketchboard Generation (Groq / Schema)
+    // If the skill is sketch/diagram, or if on Rung 4 (Visual scaffold), or if no specific modality is requested
+    const wantsSketch =
+      skillType === "sketch" ||
+      skillType === "sketchboard" ||
+      skillType === "diagram" ||
+      rung === 4 ||
+      !skillType;
+
+    if (
+      wantsSketch &&
+      skillType !== "trace" &&
+      skillType !== "plot" &&
+      skillType !== "animate" &&
+      skillType !== "three_d"
+    ) {
+      try {
+        const board = await sketchService.generateSketchboard(concept);
+        if (board && Array.isArray(board.rows) && board.rows.length > 0) {
+          return {
+            chosenSkill: "sketch",
+            concept,
+            visualSpec: {
+              concept,
+              board_window_title: board.board_window_title,
+              main_heading: board.main_heading,
+              rows: board.rows,
+              footer_summary: board.footer_summary,
+              socratic_voice_prompt: board.socratic_voice_prompt,
+            },
+            reasoning: `Dynamically generated hand-drawn Socratic whiteboard for "${concept}" with mystery puzzle box.`,
+          };
+        }
+      } catch (err) {
+        console.warn("[VisualizerAgent] Dynamic sketch generation error, falling back:", err);
+      }
+    }
+
+    // 2. Check curriculum store for code execution trace or analogies if explicitly requested
     const curated = this.curriculum.getConcept(concept);
     if (curated) {
-      if ((skillType === "diagram" || (!skillType && rung === 4)) && curated.diagrams?.length) {
-        const diag = curated.diagrams[0];
-        return {
-          chosenSkill: "diagram",
-          concept,
-          visualSpec: {
-            concept,
-            mermaidSource: diag.mermaidSource,
-            blanks: diag.blanks,
-            prompt: diag.prompt,
-          },
-          reasoning: `Curated diagram for ${concept} with blanks.`,
-        };
-      }
-
       if ((skillType === "trace" || (!skillType && concept.includes("code"))) && curated.traces?.length) {
         const tr = curated.traces[0];
         return {
@@ -91,7 +115,7 @@ export class VisualizerAgent {
       }
     }
 
-    // 2. Fall back to LLM visual design
+    // 3. Fall back to LLM visual design
     let systemPrompt = `${this.basePrompt}
 
 REQUEST CONSTRAINTS:

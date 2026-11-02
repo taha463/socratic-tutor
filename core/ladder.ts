@@ -75,8 +75,8 @@ export class HintLadder {
 
     this.turnsOnCurrentRung += 1;
 
-    // Diagnostician suggestion override (e.g. for complete beginners starting higher)
-    if (recommendedRung && recommendedRung > this.currentRung) {
+    // Diagnostician suggestion override (e.g. for complete beginners starting higher or visual escalation)
+    if (recommendedRung && (recommendedRung > this.currentRung || recommendedRung === 4)) {
       this.currentRung = Math.min(7, recommendedRung);
       this.failedAttemptsOnRung = 0;
       this.turnsOnCurrentRung = 0;

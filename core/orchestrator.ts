@@ -175,11 +175,17 @@ export class TutorOrchestrator {
       });
       finalDraft = draft;
 
-      // Handle visual aid if needed or if on Rung 4
-      if (draft.needsVisual || activeRung === 4) {
+      // Handle visual aid if needed or if on Rung 4 or visual requested
+      const wantsVisualInMsg = /draw|sketch|visual|diagram|whiteboard|show\s+me|notepad/i.test(message);
+      if (draft.needsVisual || activeRung === 4 || wantsVisualInMsg || diag.recommendedRung === 4) {
+        let activeConcept = draft.visualConcept?.trim();
+        if (!activeConcept || activeConcept.toLowerCase() === "general") {
+          activeConcept = topic && topic.toLowerCase() !== "general" ? topic : message.slice(0, 60);
+        }
+
         const visDecision = await this.visualizer.decide({
-          concept: draft.visualConcept || topic,
-          skillType: draft.visualType || null,
+          concept: activeConcept,
+          skillType: draft.visualType || "sketch",
           rung: activeRung,
           learnerLevel: diag.level,
           factualContext: ragContext || null,
@@ -217,7 +223,7 @@ export class TutorOrchestrator {
       role: "tutor",
       text: approvedText,
       rung: activeRung,
-      skillUsed: visualSpec ? (visualSpec.skill || "visual") : null,
+      skillUsed: visualSpec ? JSON.stringify(visualSpec) : null,
       criticVerdict: JSON.stringify(finalVerdict),
       ts: new Date().toISOString(),
     });

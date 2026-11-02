@@ -8,7 +8,7 @@ function NewSessionContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const topic = searchParams.get("topic") || "recursion";
+    const topic = searchParams.get("topic") || "General";
     const sessionId = "session-" + Math.random().toString(36).substring(2, 9);
     router.replace(`/session/${sessionId}?topic=${encodeURIComponent(topic)}`);
   }, [router, searchParams]);
