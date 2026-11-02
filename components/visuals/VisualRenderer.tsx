@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { PlotViewer } from "./PlotViewer";
 import { StepAnimationPlayer } from "./StepAnimationPlayer";
+import { SketchNotebook } from "./SketchNotebook";
 
 export interface VisualRendererProps {
   visualSpec: Record<string, any>;
@@ -58,6 +59,19 @@ export function VisualRenderer({ visualSpec, onPredictionSubmit }: VisualRendere
       setFeedback("Scaffold revealed. Observe how this connects to the core question.");
     }
   };
+
+  // 0. SKETCHBOARD / SKETCHSOCRATIC (Hand-Drawn Notebook)
+  if (skill === "sketch" || skill === "sketchboard" || Array.isArray(visualSpec.rows)) {
+    return (
+      <SketchNotebook
+        initialData={visualSpec.rows ? (visualSpec as any) : undefined}
+        conceptQuery={concept}
+        onSolvePuzzle={(_idx, option) => {
+          onPredictionSubmit?.(option);
+        }}
+      />
+    );
+  }
 
   // 1. COMPLEXITY PLOT
   if (skill === "plot" || visualSpec.plotType) {

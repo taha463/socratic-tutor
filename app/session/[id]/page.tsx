@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
 import { VisualRenderer } from "@/components/visuals/VisualRenderer";
+import { SketchNotebook } from "@/components/visuals/SketchNotebook";
 
 interface Message {
   id: string;
@@ -33,6 +34,7 @@ function SessionWorkspaceContent() {
   const [frustration, setFrustration] = useState(0.1);
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
+  const [showSketchboard, setShowSketchboard] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -287,6 +289,20 @@ function SessionWorkspaceContent() {
               Today
             </Link>
             <Link
+              href="/sketch"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                minHeight: "64px",
+                padding: "0 14px",
+                boxSizing: "border-box",
+                color: "var(--muted)",
+                fontWeight: 500,
+              }}
+            >
+              Sketchboard
+            </Link>
+            <Link
               href="/dashboard"
               style={{
                 display: "flex",
@@ -348,17 +364,38 @@ function SessionWorkspaceContent() {
               The tutor asks, you answer. It only shows you the answer when you have tried.
             </p>
           </div>
-          <button
-            className="btn btn-sm"
-            type="button"
-            onClick={() => {
-              const newTopic = prompt("Enter topic (e.g. recursion, binary_search, tree_traversal):", topic);
-              if (newTopic) setTopic(newTopic);
-            }}
-          >
-            Change topic
-          </button>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              className="btn btn-sm font-sketch"
+              type="button"
+              onClick={() => setShowSketchboard((prev) => !prev)}
+              style={{
+                background: showSketchboard ? "#FFF2CC" : "var(--cotton)",
+                borderColor: showSketchboard ? "#D4A017" : "var(--rule-2)",
+                color: showSketchboard ? "#854D0E" : "var(--ink)",
+                fontWeight: 700,
+              }}
+            >
+              {showSketchboard ? "✕ Close Whiteboard" : "🎨 Open Sketchboard"}
+            </button>
+            <button
+              className="btn btn-sm"
+              type="button"
+              onClick={() => {
+                const newTopic = prompt("Enter topic (e.g. recursion, binary_search, tree_traversal):", topic);
+                if (newTopic) setTopic(newTopic);
+              }}
+            >
+              Change topic
+            </button>
+          </div>
         </div>
+
+        {showSketchboard && (
+          <div style={{ marginBottom: "12px" }}>
+            <SketchNotebook conceptQuery={topic} />
+          </div>
+        )}
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
           {/* Conversation Column */}

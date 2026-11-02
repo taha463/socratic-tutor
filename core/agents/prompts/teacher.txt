@@ -21,6 +21,6 @@ OUTPUT FORMAT (JSON ONLY):
   "singleQuestion": "the exact single question posed",
   "needsVisual": boolean,
   "visualConcept": string | null,
-  "visualType": "diagram" | "trace" | "eli5" | "analogy" | "plot" | "animate" | "three_d" | null
+  "visualType": "diagram" | "trace" | "eli5" | "analogy" | "plot" | "animate" | "three_d" | "sketch" | null
 }
 

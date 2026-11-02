@@ -10,7 +10,7 @@ import { getLLMClient } from "../llm";
 import { CurriculumStore } from "../../curriculum/store";
 
 export const VisualizerDecisionSchema = z.object({
-  chosenSkill: z.enum(["diagram", "trace", "eli5", "analogy", "plot", "animate", "three_d"]),
+  chosenSkill: z.enum(["diagram", "trace", "eli5", "analogy", "plot", "animate", "three_d", "sketch"]),
   concept: z.string(),
   visualSpec: z.record(z.any()),
   reasoning: z.string(),

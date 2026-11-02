@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --loader ./scripts/loader.mjs --experimental-strip-types --test tests/storage.test.ts tests/llm.test.ts tests/ladder.test.ts tests/learner.test.ts tests/leak-detection.test.ts tests/skills.test.ts tests/trace-sandbox.test.ts tests/advanced-skills.test.ts tests/backend.test.ts",
+    "test": "node --loader ./scripts/loader.mjs --experimental-strip-types --test tests/storage.test.ts tests/llm.test.ts tests/ladder.test.ts tests/learner.test.ts tests/leak-detection.test.ts tests/skills.test.ts tests/trace-sandbox.test.ts tests/advanced-skills.test.ts tests/backend.test.ts tests/sketch.test.ts",
     "eval": "node --loader ./scripts/loader.mjs --experimental-strip-types eval/run.ts"
   },
   "dependencies": {

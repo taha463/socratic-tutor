@@ -53,6 +53,7 @@ export default function LandingPage() {
         <nav aria-label="Main" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px" }}>
           <a className="navlink" href="#how">How it works</a>
           <a className="navlink" href="#visuals">Visuals</a>
+          <Link className="navlink" href="/sketch">Sketchboard</Link>
           <Link className="navlink" href="/dashboard">Dashboard</Link>
           <a className="navlink" href="#privacy">Privacy</a>
           <Link

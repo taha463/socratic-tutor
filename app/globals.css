@@ -150,3 +150,56 @@ tr:last-child td {
     animation: none !important;
   }
 }
+
+/* SketchSocratic Hand-Drawn Whiteboard Aesthetics */
+:root {
+  --sketch-bg: #FDFBF7;
+  --sketch-grid: #E6E2D8;
+  --sketch-charcoal: #2C2C2C;
+  --sketch-muted: #7A7A7A;
+  --sketch-highlighter: rgba(226, 192, 125, 0.4);
+  --sketch-blue-fill: #D0E4F7;
+  --sketch-blue-border: #5B9BD5;
+  --sketch-purple-fill: #B4A7D6;
+  --sketch-purple-border: #674EA7;
+  --sketch-coral-fill: #F9D5D0;
+  --sketch-coral-border: #C87A72;
+  --sketch-green-fill: #D9EAD3;
+  --sketch-green-border: #6AA84F;
+  --sketch-mystery-fill: #FFF2CC;
+  --sketch-mystery-border: #D4A017;
+}
+
+.font-sketch {
+  font-family: "Kalam", "Caveat", cursive, sans-serif;
+}
+
+.sketch-canvas-grid {
+  background-color: #FDFBF7;
+  background-image:
+    linear-gradient(#E6E2D8 1px, transparent 1px),
+    linear-gradient(90deg, #E6E2D8 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+.sketch-box {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 2px 3px 0px rgba(44, 44, 44, 0.15);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sketch-box-pulse {
+  animation: sketchPulse 2s infinite ease-in-out;
+}
+
+@keyframes sketchPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 160, 23, 0.4), 2px 3px 0px rgba(44, 44, 44, 0.15);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(212, 160, 23, 0), 2px 4px 6px rgba(212, 160, 23, 0.3);
+    transform: scale(1.02);
+  }
+}

@@ -14,7 +14,7 @@ export const TeacherDraftSchema = z.object({
   needsVisual: z.boolean().default(false),
   visualConcept: z.string().optional().nullable(),
   visualType: z
-    .enum(["diagram", "trace", "eli5", "analogy", "plot", "animate", "three_d"])
+    .enum(["diagram", "trace", "eli5", "analogy", "plot", "animate", "three_d", "sketch"])
     .optional()
     .nullable(),
 });

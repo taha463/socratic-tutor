@@ -58,24 +58,24 @@ export default function DashboardPage() {
   // Practice items dynamically derived from real backend mastery data
   const practiceItems = (data?.concepts && data.concepts.length > 0)
     ? data.concepts.map((c) => {
-        const pct = Math.round(c.score * 100);
-        return {
-          name: c.name || c.conceptId.replace(/_/g, " "),
-          value: pct,
-          width: `${pct}%`,
-          fill: pct > 50 ? "#E8725A" : "#FFFDFB",
-          border: pct > 50 ? "0" : "2px solid #E8725A",
-          last: c.lastSeen || "Recently",
-          topicKey: c.conceptId,
-        };
-      })
+      const pct = Math.round(c.score * 100);
+      return {
+        name: c.name || c.conceptId.replace(/_/g, " "),
+        value: pct,
+        width: `${pct}%`,
+        fill: pct > 50 ? "#E8725A" : "#FFFDFB",
+        border: pct > 50 ? "0" : "2px solid #E8725A",
+        last: c.lastSeen || "Recently",
+        topicKey: c.conceptId,
+      };
+    })
     : [
-        { name: "Graphs", value: 35, width: "35%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 18", topicKey: "graphs" },
-        { name: "Pointers", value: 41, width: "41%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 29", topicKey: "pointers" },
-        { name: "Gradient descent", value: 57, width: "57%", fill: "#E8725A", border: "0", last: "Oct 27", topicKey: "gradient_descent" },
-        { name: "Hash maps", value: 63, width: "63%", fill: "#E8725A", border: "0", last: "Oct 30", topicKey: "hash_maps" },
-        { name: "Binary trees", value: 68, width: "68%", fill: "#E8725A", border: "0", last: "Oct 12", topicKey: "binary_trees" },
-      ];
+      { name: "Graphs", value: 35, width: "35%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 18", topicKey: "graphs" },
+      { name: "Pointers", value: 41, width: "41%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 29", topicKey: "pointers" },
+      { name: "Gradient descent", value: 57, width: "57%", fill: "#E8725A", border: "0", last: "Oct 27", topicKey: "gradient_descent" },
+      { name: "Hash maps", value: 63, width: "63%", fill: "#E8725A", border: "0", last: "Oct 30", topicKey: "hash_maps" },
+      { name: "Binary trees", value: 68, width: "68%", fill: "#E8725A", border: "0", last: "Oct 12", topicKey: "binary_trees" },
+    ];
 
   // Calendar cells dynamically calculated from activity
   const calendarCells = [];
@@ -105,40 +105,40 @@ export default function DashboardPage() {
   // Recent session records dynamically derived from SQLite
   const recentSessionRows = (data?.recentSessions && data.recentSessions.length > 0)
     ? data.recentSessions.map((s) => {
-        const dateObj = new Date(s.startedAt);
-        const dateStr = isNaN(dateObj.getTime())
-          ? "Today"
-          : dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        const turnCount = s.turnCount || 0;
-        return {
-          id: s.id,
-          date: dateStr,
-          concept: s.topic,
-          max: s.highestRung || 1,
-          hints: Math.max(1, Math.round(turnCount / 2)),
-          time: `${Math.max(5, turnCount * 2)} min`,
-          result: s.result || "Building",
-          color: s.result === "Mastered" ? "#B93E29" : s.result === "Needs another go" ? "#6B5F59" : "#2B2320",
-        };
-      })
+      const dateObj = new Date(s.startedAt);
+      const dateStr = isNaN(dateObj.getTime())
+        ? "Today"
+        : dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const turnCount = s.turnCount || 0;
+      return {
+        id: s.id,
+        date: dateStr,
+        concept: s.topic,
+        max: s.highestRung || 1,
+        hints: Math.max(1, Math.round(turnCount / 2)),
+        time: `${Math.max(5, turnCount * 2)} min`,
+        result: s.result || "Building",
+        color: s.result === "Mastered" ? "#B93E29" : s.result === "Needs another go" ? "#6B5F59" : "#2B2320",
+      };
+    })
     : [
-        { id: "s-1", date: "Today", concept: "Hash maps", max: 4, hints: 2, time: "22 min", result: "Building", color: "#2B2320" },
-        { id: "s-2", date: "Yesterday", concept: "Pointers", max: 5, hints: 3, time: "18 min", result: "Needs another go", color: "#6B5F59" },
-        { id: "s-3", date: "2 days ago", concept: "Recursion", max: 2, hints: 1, time: "25 min", result: "Mastered", color: "#B93E29" },
-      ];
+      { id: "s-1", date: "Today", concept: "Hash maps", max: 4, hints: 2, time: "22 min", result: "Building", color: "#2B2320" },
+      { id: "s-2", date: "Yesterday", concept: "Pointers", max: 5, hints: 3, time: "18 min", result: "Needs another go", color: "#6B5F59" },
+      { id: "s-3", date: "2 days ago", concept: "Recursion", max: 2, hints: 1, time: "25 min", result: "Mastered", color: "#B93E29" },
+    ];
 
   // Dynamic Wagon Wheel calculation from real backend SQLite concepts
   const wheelConcepts = (data?.concepts && data.concepts.length >= 3)
     ? data.concepts
     : (data?.concepts && data.concepts.length > 0)
-    ? [
+      ? [
         ...data.concepts,
         ...[
           { conceptId: "curiosity", name: "Inquiry", score: 0.65 },
           { conceptId: "reasoning", name: "Deduction", score: 0.70 },
         ].slice(0, 3 - data.concepts.length)
       ]
-    : [
+      : [
         { conceptId: "recursion", name: "Recursion", score: 0.82 },
         { conceptId: "binary_trees", name: "Binary trees", score: 0.68 },
         { conceptId: "big_o", name: "Big-O", score: 0.74 },
@@ -300,6 +300,20 @@ export default function DashboardPage() {
               }}
             >
               Today
+            </Link>
+            <Link
+              href="/sketch"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                minHeight: "64px",
+                padding: "0 14px",
+                boxSizing: "border-box",
+                color: "var(--muted)",
+                fontWeight: 500,
+              }}
+            >
+              Sketchboard
             </Link>
             <Link
               href="/dashboard"
