@@ -42,8 +42,65 @@ function SessionWorkspaceContent() {
   const [pastedLength, setPastedLength] = useState(0);
   const [idleSeconds, setIdleSeconds] = useState(0);
 
+  // Quota and Rate Limit Cooldown State
+  const [capacityNotice, setCapacityNotice] = useState<{
+    limited: boolean;
+    provider?: string;
+    retryAt?: string;
+    secondsRemaining: number;
+    message?: string;
+  } | null>(null);
+
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Check LLM Gateway capacity status on mount
+  useEffect(() => {
+    let active = true;
+    fetch("/api/capacity")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!active || !data) return;
+        if (!data.available && data.retryAfterSeconds > 0) {
+          const retryAtDate = data.nextAvailableAt ? new Date(data.nextAvailableAt) : new Date(Date.now() + data.retryAfterSeconds * 1000);
+          const timeStr = retryAtDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          setCapacityNotice({
+            limited: true,
+            provider: "Groq & OpenRouter",
+            retryAt: timeStr,
+            secondsRemaining: data.retryAfterSeconds,
+            message: `Model capacity limit active. Cooldown resets at ${timeStr}.`,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Countdown timer for quota cooldown
+  useEffect(() => {
+    if (!capacityNotice || !capacityNotice.limited || capacityNotice.secondsRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setCapacityNotice((prev) => {
+        if (!prev) return null;
+        const next = prev.secondsRemaining - 1;
+        if (next <= 0) {
+          return null; // Cooldown expired, models ready!
+        }
+        return { ...prev, secondsRemaining: next };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [capacityNotice]);
+
+  const formatCountdown = (sec: number): string => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   // Load real session data from backend on mount
   useEffect(() => {
@@ -199,8 +256,54 @@ function SessionWorkspaceContent() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to process turn");
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Fallback for non-JSON responses
+      }
+
+      if (!res.ok) {
+        if (res.status === 429 || data?.limited || data?.error === "RATE_LIMIT_EXCEEDED") {
+          const secs = data?.retryAfterSeconds || 60;
+          const retryAtDate = data?.retryAt
+            ? new Date(data.retryAt)
+            : new Date(Date.now() + secs * 1000);
+          const timeStr = retryAtDate.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+
+          setCapacityNotice({
+            limited: true,
+            provider: data?.provider || "Groq & OpenRouter",
+            retryAt: timeStr,
+            secondsRemaining: secs,
+            message: data?.message || `Model limit reached. Quota resets at ${timeStr}.`,
+          });
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `tutor-limit-${Date.now()}`,
+              role: "tutor",
+              text: `⏳ **Model limit reached.** The AI model quota is temporarily in cooldown.\n\n` +
+                `• **Quota resets in:** ~${secs} seconds\n` +
+                `• **Next window opens at:** **${timeStr}**\n\n` +
+                `Please take a moment to reflect on your previous thought or interact with the visual sketchboard on the right while the quota resets!`,
+              rung: currentRung,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+          return;
+        }
+
+        throw new Error(data?.message || "Failed to process turn");
+      }
+
+      // Success: clear capacity notice if active
+      setCapacityNotice(null);
 
       const newTutorMsg: Message = {
         id: `tutor-${Date.now()}`,
@@ -330,17 +433,48 @@ function SessionWorkspaceContent() {
             </Link>
           </nav>
         </div>
-        <span
-          style={{
-            padding: "4px 10px",
-            border: "1px solid var(--rule-2)",
-            borderRadius: "6px",
-            fontSize: "13px",
-            color: "var(--muted)",
-          }}
-        >
-          Session active
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {capacityNotice?.limited && capacityNotice.secondsRemaining > 0 && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "5px 12px",
+                background: "#FFF8F0",
+                border: "1px solid #F59E0B",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "#78350F",
+              }}
+            >
+              <span>⏳ Quota reset at {capacityNotice.retryAt}</span>
+              <span
+                style={{
+                  fontFamily: "monospace",
+                  background: "#FEF3C7",
+                  padding: "1px 6px",
+                  borderRadius: "4px",
+                  border: "1px solid #FCD34D",
+                }}
+              >
+                {formatCountdown(capacityNotice.secondsRemaining)}
+              </span>
+            </span>
+          )}
+          <span
+            style={{
+              padding: "4px 10px",
+              border: "1px solid var(--rule-2)",
+              borderRadius: "6px",
+              fontSize: "13px",
+              color: "var(--muted)",
+            }}
+          >
+            Session active
+          </span>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -436,6 +570,53 @@ function SessionWorkspaceContent() {
 
             <div ref={messagesEndRef} />
 
+            {/* Model Limit / Capacity Countdown Alert Banner */}
+            {capacityNotice?.limited && capacityNotice.secondsRemaining > 0 && (
+              <div
+                role="alert"
+                style={{
+                  padding: "16px 20px",
+                  borderRadius: "8px",
+                  background: "#FFF8F0",
+                  border: "1.5px solid #F59E0B",
+                  color: "#78350F",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  boxShadow: "0 2px 10px rgba(245, 158, 11, 0.12)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: 700, fontSize: "15px" }}>
+                    <span style={{ fontSize: "20px" }}>⚠️</span>
+                    <span>AI Model Limit Reached ({capacityNotice.provider || "Groq & OpenRouter"})</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "13px", color: "#92400E", fontWeight: 500 }}>Cooldown resets in:</span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono, monospace)",
+                        fontWeight: 700,
+                        fontSize: "14px",
+                        background: "#FEF3C7",
+                        color: "#B45309",
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid #FCD34D",
+                      }}
+                    >
+                      {formatCountdown(capacityNotice.secondsRemaining)}
+                    </span>
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: "14px", lineHeight: "1.5", color: "#92400E" }}>
+                  All cloud LLM routes are currently cooling down to prevent rate exhaustion. 
+                  Next request window opens at <strong>{capacityNotice.retryAt || "shortly"}</strong>. 
+                  You can inspect the visual whiteboard on the right or review past steps while the quota refills.
+                </p>
+              </div>
+            )}
+
             {/* Composer */}
             <form
               style={{
@@ -481,12 +662,21 @@ function SessionWorkspaceContent() {
                   <button
                     className="btn"
                     type="button"
+                    disabled={isLoading || (capacityNotice?.limited && capacityNotice.secondsRemaining > 0)}
                     onClick={() => handleSend("I'm feeling stuck on this step. Could you explain this visually with a sketchboard or diagram?", true)}
                   >
                     I&apos;m stuck
                   </button>
-                  <button className="btn btn-primary" type="submit" disabled={isLoading}>
-                    {isLoading ? "Thinking..." : "Send"}
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={isLoading || (capacityNotice?.limited && capacityNotice.secondsRemaining > 0)}
+                  >
+                    {isLoading
+                      ? "Thinking..."
+                      : capacityNotice?.limited && capacityNotice.secondsRemaining > 0
+                      ? `Wait ${formatCountdown(capacityNotice.secondsRemaining)}`
+                      : "Send"}
                   </button>
                 </div>
               </div>

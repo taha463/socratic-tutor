@@ -4,10 +4,10 @@
 
 import { AnthropicProvider } from "./anthropic";
 import { GeminiProvider } from "./gemini";
-import { GroqProvider } from "./groq";
 import { MockLLMProvider } from "./mock";
 import { OllamaProvider } from "./ollama";
 import { OpenAIProvider } from "./openai";
+import { getLLMGateway, hasConfiguredRoutes } from "./gateway";
 import type { BaseLLMProvider } from "./types";
 
 export * from "./types";
@@ -17,17 +17,23 @@ export * from "./openai";
 export * from "./gemini";
 export * from "./ollama";
 export * from "./groq";
+export * from "./gateway";
 
 let singletonMock: MockLLMProvider | null = null;
 
+/**
+ * Resolves the LLM client.
+ * - groq / openrouter / gateway (or any GROQ/OPENROUTER key present) -> quota-aware LLMGateway
+ *   that routes across every configured Groq + OpenRouter model with cooldowns and fallback.
+ * - anthropic / openai / gemini / ollama -> single direct provider.
+ * - mock -> deterministic offline provider (tests / no keys).
+ */
 export function getLLMClient(providerName?: string): BaseLLMProvider {
-  // If provider is explicitly specified, use it
   let chosen = (providerName || process.env.LLM_PROVIDER || "").toLowerCase();
 
-  // If not explicitly set or set to mock, check if user provided keys in environment
-  if (!chosen || chosen === "mock") {
-    if (process.env.GROQ_API_KEY) {
-      chosen = "groq";
+  if (!chosen || chosen === "mock" && !providerName) {
+    if (hasConfiguredRoutes()) {
+      chosen = "gateway";
     } else if (process.env.GEMINI_API_KEY) {
       chosen = "gemini";
     } else if (process.env.OPENAI_API_KEY) {
@@ -41,7 +47,10 @@ export function getLLMClient(providerName?: string): BaseLLMProvider {
 
   switch (chosen) {
     case "groq":
-      return new GroqProvider();
+    case "openrouter":
+    case "gateway":
+      if (hasConfiguredRoutes()) return getLLMGateway();
+      return getLLMClient("mock");
     case "anthropic":
       return new AnthropicProvider();
     case "openai":

@@ -17,7 +17,7 @@ describe("Storage & Learner Model Tests", () => {
   it("creates learners and sessions cleanly", () => {
     store.ensureLearner("learner-1", "Alice");
     store.ensureSession("sess-1", "learner-1", "recursion");
-    
+
     // Idempotent calls should not throw
     expect(() => store.ensureLearner("learner-1")).not.toThrow();
     expect(() => store.ensureSession("sess-1", "learner-1", "recursion")).not.toThrow();
@@ -25,7 +25,7 @@ describe("Storage & Learner Model Tests", () => {
 
   it("records and retrieves turns with full metadata", () => {
     store.ensureSession("sess-1", "learner-1", "recursion");
-    
+
     store.recordTurn({
       id: "turn-1",
       sessionId: "sess-1",

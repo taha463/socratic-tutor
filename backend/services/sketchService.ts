@@ -182,71 +182,129 @@ export class SketchService {
       }
 
       // Step B: Direct Groq Cloud call with multi-model cascade
-      const apiKey = process.env.GROQ_API_KEY;
-      if (!apiKey) {
-        const fallback = this.generateFallbackBoard(clean);
-        this.cache.set(cacheKey, { data: fallback, timestamp: Date.now() });
-        return fallback;
-      }
+      const groqKey = process.env.GROQ_API_KEY;
+      if (groqKey) {
+        const preferredModel = (process.env.GROQ_MODEL || "openai/gpt-oss-20b").trim();
+        const candidates = [
+          preferredModel,
+          "openai/gpt-oss-20b",
+          "qwen/qwen3.8-27b",
+          "openai/gpt-oss-120b",
+        ];
+        const modelsToTry = Array.from(new Set(candidates.filter(Boolean)));
 
-      const preferredModel = (process.env.GROQ_MODEL || "openai/gpt-oss-20b").trim();
-      const candidates = [
-        preferredModel,
-        "openai/gpt-oss-20b",
-        "qwen/qwen3.8-27b",
-        "openai/gpt-oss-120b",
-      ];
-      const modelsToTry = Array.from(new Set(candidates.filter(Boolean)));
+        for (const model of modelsToTry) {
+          try {
+            const bodyPayload: Record<string, any> = {
+              model,
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are a Visual Hand-Drawn Socratic Tutor. Never use walls of text. " +
+                    "Deconstruct the student's query into notebook whiteboard rows. " +
+                    "Always leave the key outcome box as a socratic puzzle (is_socratic_puzzle: true) " +
+                    "with 3-4 plausible options (socratic_options) including the exact right_box_text, so the student must solve it.",
+                },
+                { role: "user", content: clean },
+              ],
+              response_format: SKETCHBOARD_JSON_SCHEMA,
+              temperature: 0.2,
+            };
 
-      for (const model of modelsToTry) {
-        try {
-          const bodyPayload: Record<string, any> = {
-            model,
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a Visual Hand-Drawn Socratic Tutor. Never use walls of text. " +
-                  "Deconstruct the student's query into notebook whiteboard rows. " +
-                  "Always leave the key outcome box as a socratic puzzle (is_socratic_puzzle: true) " +
-                  "with 3-4 plausible options (socratic_options) including the exact right_box_text, so the student must solve it.",
+            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${groqKey}`,
               },
-              { role: "user", content: clean },
-            ],
-            response_format: SKETCHBOARD_JSON_SCHEMA,
-            temperature: 0.2,
-          };
+              body: JSON.stringify(bodyPayload),
+            });
 
-          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify(bodyPayload),
-          });
+            if (!groqRes.ok) {
+              const errStatus = groqRes.status;
+              const errText = await groqRes.text();
+              console.warn(`[SketchService] Groq model ${model} failed (${errStatus}): ${errText.slice(0, 150)}. Cascading...`);
+              continue;
+            }
 
-          if (!groqRes.ok) {
-            const errStatus = groqRes.status;
-            const errText = await groqRes.text();
-            console.warn(`[SketchService] Groq model ${model} failed (${errStatus}): ${errText.slice(0, 150)}. Cascading to next model...`);
+            const completion = (await groqRes.json()) as any;
+            const rawContent = completion?.choices?.[0]?.message?.content;
+            if (!rawContent) continue;
+
+            const parsed = JSON.parse(rawContent) as SketchboardDTO;
+            this.cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
+            return parsed;
+          } catch (err: any) {
+            console.warn(`[SketchService] Groq model ${model} error: ${err?.message || err}. Trying next...`);
             continue;
           }
-
-          const completion = (await groqRes.json()) as any;
-          const rawContent = completion?.choices?.[0]?.message?.content;
-          if (!rawContent) continue;
-
-          const parsed = JSON.parse(rawContent) as SketchboardDTO;
-          this.cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
-          return parsed;
-        } catch (err: any) {
-          console.warn(`[SketchService] Model ${model} execution error: ${err?.message || err}. Trying next model...`);
-          continue;
         }
       }
 
-      // Step C: If all live models failed or were rate-limited, return dynamic algorithmic board
+      // Step C: OpenRouter fallback cascade
+      const openRouterKey = process.env.OPENROUTER_API_KEY || process.env.OPEN_ROUTER_API_KEY;
+      if (openRouterKey) {
+        const orModels = [
+          (process.env.OPENROUTER_MODEL || process.env.OPEN_ROUTER_MODEL || "").trim(),
+          "dots-studio/dots-3-note-preview:free",
+          "nvidia/nemotron-3.5-lightning:free",
+          "meta-llama/llama-3.3-70b-instruct:free",
+          "google/gemma-4-31b-it:free",
+        ].filter(Boolean);
+
+        for (const model of orModels) {
+          try {
+            const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${openRouterKey}`,
+                "HTTP-Referer": "http://localhost:3000",
+                "X-Title": "Socratic Tutor",
+              },
+              body: JSON.stringify({
+                model,
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a Visual Hand-Drawn Socratic Tutor. Output strictly valid JSON matching this schema:\n" +
+                      JSON.stringify(SKETCHBOARD_JSON_SCHEMA.json_schema.schema) +
+                      "\nEnsure at least one row has is_socratic_puzzle: true and 3-4 socratic_options.",
+                  },
+                  { role: "user", content: `Visual sketchboard for: ${clean}` },
+                ],
+                response_format: { type: "json_object" },
+                temperature: 0.2,
+              }),
+            });
+
+            if (!orRes.ok) continue;
+
+            const orData = (await orRes.json()) as any;
+            const msg = orData?.choices?.[0]?.message;
+            let raw = msg?.content || msg?.reasoning || "";
+            if (raw.includes("```json")) {
+              raw = raw.split("```json")[1].split("```")[0].trim();
+            } else if (raw.includes("```")) {
+              raw = raw.split("```")[1].split("```")[0].trim();
+            }
+            if (raw) {
+              const parsed = JSON.parse(raw) as SketchboardDTO;
+              if (parsed && Array.isArray(parsed.rows) && parsed.rows.length >= 1) {
+                this.cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
+                return parsed;
+              }
+            }
+          } catch (err: any) {
+            console.warn(`[SketchService] OpenRouter model ${model} error: ${err?.message || err}`);
+            continue;
+          }
+        }
+      }
+
+      // Step D: Dynamic algorithmic board if external APIs are unavailable
       const fallback = this.generateFallbackBoard(clean);
       this.cache.set(cacheKey, { data: fallback, timestamp: Date.now() });
       return fallback;
