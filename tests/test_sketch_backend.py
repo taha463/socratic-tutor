@@ -39,3 +39,18 @@ def test_generate_sketch_tutor_endpoint():
     assert len(puzzles) >= 1, "Must contain at least one Socratic mystery puzzle"
     assert len(puzzles[0]["socratic_options"]) >= 2
 
+def test_cache_and_flexible_colors():
+    # Verify schema allows any string for box colors
+    row_props = sketchboard_schema["json_schema"]["schema"]["properties"]["rows"]["items"]["properties"]
+    assert row_props["left_box_color"]["type"] == "string"
+    assert "enum" not in row_props["left_box_color"], "Color should not be constrained by restrictive enum"
+    assert row_props["right_box_color"]["type"] == "string"
+    assert "enum" not in row_props["right_box_color"], "Color should not be constrained by restrictive enum"
+
+    # Fast repeat call test (cached)
+    r1 = client.post("/api/sketch-tutor", json={"concept_query": "Call Stack Operations"})
+    assert r1.status_code == 200
+    r2 = client.post("/api/sketch-tutor", json={"concept_query": "Call Stack Operations"})
+    assert r2.status_code == 200
+    assert r1.json()["main_heading"] == r2.json()["main_heading"]
+

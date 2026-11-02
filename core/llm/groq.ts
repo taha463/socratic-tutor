@@ -49,25 +49,31 @@ export class GroqProvider implements BaseLLMProvider {
 
     if (!res.ok) {
       const errText = await res.text();
-      // If 120b has capacity issues, try fallback to 20b
-      if (this.model !== "openai/gpt-oss-20b") {
-        console.warn(`[GroqProvider] Primary model ${this.model} error, attempting fallback to openai/gpt-oss-20b`);
-        const fallbackRes = await fetch(`${this.baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${this.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: "openai/gpt-oss-20b",
-            messages: formattedMessages,
-            temperature: 0.3,
-            max_tokens: 1024,
-          }),
-        });
-        if (fallbackRes.ok) {
-          const fallbackData = await fallbackRes.json();
-          return fallbackData?.choices?.[0]?.message?.content || "";
+      const fallbackModels = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b"].filter(
+        (m) => m !== this.model
+      );
+      for (const fallbackModel of fallbackModels) {
+        console.warn(`[GroqProvider] Primary model ${this.model} error (${res.status}), cascading fallback to ${fallbackModel}`);
+        try {
+          const fallbackRes = await fetch(`${this.baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${this.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: fallbackModel,
+              messages: formattedMessages,
+              temperature: 0.3,
+              max_tokens: 1024,
+            }),
+          });
+          if (fallbackRes.ok) {
+            const fallbackData = await fallbackRes.json();
+            return fallbackData?.choices?.[0]?.message?.content || "";
+          }
+        } catch {
+          continue;
         }
       }
       throw new Error(`Groq API error (${res.status}): ${errText}`);

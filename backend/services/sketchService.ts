@@ -40,20 +40,17 @@ export const SKETCHBOARD_JSON_SCHEMA = {
             properties: {
               row_type: {
                 type: "string",
-                enum: ["mapping_pair", "process_flow", "annotation_text"],
               },
               left_label: { type: "string" },
               left_box_text: { type: "string" },
               left_box_color: {
                 type: "string",
-                enum: ["pastel_blue", "pastel_purple", "none"],
               },
               arrow_label: { type: "string" },
               right_label: { type: "string" },
               right_box_text: { type: "string" },
               right_box_color: {
                 type: "string",
-                enum: ["pastel_red", "pastel_green", "mystery_yellow"],
               },
               is_socratic_puzzle: { type: "boolean" },
               socratic_options: {
@@ -92,6 +89,10 @@ export const SKETCHBOARD_JSON_SCHEMA = {
 };
 
 export class SketchService {
+  private cache = new Map<string, { data: SketchboardDTO; timestamp: number }>();
+  private inFlight = new Map<string, Promise<SketchboardDTO>>();
+  private readonly TTL_MS = 15 * 60 * 1000; // 15 minutes
+
   generateFallbackBoard(concept: string): SketchboardDTO {
     const clean = concept.trim() || "Concept Architecture";
     return {
@@ -146,65 +147,116 @@ export class SketchService {
   }
 
   async generateSketchboard(concept: string): Promise<SketchboardDTO> {
-    // 1. Try FastAPI backend if running on 8000
-    try {
-      const fastApiResponse = await fetch("http://127.0.0.1:8000/api/sketch-tutor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ concept_query: concept }),
-        signal: AbortSignal.timeout(1500),
-      });
+    const clean = concept.trim() || "Concept Architecture";
+    const cacheKey = clean.toLowerCase();
 
-      if (fastApiResponse.ok) {
-        return (await fastApiResponse.json()) as SketchboardDTO;
+    // 1. Check in-memory cache
+    const now = Date.now();
+    const cached = this.cache.get(cacheKey);
+    if (cached && now - cached.timestamp < this.TTL_MS) {
+      return cached.data;
+    }
+
+    // 2. In-flight request deduplication
+    if (this.inFlight.has(cacheKey)) {
+      return this.inFlight.get(cacheKey)!;
+    }
+
+    const task = (async (): Promise<SketchboardDTO> => {
+      // Step A: Try FastAPI backend on 8000 if available
+      try {
+        const fastApiResponse = await fetch("http://127.0.0.1:8000/api/sketch-tutor", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ concept_query: clean }),
+          signal: AbortSignal.timeout(1500),
+        });
+
+        if (fastApiResponse.ok) {
+          const result = (await fastApiResponse.json()) as SketchboardDTO;
+          this.cache.set(cacheKey, { data: result, timestamp: Date.now() });
+          return result;
+        }
+      } catch {
+        // Fall through to Groq API cascade
       }
-    } catch {
-      // Fall through to Groq API
-    }
 
-    // 2. Direct Groq Cloud call
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return this.generateFallbackBoard(concept);
-    }
+      // Step B: Direct Groq Cloud call with multi-model cascade
+      const apiKey = process.env.GROQ_API_KEY;
+      if (!apiKey) {
+        const fallback = this.generateFallbackBoard(clean);
+        this.cache.set(cacheKey, { data: fallback, timestamp: Date.now() });
+        return fallback;
+      }
 
-    try {
-      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
-          reasoning_effort: "medium",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a Visual Hand-Drawn Socratic Tutor. Never use walls of text. " +
-                "Deconstruct the student's query into notebook whiteboard rows. " +
-                "Always leave the key outcome box as a socratic puzzle (is_socratic_puzzle: true) " +
-                "with 3-4 plausible options (socratic_options) including the exact right_box_text, so the student must solve it.",
+      const preferredModel = (process.env.GROQ_MODEL || "openai/gpt-oss-20b").trim();
+      const candidates = [
+        preferredModel,
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-120b",
+      ];
+      const modelsToTry = Array.from(new Set(candidates.filter(Boolean)));
+
+      for (const model of modelsToTry) {
+        try {
+          const bodyPayload: Record<string, any> = {
+            model,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a Visual Hand-Drawn Socratic Tutor. Never use walls of text. " +
+                  "Deconstruct the student's query into notebook whiteboard rows. " +
+                  "Always leave the key outcome box as a socratic puzzle (is_socratic_puzzle: true) " +
+                  "with 3-4 plausible options (socratic_options) including the exact right_box_text, so the student must solve it.",
+              },
+              { role: "user", content: clean },
+            ],
+            response_format: SKETCHBOARD_JSON_SCHEMA,
+            temperature: 0.2,
+          };
+
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
             },
-            { role: "user", content: concept },
-          ],
-          response_format: SKETCHBOARD_JSON_SCHEMA,
-          temperature: 0.2,
-        }),
-      });
+            body: JSON.stringify(bodyPayload),
+          });
 
-      if (!groqRes.ok) {
-        return this.generateFallbackBoard(concept);
+          if (!groqRes.ok) {
+            const errStatus = groqRes.status;
+            const errText = await groqRes.text();
+            console.warn(`[SketchService] Groq model ${model} failed (${errStatus}): ${errText.slice(0, 150)}. Cascading to next model...`);
+            continue;
+          }
+
+          const completion = (await groqRes.json()) as any;
+          const rawContent = completion?.choices?.[0]?.message?.content;
+          if (!rawContent) continue;
+
+          const parsed = JSON.parse(rawContent) as SketchboardDTO;
+          this.cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
+          return parsed;
+        } catch (err: any) {
+          console.warn(`[SketchService] Model ${model} execution error: ${err?.message || err}. Trying next model...`);
+          continue;
+        }
       }
 
-      const completion = (await groqRes.json()) as any;
-      const rawContent = completion?.choices?.[0]?.message?.content;
-      if (!rawContent) return this.generateFallbackBoard(concept);
+      // Step C: If all live models failed or were rate-limited, return dynamic algorithmic board
+      const fallback = this.generateFallbackBoard(clean);
+      this.cache.set(cacheKey, { data: fallback, timestamp: Date.now() });
+      return fallback;
+    })();
 
-      return JSON.parse(rawContent) as SketchboardDTO;
-    } catch {
-      return this.generateFallbackBoard(concept);
+    this.inFlight.set(cacheKey, task);
+    try {
+      return await task;
+    } finally {
+      this.inFlight.delete(cacheKey);
     }
   }
 }

@@ -115,6 +115,8 @@ export function SketchNotebook({
           text: "#2C2C2C",
         };
       case "mystery_yellow":
+      case "pastel_yellow":
+      case "yellow":
         return {
           bg: "#FFF2CC",
           border: "#D4A017",

@@ -80,4 +80,18 @@ describe("SketchSocratic Architecture & Schema Tests", () => {
     ok(decision.visualSpec.rows.length >= 2, "Whiteboard must have at least 2 rows");
     ok(decision.visualSpec.rows.some((r: any) => r.is_socratic_puzzle), "Must have Socratic mystery box");
   });
+
+  it("serves repeat queries from in-memory cache to prevent Groq TPM rate limits", async () => {
+    const t0 = Date.now();
+    const first = await sketchService.generateSketchboard("Binary Search Invariant");
+    const tFirst = Date.now() - t0;
+
+    const t1 = Date.now();
+    const second = await sketchService.generateSketchboard("Binary Search Invariant");
+    const tCached = Date.now() - t1;
+
+    strictEqual(first.main_heading, second.main_heading);
+    ok(tCached <= tFirst, "Cached retrieval should be faster than initial fetch");
+    ok(tCached < 100, "Cached retrieval should resolve near-instantaneously (< 100ms)");
+  });
 });
