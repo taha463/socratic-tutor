@@ -387,21 +387,7 @@ function SessionWorkspaceContent() {
                 borderBottom: "3px solid var(--coral-deep)",
               }}
             >
-              Today
-            </Link>
-            <Link
-              href="/sketch"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                minHeight: "64px",
-                padding: "0 14px",
-                boxSizing: "border-box",
-                color: "var(--muted)",
-                fontWeight: 500,
-              }}
-            >
-              Sketchboard
+              Session
             </Link>
             <Link
               href="/dashboard"
@@ -559,7 +545,11 @@ function SessionWorkspaceContent() {
                       {msg.visualSpec && (
                         <VisualRenderer
                           visualSpec={msg.visualSpec}
-                          onPredictionSubmit={(p) => setInputMessage(p)}
+                          onPredictionSubmit={(p) => {
+                            setInputMessage(p);
+                            const el = document.getElementById("reply");
+                            if (el) el.focus();
+                          }}
                         />
                       )}
                     </div>
@@ -658,14 +648,23 @@ function SessionWorkspaceContent() {
                 <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
                   Stuck is fine. The button below gives you a smaller step, not the answer.
                 </p>
-                <div style={{ display: "flex", gap: "12px" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                   <button
                     className="btn"
                     type="button"
                     disabled={isLoading || (capacityNotice?.limited && capacityNotice.secondsRemaining > 0)}
-                    onClick={() => handleSend("I'm feeling stuck on this step. Could you explain this visually with a sketchboard or diagram?", true)}
+                    onClick={() => handleSend("I'm feeling stuck on this step. Could you give me a smaller hint?", true)}
                   >
                     I&apos;m stuck
+                  </button>
+                  <button
+                    className="btn"
+                    type="button"
+                    title="Ask the AI tutor to draw a visual sketchboard for this step"
+                    disabled={isLoading || (capacityNotice?.limited && capacityNotice.secondsRemaining > 0)}
+                    onClick={() => handleSend("Could you draw a visual sketchboard diagram to explain this concept?", true)}
+                  >
+                    ✏️ Explain with sketch
                   </button>
                   <button
                     className="btn btn-primary"

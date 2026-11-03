@@ -189,8 +189,10 @@ export class TutorOrchestrator {
       finalDraft = draft;
 
       // Handle visual aid if needed or if on Rung 4 or visual requested
-      const wantsVisualInMsg = /draw|sketch|visual|diagram|whiteboard|show\s+me|notepad/i.test(message);
-      if (draft.needsVisual || activeRung === 4 || wantsVisualInMsg || diag.recommendedRung === 4) {
+      const wantsVisualInMsg = /draw|sketch|visual|diagram|whiteboard|show\s+me|notepad|picture|canvas|illustrat|graph\s+flow/i.test(message);
+      const shouldProvideVisual = draft.needsVisual || activeRung === 4 || wantsVisualInMsg || diag.recommendedRung === 4;
+
+      if (shouldProvideVisual) {
         let activeConcept = draft.visualConcept?.trim();
         if (!activeConcept || activeConcept.toLowerCase() === "general") {
           activeConcept = topic && topic.toLowerCase() !== "general" ? topic : message.slice(0, 60);
@@ -199,7 +201,7 @@ export class TutorOrchestrator {
         const visDecision = await this.visualizer.decide({
           concept: activeConcept,
           skillType: draft.visualType || "sketch",
-          rung: activeRung,
+          rung: Math.max(activeRung, 4),
           learnerLevel: diag.level,
           factualContext: ragContext || null,
         });

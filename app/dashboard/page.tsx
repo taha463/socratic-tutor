@@ -299,21 +299,7 @@ export default function DashboardPage() {
                 fontWeight: 500,
               }}
             >
-              Today
-            </Link>
-            <Link
-              href="/sketch"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                minHeight: "64px",
-                padding: "0 14px",
-                boxSizing: "border-box",
-                color: "var(--muted)",
-                fontWeight: 500,
-              }}
-            >
-              Sketchboard
+              Session
             </Link>
             <Link
               href="/dashboard"
