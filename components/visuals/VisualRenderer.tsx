@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { PlotViewer } from "./PlotViewer";
 import { StepAnimationPlayer } from "./StepAnimationPlayer";
 import { SketchNotebook } from "./SketchNotebook";
+import { LiveCodeSandbox } from "../sandbox/LiveCodeSandbox";
 
 export interface VisualRendererProps {
   visualSpec: Record<string, any>;
@@ -103,84 +104,20 @@ export function VisualRenderer({ visualSpec, onPredictionSubmit }: VisualRendere
     );
   }
 
-  // 3. CODE TRACE
-  if (skill === "trace" || visualSpec.code) {
+  // 3. CODE TRACE & LIVE PYTHON SANDBOX
+  if (skill === "trace" || skill === "sandbox" || visualSpec.code) {
     return (
-      <figure
-        style={{
-          margin: 0,
-          padding: "20px",
-          border: "1px solid var(--rule)",
-          borderRadius: "12px",
-          background: "var(--paper)",
-          maxWidth: "560px",
-          boxSizing: "border-box",
-        }}
-      >
-        <figcaption
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "baseline",
-            marginBottom: "12px",
+      <div style={{ margin: "10px 0", width: "100%", maxWidth: "920px" }}>
+        <LiveCodeSandbox
+          initialCode={visualSpec.code}
+          topic={concept}
+          onAskTutor={(question) => {
+            if (typeof onPredictionSubmit === "function") {
+              onPredictionSubmit(question);
+            }
           }}
-        >
-          <span style={{ fontWeight: 600, fontSize: "15px" }}>Code Execution Trace: {concept}</span>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>Step-by-step prediction</span>
-        </figcaption>
-        <div
-          style={{
-            background: "var(--cotton)",
-            padding: "14px",
-            borderRadius: "8px",
-            border: "1px solid var(--rule-2)",
-            fontFamily: "var(--font-figure)",
-            fontSize: "13px",
-            overflowX: "auto",
-          }}
-        >
-          <pre style={{ margin: 0 }}>{visualSpec.code}</pre>
-        </div>
-        <p style={{ margin: "14px 0 8px", fontSize: "14px", color: "var(--ink)", fontWeight: 500 }}>
-          {prompt}
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px", marginTop: "12px" }}>
-          <input
-            type="text"
-            value={prediction}
-            onChange={(e) => setPrediction(e.target.value)}
-            placeholder="Predict output or variable..."
-            className="fig"
-            style={{
-              flex: "1 1 180px",
-              minHeight: "38px",
-              padding: "0 12px",
-              border: "1px solid var(--muted)",
-              borderRadius: "6px",
-              background: "var(--cotton)",
-              color: "var(--ink)",
-              fontSize: "13px",
-            }}
-          />
-          <button className="btn btn-sm" type="button" onClick={handleCheck}>
-            Check
-          </button>
-          <button className="btn btn-sm" type="button" onClick={handleReveal}>
-            Reveal
-          </button>
-        </div>
-        {isRevealed && expected && (
-          <div style={{ marginTop: "12px", padding: "10px 14px", background: "var(--cotton)", borderRadius: "6px", border: "1px solid var(--coral)" }}>
-            <span style={{ fontSize: "13px", color: "var(--coral-deep)", fontWeight: 600 }}>Expected: </span>
-            <span className="fig" style={{ fontSize: "13px" }}>{expected}</span>
-          </div>
-        )}
-        {feedback && (
-          <p style={{ margin: "10px 0 0", color: "var(--coral-deep)", fontSize: "13px", fontWeight: 500 }}>
-            {feedback}
-          </p>
-        )}
-      </figure>
+        />
+      </div>
     );
   }
 

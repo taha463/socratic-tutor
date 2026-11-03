@@ -66,3 +66,4 @@ export function getSocraticGraphMermaid(): string {
     critic -- "Approved" --> visualizer[Visualizer Agent<br/>Dynamic Scaffold & Sketchboard]
     visualizer --> __end__([End: Persist & Stream to Learner])`;
 }
+

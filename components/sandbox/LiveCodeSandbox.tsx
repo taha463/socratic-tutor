@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  Zap,
   Play,
   SkipBack,
   SkipForward,
@@ -12,7 +11,7 @@ import {
 } from "lucide-react";
 import type { PythonTraceStep } from "@/skills/trace/pythonSandbox";
 
-interface LiveCodeSandboxProps {
+export interface LiveCodeSandboxProps {
   initialCode?: string;
   topic?: string;
   onAskTutor?: (questionContext: string) => void;
@@ -131,65 +130,95 @@ Can you ask me a Socratic question to test if I understand why the program reach
     onAskTutor(ctx);
   };
 
+  const displayTitle = topic && topic.toLowerCase() !== "general"
+    ? `${topic.charAt(0).toUpperCase() + topic.slice(1)} · Python Trace Sandbox`
+    : "Python 3.14 · Trace Sandbox";
+
   return (
     <div
       style={{
-        borderRadius: "12px",
-        border: "1px solid var(--rule)",
-        background: "#1E1E24",
-        color: "#E2E8F0",
+        width: "100%",
+        maxWidth: "920px",
+        margin: "0 auto",
+        borderRadius: "16px",
+        boxShadow: "0 10px 30px rgba(44, 44, 44, 0.08), 0 1px 3px rgba(44, 44, 44, 0.05)",
+        border: "2px solid #E6E2D8",
         overflow: "hidden",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
         display: "flex",
         flexDirection: "column",
-        gap: 0,
+        background: "#FDFBF7",
+        backgroundImage: "linear-gradient(to right, rgba(44, 44, 44, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(44, 44, 44, 0.04) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
+        color: "#2B2320",
+        boxSizing: "border-box",
       }}
     >
-      {/* Sandbox Header */}
+      {/* 1. macOS Style Notebook Window Header */}
       <div
         style={{
+          background: "#F2EDE4",
+          borderBottom: "2px solid #E6E2D8",
+          padding: "10px 18px",
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "10px 16px",
-          background: "#141418",
-          borderBottom: "1px solid #2D2D38",
           gap: "10px",
+          userSelect: "none",
         }}
       >
+        {/* Left: 3 macOS dots + Title */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Zap size={16} style={{ color: "#F59E0B" }} />
-          <span style={{ fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px" }}>
-            LIVE PYTHON TRACE SANDBOX
-          </span>
+          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#FF5F56", display: "inline-block" }} />
+          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#FFBD2E", display: "inline-block" }} />
+          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#27C93F", display: "inline-block" }} />
           <span
             style={{
-              fontSize: "10px",
-              padding: "2px 6px",
-              borderRadius: "4px",
-              background: "#2D3748",
-              color: "#94A3B8",
-              fontFamily: "monospace",
+              marginLeft: "12px",
+              fontFamily: "ui-monospace, monospace",
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "#5C5652",
+              letterSpacing: "0.02em",
             }}
           >
-            Python 3.14 Isolated
+            {displayTitle}
           </span>
         </div>
 
-        {/* Template selector & Run Button */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Right: 80/20 Rule Badge, Template Selector & System Theme Run Button */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              padding: "3px 8px",
+              borderRadius: "12px",
+              background: "#FFF2CC",
+              color: "#B45309",
+              border: "1px solid #FCD34D",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#D97706" }} />
+            80/20 Socratic Rule
+          </span>
+
           <select
             value={selectedTemplate}
             onChange={(e) => handleTemplateChange(e.target.value)}
             style={{
-              padding: "4px 8px",
+              padding: "5px 10px",
               borderRadius: "6px",
-              background: "#2A2A36",
-              color: "#E2E8F0",
-              border: "1px solid #3F3F50",
+              background: "#FFFDFB",
+              color: "#2B2320",
+              border: "1.5px solid #D6CCC3",
               fontSize: "12px",
+              fontWeight: 600,
               cursor: "pointer",
+              outline: "none",
             }}
           >
             <option value="recursion">Template: Factorial</option>
@@ -205,15 +234,16 @@ Can you ask me a Socratic question to test if I understand why the program reach
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              padding: "6px 14px",
+              padding: "6px 16px",
               borderRadius: "6px",
-              background: isRunning ? "#4B5563" : "#10B981",
+              background: isRunning ? "#9CA3AF" : "#B93E29", // System Coral-Deep Primary
               border: "none",
               color: "#FFFFFF",
               fontSize: "12px",
               fontWeight: 700,
               cursor: isRunning ? "not-allowed" : "pointer",
-              transition: "background 0.2s ease",
+              transition: "all 0.15s ease",
+              boxShadow: "0 2px 6px rgba(185, 62, 41, 0.25)",
             }}
           >
             <Play size={13} fill="currentColor" />
@@ -222,32 +252,70 @@ Can you ask me a Socratic question to test if I understand why the program reach
         </div>
       </div>
 
-      {/* Main Workspace (Editor + Stepper Side-by-Side) */}
+      {/* 2. Main Workspace (Code Editor / Trace + State Stepper) */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          minHeight: "280px",
+          minHeight: "320px",
         }}
       >
-        {/* Left: Code Editor with Line Highlight */}
+        {/* Left: Code Box with Socratic Active Line Highlight */}
         <div
           style={{
-            borderRight: "1px solid #2D2D38",
+            borderRight: "2px solid #E6E2D8",
             display: "flex",
             flexDirection: "column",
-            background: "#1E1E24",
+            background: "#FFFFFF",
           }}
         >
-          {/* Stepper active line display */}
+          {/* Subheader */}
+          <div
+            style={{
+              padding: "8px 14px",
+              borderBottom: "1px solid #E6E2D8",
+              background: "#FAF7F2",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "#6B5F59", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Active Code
+            </span>
+            {steps.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSteps([])}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#B93E29",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <Edit3 size={12} />
+                <span>Edit Code</span>
+              </button>
+            )}
+          </div>
+
+          {/* Stepper Active Line Display */}
           {steps.length > 0 ? (
             <div
               style={{
-                padding: "8px 12px",
+                padding: "12px 14px",
                 fontFamily: "ui-monospace, monospace",
                 fontSize: "13px",
                 lineHeight: "22px",
                 overflowX: "auto",
+                background: "#FFFFFF",
+                flex: 1,
               }}
             >
               {codeLines.map((line, idx) => {
@@ -258,10 +326,10 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     key={idx}
                     style={{
                       display: "flex",
-                      background: isCurrent ? "rgba(245, 158, 11, 0.25)" : "transparent",
-                      borderLeft: isCurrent ? "3px solid #F59E0B" : "3px solid transparent",
-                      paddingLeft: "6px",
-                      borderRadius: "2px",
+                      background: isCurrent ? "#FFF2CC" : "transparent",
+                      borderLeft: isCurrent ? "3px solid #D4A017" : "3px solid transparent",
+                      paddingLeft: "8px",
+                      borderRadius: "3px",
                       transition: "background 0.15s ease",
                     }}
                   >
@@ -270,7 +338,8 @@ Can you ask me a Socratic question to test if I understand why the program reach
                         width: "28px",
                         textAlign: "right",
                         marginRight: "12px",
-                        color: isCurrent ? "#FBBF24" : "#64748B",
+                        color: isCurrent ? "#854D0E" : "#8C827A",
+                        fontWeight: isCurrent ? 700 : 400,
                         userSelect: "none",
                       }}
                     >
@@ -279,7 +348,7 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     <span
                       style={{
                         whiteSpace: "pre",
-                        color: isCurrent ? "#FDE68A" : "#E2E8F0",
+                        color: isCurrent ? "#854D0E" : "#2B2320",
                         fontWeight: isCurrent ? 700 : 400,
                       }}
                     >
@@ -298,13 +367,13 @@ Can you ask me a Socratic question to test if I understand why the program reach
               style={{
                 width: "100%",
                 flex: 1,
-                minHeight: "220px",
-                padding: "12px 14px",
+                minHeight: "260px",
+                padding: "14px",
                 fontFamily: "ui-monospace, monospace",
                 fontSize: "13px",
-                lineHeight: "20px",
-                background: "transparent",
-                color: "#F1F5F9",
+                lineHeight: "22px",
+                background: "#FFFFFF",
+                color: "#2B2320",
                 border: "none",
                 resize: "vertical",
                 outline: "none",
@@ -312,34 +381,12 @@ Can you ask me a Socratic question to test if I understand why the program reach
               }}
             />
           )}
-
-          {steps.length > 0 && (
-            <div style={{ padding: "8px 12px", borderTop: "1px solid #2D2D38" }}>
-              <button
-                type="button"
-                onClick={() => setSteps([])}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#94A3B8",
-                  fontSize: "11px",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <Edit3 size={12} />
-                <span>Edit Code</span>
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Right: Step Navigator & Variable State Inspector */}
+        {/* Right: Step Navigator & State Inspector */}
         <div
           style={{
-            background: "#18181D",
+            background: "rgba(253, 251, 247, 0.9)",
             padding: "16px",
             display: "flex",
             flexDirection: "column",
@@ -355,10 +402,11 @@ Can you ask me a Socratic question to test if I understand why the program reach
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: "8px",
-                padding: "10px",
+                padding: "10px 14px",
                 borderRadius: "8px",
-                background: "#23232C",
-                border: "1px solid #333342",
+                background: "#FFFFFF",
+                border: "1.5px solid #E6E2D8",
+                boxShadow: "0 2px 6px rgba(44, 44, 44, 0.04)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -370,11 +418,11 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    padding: "4px 10px",
-                    borderRadius: "4px",
-                    background: currentStepIdx === 0 ? "#2D3748" : "#3B82F6",
-                    border: "none",
-                    color: "#FFFFFF",
+                    padding: "5px 12px",
+                    borderRadius: "6px",
+                    background: "#FFFDFB",
+                    border: "1.5px solid #D6CCC3",
+                    color: currentStepIdx === 0 ? "#A8A29E" : "#2B2320",
                     fontSize: "11px",
                     fontWeight: 600,
                     cursor: currentStepIdx === 0 ? "not-allowed" : "pointer",
@@ -391,14 +439,15 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    padding: "4px 10px",
-                    borderRadius: "4px",
-                    background: currentStepIdx === steps.length - 1 ? "#2D3748" : "#3B82F6",
+                    padding: "5px 14px",
+                    borderRadius: "6px",
+                    background: currentStepIdx === steps.length - 1 ? "#A8A29E" : "#B93E29", // System Coral-Deep Primary
                     border: "none",
                     color: "#FFFFFF",
                     fontSize: "11px",
-                    fontWeight: 600,
+                    fontWeight: 700,
                     cursor: currentStepIdx === steps.length - 1 ? "not-allowed" : "pointer",
+                    boxShadow: currentStepIdx === steps.length - 1 ? "none" : "0 2px 6px rgba(185, 62, 41, 0.2)",
                   }}
                 >
                   <span>Next</span>
@@ -411,12 +460,13 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    background: "#333342",
-                    border: "none",
-                    color: "#94A3B8",
+                    padding: "5px 10px",
+                    borderRadius: "6px",
+                    background: "#FFFDFB",
+                    border: "1.5px solid #D6CCC3",
+                    color: "#6B5F59",
                     fontSize: "11px",
+                    fontWeight: 500,
                     cursor: "pointer",
                   }}
                 >
@@ -425,34 +475,35 @@ Can you ask me a Socratic question to test if I understand why the program reach
                 </button>
               </div>
 
-              <div style={{ fontSize: "11px", color: "#FBBF24", fontWeight: 600 }}>
+              <div style={{ fontSize: "12px", color: "#B93E29", fontWeight: 700 }}>
                 Step {currentStepIdx + 1} of {steps.length} (Line {currentStep?.line})
               </div>
             </div>
           ) : (
             <div
               style={{
-                padding: "16px",
+                padding: "20px",
                 borderRadius: "8px",
-                background: "#23232C",
-                border: "1px dashed #3D3D4E",
+                background: "#FFFFFF",
+                border: "2px dashed #D6CCC3",
                 textAlign: "center",
-                color: "#94A3B8",
-                fontSize: "12px",
+                color: "#6B5F59",
+                fontSize: "13px",
               }}
             >
-              Click <strong>"Run & Trace"</strong> to step through execution lines and inspect local variables.
+              Click <strong>&quot;Run &amp; Trace&quot;</strong> to step through execution lines and inspect local variables.
             </div>
           )}
 
-          {/* Active Local Variables Table */}
+          {/* Active Local Variables Table (Matching Pastel Blue Card) */}
           {currentStep && (
             <div
               style={{
                 borderRadius: "8px",
-                border: "1px solid #2D2D38",
-                background: "#202028",
-                padding: "12px",
+                border: "1.5px solid #E6E2D8",
+                background: "#FFFFFF",
+                padding: "14px",
+                boxShadow: "0 2px 8px rgba(44, 44, 44, 0.03)",
               }}
             >
               <div
@@ -460,19 +511,20 @@ Can you ask me a Socratic question to test if I understand why the program reach
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "8px",
+                  marginBottom: "10px",
                   fontSize: "11px",
-                  color: "#94A3B8",
+                  color: "#6B5F59",
                   textTransform: "uppercase",
                   fontWeight: 700,
+                  letterSpacing: "0.05em",
                 }}
               >
                 <span>Memory State (Locals)</span>
-                <span>Frame: {currentStep.function}()</span>
+                <span style={{ fontFamily: "monospace", color: "#B93E29" }}>Frame: {currentStep.function}()</span>
               </div>
 
               {Object.keys(currentStep.locals).length === 0 ? (
-                <div style={{ fontSize: "11px", color: "#64748B", fontStyle: "italic" }}>
+                <div style={{ fontSize: "12px", color: "#8C827A", fontStyle: "italic" }}>
                   No local variables initialized yet in this scope.
                 </div>
               ) : (
@@ -480,23 +532,26 @@ Can you ask me a Socratic question to test if I understand why the program reach
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-                    gap: "6px",
+                    gap: "8px",
                   }}
                 >
                   {Object.entries(currentStep.locals).map(([name, val]) => (
                     <div
                       key={name}
                       style={{
-                        padding: "6px 8px",
-                        borderRadius: "4px",
-                        background: "#16161B",
-                        border: "1px solid #333342",
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        background: "#D0E4F7", // Pastel Blue from the Whiteboard Design
+                        border: "1.5px solid #5B9BD5",
                         fontFamily: "ui-monospace, monospace",
-                        fontSize: "11px",
+                        fontSize: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ color: "#38BDF8", fontWeight: 600 }}>{name}: </span>
-                      <span style={{ color: "#A7F3D0" }}>{val}</span>
+                      <span style={{ color: "#1E40AF", fontWeight: 700 }}>{name}</span>
+                      <span style={{ color: "#1E3A8A", fontWeight: 600 }}>{val}</span>
                     </div>
                   ))}
                 </div>
@@ -508,12 +563,13 @@ Can you ask me a Socratic question to test if I understand why the program reach
           {error && (
             <div
               style={{
-                padding: "10px",
+                padding: "10px 14px",
                 borderRadius: "6px",
-                background: "rgba(239, 68, 68, 0.15)",
-                border: "1px solid #EF4444",
-                color: "#FCA5A5",
-                fontSize: "11px",
+                background: "#FEE2E2",
+                border: "1.5px solid #F87171",
+                color: "#991B1B",
+                fontSize: "12px",
+                fontWeight: 600,
               }}
             >
               <strong>Sandbox Alert:</strong> {error}
@@ -525,19 +581,22 @@ Can you ask me a Socratic question to test if I understand why the program reach
             <div
               style={{
                 borderRadius: "8px",
-                border: "1px solid #2D2D38",
-                background: "#111115",
-                padding: "10px",
+                border: "1.5px solid #E6E2D8",
+                background: "#FFFFFF",
+                padding: "12px",
                 fontFamily: "ui-monospace, monospace",
-                fontSize: "11px",
+                fontSize: "12px",
+                boxShadow: "0 2px 6px rgba(44, 44, 44, 0.03)",
               }}
             >
-              <div style={{ color: "#64748B", marginBottom: "4px" }}>Output:</div>
-              <pre style={{ margin: 0, color: "#34D399", whiteSpace: "pre-wrap" }}>{stdout}</pre>
+              <div style={{ color: "#8C827A", marginBottom: "4px", fontSize: "11px", fontWeight: 700, textTransform: "uppercase" }}>
+                Standard Output:
+              </div>
+              <pre style={{ margin: 0, color: "#15803D", whiteSpace: "pre-wrap", fontWeight: 600 }}>{stdout}</pre>
             </div>
           )}
 
-          {/* Ask Socratic Tutor Bridge Button */}
+          {/* Ask Socratic Tutor Bridge Button (System Primary Coral) */}
           {onAskTutor && (
             <button
               type="button"
@@ -548,15 +607,22 @@ Can you ask me a Socratic question to test if I understand why the program reach
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                padding: "10px 14px",
-                borderRadius: "6px",
-                background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+                padding: "10px 16px",
+                borderRadius: "8px",
+                background: "#B93E29", // System Coral-Deep
                 border: "none",
                 color: "#FFFFFF",
                 fontSize: "12px",
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(99, 102, 241, 0.3)",
+                boxShadow: "0 2px 8px rgba(185, 62, 41, 0.25)",
+                transition: "background 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#A33420";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#B93E29";
               }}
             >
               <Lightbulb size={15} />
@@ -568,4 +634,3 @@ Can you ask me a Socratic question to test if I understand why the program reach
     </div>
   );
 };
-
