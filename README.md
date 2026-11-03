@@ -70,134 +70,74 @@ Click any preview below to inspect the full-resolution screenshot:
 
 ## 🏛️ System Architecture
 
-Socratic Tutor v2.0 replaces centralized microservice architectures (Docker, Celery, Redis, MongoDB) with a clean, high-performance, local-first in-process single stack.
-
-### 1. End-to-End System & Component Architecture
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#FFFDFB',
-    'primaryTextColor': '#2B2320',
-    'primaryBorderColor': '#E8725A',
-    'lineColor': '#B93E29',
-    'secondaryColor': '#FAF8F5',
-    'tertiaryColor': '#F4EFEB',
-    'fontFamily': 'Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
-    'fontSize': '14px'
-  }
-}}%%
-
 flowchart TB
-    User(["👤 Learner"]):::userNode
+    User([Learner])
 
-    subgraph Browser ["🖥️ Browser (Client-Side)"]
-        UI["Web Client UI<br/>(Hallmark Theme)"]:::uiNode
-        Pyodide["Pyodide WebAssembly<br/>(runs student code safely)"]:::sandboxNode
+    subgraph Browser
+        UI[Web UI]
+        Py["Pyodide<br/>runs student code"]
     end
 
-    subgraph Server ["🌐 Next.js Server (Port 3000)"]
-        API["API Routes<br/>/api/turn • /api/graph • /api/dashboard"]:::apiNode
+    subgraph Server["Next.js Server :3000"]
+        API["API Routes<br/>turn / graph / dashboard"]
     end
 
-    subgraph Agents ["🧠 LangGraph Multi-Agent Engine"]
-        Diag["🎯 Diagnostician"]:::agentNode
-        Teacher["🧑‍🏫 Teacher"]:::agentNode
-        Vis["🎨 Visualizer"]:::agentNode
-        Critic{"🛡️ Critic Gate"}:::criticNode
-
-        Diag --> Teacher --> Vis --> Critic
-        Critic -->|leak found: rewrite| Teacher
+    subgraph Agents["LangGraph Agents"]
+        direction LR
+        D[Diagnostician] --> T[Teacher] --> V[Visualizer] --> C{Critic}
+        C -. rewrite .-> T
     end
 
-    subgraph Services ["💾 Foundations &amp; Storage"]
-        DB[("SQLite WAL<br/>data/tutor.db")]:::storageNode
-        LLM["LLM Gateway<br/>Groq, Ollama, Claude, OpenAI"]:::llmNode
-        Sketch["FastAPI Sketchpad<br/>optional whiteboard (Port 8000)"]:::sketchNode
+    subgraph Services
+        direction LR
+        LLM["LLM Gateway<br/>Groq / Ollama / Claude / OpenAI"]
+        DB[("SQLite<br/>tutor.db")]
+        SK["Sketchpad :8000<br/>optional"]
     end
 
     User <--> UI
-    UI <--> Pyodide
+    UI <--> Py
     UI --> API
-    UI -.-> Sketch
-    API --> Diag
-    Critic -->|approved turn| API
+    UI -.-> SK
+    API -->|turn + signals| Agents
+    Agents -->|approved turn| API
     Agents <--> LLM
     Agents <--> DB
 
-    classDef userNode fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px;
-    classDef uiNode fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:1.5px;
-    classDef sandboxNode fill:#F0FDF4,color:#14532D,stroke:#16A34A,stroke-width:1.5px;
-    classDef apiNode fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px;
-    classDef agentNode fill:#FEF7F4,color:#2B2320,stroke:#E8725A,stroke-width:2px;
-    classDef criticNode fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2px;
-    classDef storageNode fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px;
-    classDef llmNode fill:#F5F3FF,color:#4C1D95,stroke:#7C3AED,stroke-width:1.5px;
-    classDef sketchNode fill:#FFFBEB,color:#78350F,stroke:#D97706,stroke-width:1.5px;
+    classDef agent fill:#fdeceb,stroke:#d9534f,color:#222
+    classDef gate fill:#fff4d6,stroke:#c99a00,color:#222
+    classDef store fill:#eef2f7,stroke:#6b7a90,color:#222
+    class D,T,V agent
+    class C gate
+    class DB,LLM,SK store
 ```
 ### 2. LangGraph Cyclic Multi-Agent Topology
 
 The tutoring loop is choreographed as a cyclic state graph in `@langchain/langgraph`:
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#FFFDFB',
-    'primaryTextColor': '#2B2320',
-    'primaryBorderColor': '#E8725A',
-    'lineColor': '#B93E29',
-    'secondaryColor': '#FAF8F5',
-    'tertiaryColor': '#F4EFEB',
-    'fontFamily': 'Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
-    'fontSize': '14px'
-  }
-}}%%
+flowchart TB
+    In(["Learner message + typing signals"])
 
-flowchart TD
-    Start([Learner Message & Telemetry Signals]):::startNode --> DiagNode
+    D["<b>1. Diagnostician</b><br/>reads hesitation, WPM, pastes<br/>updates mastery (BKT)<br/>picks hint rung 1 to 7"]
+    T["<b>2. Teacher</b><br/>asks one question only<br/>never gives the answer"]
+    V["<b>3. Visualizer</b><br/>trace or diagram with blanks [ ? ]"]
+    C{"<b>4. Critic</b><br/>answer leaked?<br/>more than one question?"}
+    S[("Save checkpoint<br/>SQLite")]
+    Out(["Send to learner"])
 
-    subgraph StateGraph [LangGraph Cyclic Multi-Agent Runtime]
-        direction TB
-        
-        DiagNode["🎯 <b>1. Diagnostician Agent Node</b><br/>• Monitors friction, hesitation, & typing WPM<br/>• Computes Bayesian Knowledge Tracing (BKT)<br/>• Recommends Hint Ladder Rung (1 → 7)"]:::agentNode
-        
-        TeachNode["🧑‍🏫 <b>2. Teacher Agent Node</b><br/>• Strictly enforces the One-Question Rule<br/>• Drafts inquiry tailored to current rung<br/>• Never provides the direct answer"]:::agentNode
-        
-        VisNode["🎨 <b>3. Visualizer Agent Node</b><br/>• Synthesizes visual scaffold with blanks [ ? ]<br/>• Generates call stack traces, plots, or diagrams<br/>• Enforces 80/20 Socratic mental model rule"]:::agentNode
-        
-        CriticNode{"🛡️ <b>4. Critic Quality Gate</b><br/><b>Synchronous Invariant Check:</b><br/>• Did teacher leak code or the direct answer?<br/>• Are there multiple questions?<br/>• Is cognitive friction preserved?"}:::criticNode
-        
-        RewriteNode["↺ <b>Cyclic Rewrite Loop</b><br/>• Sends targeted rejection to Teacher<br/>• Supplies explicit negative constraints<br/><i>(Bounded: Max 2 rewrite cycles)</i>"]:::rewriteNode
+    In --> D --> T --> V --> C
+    C -->|fail: rewrite, max 2 times| T
+    C -->|pass| S --> Out
 
-        DiagNode -->|Friction & Ladder Recommendation| TeachNode
-        TeachNode -->|Turn Dialogue| VisNode
-        VisNode -->|Draft with Visual Scaffold| CriticNode
-        
-        CriticNode -->|❌ <b>LEAK DETECTED</b>| RewriteNode
-        RewriteNode -->|Negative Constraints| TeachNode
-        CriticNode -->|✅ <b>PASSED: ZERO LEAKS</b>| ApprovedNode["✓ <b>Approved Turn State</b>"]:::approvedNode
-    end
-
-    ApprovedNode --> Checkpointer[(💾 SQLite Time-Travel Checkpointer)]:::storageNode
-    Checkpointer --> Deliver([Deliver Scaffolding to Learner]):::deliverNode
-
-    classDef startNode fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px;
-    classDef agentNode fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px;
-    classDef criticNode fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2.5px;
-    classDef rewriteNode fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2px,stroke-dasharray: 4 4;
-    classDef approvedNode fill:#F0FDF4,color:#14532D,stroke:#16A34A,stroke-width:2px;
-    classDef storageNode fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px;
-    classDef deliverNode fill:#FFFDFB,color:#2B2320,stroke:#B93E29,stroke-width:2px;
+    classDef agent fill:#fdeceb,stroke:#d9534f,color:#222
+    classDef gate fill:#fff4d6,stroke:#c99a00,color:#222
+    classDef store fill:#eef2f7,stroke:#6b7a90,color:#222
+    class D,T,V agent
+    class C gate
+    class S store
 ```
-
-1. **Diagnostician Agent Node**: Analyzes raw typing duration, backspaces, paste anomalies, and Bayesian Knowledge Tracing scores. Recommends the appropriate ladder rung ($1 \to 7$) and flags detected misconceptions.
-2. **Teacher Agent Node**: Generates a single pedagogical inquiry conforming strictly to the **One-Question Rule**.
-3. **Visualizer Agent Node**: Generates visual scaffolding (code trace, Mermaid diagram with prediction blanks, or complexity plot) observing the **80/20 Socratic Rule**.
-4. **Critic Quality Gate (Synchronous Invariant Check)**: Evaluates the draft before it can ever be delivered. If the draft leaks code, explains the direct solution prematurely, or asks multiple questions, the Critic demands an immediate rewrite with explicit negative constraints (bounded to max 2 cycles).
-5. **Time-Travel SQLite Checkpointer**: Persists the complete graph state into SQLite (`data/tutor.db`), enabling students to rewind and fork conversations down alternative decision trees.
-
----
 
 ## ⚡ Backend Architecture & Service Execution Guide
 
