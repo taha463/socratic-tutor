@@ -37,12 +37,12 @@ export function initDb(dbPath: string = DEFAULT_DB_PATH): DatabaseSync {
 
   const db = new DatabaseSync(dbPath === ":memory:" ? ":memory:" : path.resolve(process.cwd(), dbPath));
   
-  // Enable foreign keys, WAL journal mode, and busy timeout for concurrent safety
-  db.exec("PRAGMA foreign_keys = ON;");
+  // Set busy timeout FIRST before journal mode to prevent database lock race conditions
   if (dbPath !== ":memory:") {
+    db.exec("PRAGMA busy_timeout = 10000;");
     db.exec("PRAGMA journal_mode = WAL;");
-    db.exec("PRAGMA busy_timeout = 5000;");
   }
+  db.exec("PRAGMA foreign_keys = ON;");
   
   // Apply schema
   const schema = getSchemaSql();
