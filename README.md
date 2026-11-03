@@ -2,6 +2,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15_App_Router-black.svg)](https://nextjs.org/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent_StateGraph-blueviolet.svg)](https://langchain-ai.github.io/langgraphjs/)
 [![Storage: SQLite Local](https://img.shields.io/badge/Storage-node:sqlite_Local-003B57.svg)]()
 [![Answer Leak Rate: 0.0%](https://img.shields.io/badge/Answer_Leak_Rate-0.0%25-brightgreen.svg)]()
 [![Design: Hallmark Modern--Minimal](https://img.shields.io/badge/Design-Hallmark_Coral-E8725A.svg)]()
@@ -55,7 +56,7 @@ Runs entirely on your machine. **No Docker, no Redis, no Celery, no MongoDB, no 
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/taha463/fehm-ai-engine.git socratic-tutor
+git clone https://github.com/taha463/socratic-tutor.git
 cd socratic-tutor
 
 # 2. Setup environment (paste an API key, or choose local Ollama for zero keys)
@@ -181,7 +182,7 @@ This project evolves the original `fehm-ai-engine`:
 Run the comprehensive test suite (all unit tests, leak detection, and sandboxed execution tests run in under 2 seconds with zero external API keys):
 
 ```bash
-# Run unit & integration tests (35 tests, 8 suites)
+# Run unit & integration tests (71 tests, 17 suites)
 npm test
 
 # Run type check

@@ -24,11 +24,14 @@ venv/
 .env.development.local
 .env.test.local
 .env.production.local
-data/*.db
+data/*.db*
 data/*.db-journal
 data/*.db-wal
+data/*.db-shm
 .socratic/
 eval/results/*.json
+**/eval/results/*.json
+**/eval/results/*.md
 
 # Editor & OS
 .vscode/

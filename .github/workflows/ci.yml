@@ -1,4 +1,4 @@
-name: CI
+name: Socratic Tutor CI
 
 on:
   push:
@@ -7,32 +7,30 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  quality-gate:
+    name: Typecheck, Test & Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+        run: npm ci
 
-      - name: Lint with ruff
-        run: |
-          python -m ruff check .
+      - name: Type check (TypeScript)
+        run: npx tsc --noEmit
 
-      - name: Run pytest
+      - name: Run Socratic Test Suite
         env:
           LLM_PROVIDER: mock
-        run: |
-          python -m pytest
+        run: npm test
 
+      - name: Build Next.js Production Bundle
+        run: npm run build
