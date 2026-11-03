@@ -7,6 +7,12 @@ import { LogoSymbol } from "@/components/brand/Logo";
 import { VisualRenderer } from "@/components/visuals/VisualRenderer";
 import { AgentDeliberationHUD } from "@/components/agents/AgentDeliberationHUD";
 import { LiveCodeSandbox } from "@/components/sandbox/LiveCodeSandbox";
+import {
+  MessageAudioSpeaker,
+  VoiceDictationMic,
+  VoiceSessionHeaderToggle,
+} from "@/components/audio/VoiceTutorControl";
+import { speakSocraticQuestion } from "@/components/audio/voiceUtils";
 import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
 interface Message {
@@ -38,6 +44,7 @@ function SessionWorkspaceContent() {
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
   const [showSandbox, setShowSandbox] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -331,6 +338,11 @@ function SessionWorkspaceContent() {
           ? "Mastery"
           : "Learning"
       );
+
+      // Auto-speak tutor question if voice mode is enabled
+      if (autoSpeak && data.text) {
+        speakSocraticQuestion(data.text);
+      }
     } catch (err: any) {
       console.error("[Session] Error processing turn:", err);
       setMessages((prev) => [
@@ -456,6 +468,7 @@ function SessionWorkspaceContent() {
               </span>
             </span>
           )}
+          <VoiceSessionHeaderToggle autoSpeak={autoSpeak} onToggle={setAutoSpeak} />
           <span
             style={{
               padding: "4px 10px",
@@ -565,7 +578,10 @@ function SessionWorkspaceContent() {
                       <circle cx="14" cy="14" r="4" fill="#E8725A" />
                     </svg>
                     <div style={{ display: "flex", flexDirection: "column", gap: "14px", minWidth: 0, flex: 1 }}>
-                      <p style={{ margin: 0, maxWidth: "560px", fontSize: "16px" }}>{msg.text}</p>
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
+                        <p style={{ margin: 0, maxWidth: "560px", fontSize: "16px" }}>{msg.text}</p>
+                        <MessageAudioSpeaker text={msg.text} />
+                      </div>
 
                       {/* Real-Time Multi-Agent Deliberation HUD */}
                       <AgentDeliberationHUD trace={msg.agentTrace} rung={msg.rung} />
@@ -706,6 +722,12 @@ function SessionWorkspaceContent() {
                       ? `Wait ${formatCountdown(capacityNotice.secondsRemaining)}`
                       : "Send"}
                   </button>
+                  <VoiceDictationMic
+                    onTranscript={(spokenText) => {
+                      setInputMessage((prev) => (prev ? `${prev} ${spokenText}` : spokenText));
+                    }}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
             </form>
