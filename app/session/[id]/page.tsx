@@ -6,6 +6,7 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
 import { VisualRenderer } from "@/components/visuals/VisualRenderer";
 import { AgentDeliberationHUD } from "@/components/agents/AgentDeliberationHUD";
+import { LiveCodeSandbox } from "@/components/sandbox/LiveCodeSandbox";
 import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
 interface Message {
@@ -36,6 +37,7 @@ function SessionWorkspaceContent() {
   const [frustration, setFrustration] = useState(0.1);
   const [learnerState, setLearnerState] = useState("Learning");
   const [useSignals, setUseSignals] = useState(true);
+  const [showSandbox, setShowSandbox] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -489,6 +491,13 @@ function SessionWorkspaceContent() {
           </div>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button
+              className={`btn btn-sm ${showSandbox ? "btn-primary" : ""}`}
+              type="button"
+              onClick={() => setShowSandbox(!showSandbox)}
+            >
+              {showSandbox ? "💻 Close Sandbox" : "💻 Python Sandbox"}
+            </button>
+            <button
               className="btn btn-sm"
               type="button"
               onClick={() => {
@@ -514,6 +523,18 @@ function SessionWorkspaceContent() {
               gap: "24px",
             }}
           >
+            {/* Live Interactive Python Sandbox Pane */}
+            {showSandbox && (
+              <div style={{ marginBottom: "8px" }}>
+                <LiveCodeSandbox
+                  topic={topic}
+                  onAskTutor={(questionContext) => {
+                    handleSend(questionContext);
+                  }}
+                />
+              </div>
+            )}
+
             {messages.map((msg) => (
               <React.Fragment key={msg.id}>
                 {msg.role === "learner" ? (

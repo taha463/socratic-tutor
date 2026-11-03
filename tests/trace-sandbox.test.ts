@@ -1,7 +1,54 @@
 import { describe, it, expect } from "./test-utils";
 import { runSandboxedJS } from "../skills/trace/sandbox";
+import { runPythonTrace } from "../skills/trace/pythonSandbox";
 
 describe("Trace Sandbox Security & Execution Tests", () => {
+  it("executes valid Python code and captures line traces and locals", async () => {
+    const pyCode = `
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+result = factorial(3)
+print("Factorial(3) =", result)
+    `;
+
+    const res = await runPythonTrace(pyCode, 100);
+    expect(res.success).toBe(true);
+    expect(res.stdout).toContain("Factorial(3) = 6");
+    expect(res.steps.length).toBeGreaterThan(5);
+
+    // Verify locals at base case
+    const baseCaseStep = res.steps.find((s) => s.code.includes("return 1"));
+    expect(baseCaseStep !== undefined).toBe(true);
+    expect(baseCaseStep?.locals.n).toBe("1");
+  });
+
+  it("blocks dangerous Python imports and builtins via AST inspection", async () => {
+    const maliciousCode = `
+import os
+print(os.listdir("."))
+    `;
+
+    const res = await runPythonTrace(maliciousCode);
+    expect(res.success).toBe(false);
+    expect(res.error).toContain("Security Violation");
+  });
+
+  it("terminates infinite Python loops cleanly before memory bloat", async () => {
+    const infiniteLoop = `
+count = 0
+while True:
+    count += 1
+    `;
+
+    const res = await runPythonTrace(infiniteLoop, 50);
+    expect(res.success).toBe(false);
+    expect(res.timedOut).toBe(true);
+    expect(res.error).toContain("Step limit exceeded");
+  });
+
   it("executes valid code and captures return value and stdout", async () => {
     const code = `
       function fact(n) {
