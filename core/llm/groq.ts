@@ -106,8 +106,9 @@ export class GroqProvider implements BaseLLMProvider {
       // Try to find first { and last }
       const firstBrace = cleaned.indexOf("{");
       const lastBrace = cleaned.lastIndexOf("}");
-      if (firstBrace !== -1 && lastBrace !== -1) {
-        const extracted = cleaned.substring(firstBrace, lastBrace + 1);
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        let extracted = cleaned.substring(firstBrace, lastBrace + 1);
+        extracted = extracted.replace(/,\s*([}\]])/g, "$1");
         const parsed = JSON.parse(extracted);
         return options.schema.parse(parsed);
       }

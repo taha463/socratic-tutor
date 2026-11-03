@@ -143,13 +143,26 @@ function estimateTokens(messages: Array<{ content: string }>, maxTokens: number)
 }
 
 function stripFences(raw: string): string {
+  if (!raw) return "{}";
   let s = raw.trim();
-  s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  const first = s.indexOf("{");
-  const last = s.lastIndexOf("}");
-  if (first > 0 || (last !== -1 && last < s.length - 1)) {
-    if (first !== -1 && last > first) s = s.slice(first, last + 1);
+  s = s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+
+  // Extract JSON object if present
+  const firstObj = s.indexOf("{");
+  const lastObj = s.lastIndexOf("}");
+  if (firstObj !== -1 && lastObj > firstObj) {
+    s = s.slice(firstObj, lastObj + 1);
+  } else {
+    // Check for JSON array
+    const firstArr = s.indexOf("[");
+    const lastArr = s.lastIndexOf("]");
+    if (firstArr !== -1 && lastArr > firstArr) {
+      s = s.slice(firstArr, lastArr + 1);
+    }
   }
+
+  // Strip trailing commas before closing braces/brackets
+  s = s.replace(/,\s*([}\]])/g, "$1");
   return s;
 }
 
@@ -291,7 +304,17 @@ export class LLMGateway implements BaseLLMProvider {
       },
       (text) => options.schema.parse(JSON.parse(stripFences(text)))
     );
-    return options.schema.parse(JSON.parse(stripFences(raw)));
+    try {
+      return options.schema.parse(JSON.parse(stripFences(raw)));
+    } catch (err) {
+      const key = this.cacheKey(messages, system, {
+        maxTokens: options.maxTokens,
+        temperature: options.temperature,
+        jsonSchema: options.jsonSchema,
+      });
+      this.cache.delete(key);
+      throw err;
+    }
   }
 
   private cacheKey(messages: ChatMessage[], system: string | undefined, opts: GatewayCallOptions): string {
