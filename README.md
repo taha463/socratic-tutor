@@ -72,15 +72,7 @@ Click any preview below to inspect the full-resolution screenshot:
 
 Socratic Tutor v2.0 replaces centralized microservice architectures (Docker, Celery, Redis, MongoDB) with a clean, high-performance, local-first in-process single stack.
 
-<p align="center">
-  <a href="docs/images/architecture.png" target="_blank" title="Click to zoom full screen">
-    <img src="docs/images/architecture.png" alt="Socratic Tutor System Architecture Diagram" width="100%" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #E5DED7;" />
-  </a>
-  <br />
-  <sub>📐 <em>System Architecture Flow: Next.js Presentation &amp; API Layer → LangGraph Multi-Agent Engine with Critic Gate → SQLite WAL &amp; Pyodide WebAssembly Sandbox (Click to zoom full-screen)</em></sub>
-</p>
-
-### Interactive System Architecture Diagram (GitHub-Native Mermaid)
+### 1. End-to-End System & Component Architecture
 
 ```mermaid
 %%{init: {
@@ -160,19 +152,40 @@ flowchart TD
     classDef sketchNode fill:#FFFBEB,color:#78350F,stroke:#D97706,stroke-width:2px;
 ```
 
-### Architectural Breakdown
+---
 
-1. **Presentation & Full-Stack Boundary (Next.js 15 App Router)**:
-   - Single-command execution: hosts the Web Client and the server-side API Route Handlers in a single Node.js runtime process on port 3000.
-   - Captures client telemetry passively (keystroke pacing, backspace hesitation, paste length) to detect struggle without invading learner privacy.
-2. **LangGraph Cyclic Multi-Agent Core**:
-   - **Diagnostician Node**: Analyzes raw typing duration, backspaces, paste anomalies, and Bayesian Knowledge Tracing scores. Recommends the appropriate ladder rung ($1 \to 7$) and flags detected misconceptions.
-   - **Teacher Agent Node**: Generates a single pedagogical inquiry conforming strictly to the **One-Question Rule**. Selects appropriate visual scaffolding (code trace, Mermaid diagram with prediction blanks, or complexity plot).
-   - **Critic Quality Gate (Synchronous Invariant Check)**: Evaluates the draft before it can ever be delivered. If the draft leaks code, explains the direct solution prematurely, or asks multiple questions, the Critic demands an immediate rewrite with explicit negative constraints (bounded to max 2 cycles).
-3. **Storage & Sandboxed Execution**:
-   - **In-Process SQLite (`node:sqlite`)**: High-throughput WAL mode embedded database storing sessions, turns, telemetry, and LangGraph state checkpoints with zero external daemon configuration.
-   - **Pyodide WebAssembly Sandboxing**: Code execution happens **100% inside client-side browser Web Workers**. Zero student code runs on the server, eliminating remote code execution vulnerabilities while providing real-time 60 FPS stepping.
-   - **Optional FastAPI Sketchpad**: Generates generative SVG whiteboard sketches on port 8000 when the learner clicks *"Explain with sketch"*.
+### 2. LangGraph Cyclic Multi-Agent Topology
+
+The tutoring loop is choreographed as a cyclic state graph in `@langchain/langgraph`:
+
+```mermaid
+flowchart TD
+    Start([Learner Message & Telemetry]) --> DiagNode[1. Diagnostician Node]
+    
+    subgraph StateGraph [LangGraph Cyclic Agent Runtime]
+        DiagNode -->|Estimate Frustration & BKT Rung| TeachNode[2. Teacher Agent Node]
+        TeachNode -->|Draft Step & Visual with Blanks| CriticNode{3. Critic Quality Gate}
+        
+        CriticNode -->|Answer Leaked OR Multiple Questions| Rewrite[Demand Targeted Rewrite]
+        Rewrite -->|Bounded Loop: Max 2 Iterations| TeachNode
+        CriticNode -->|Verdict: PASSED Zero Leaks| Approved[Approved Turn State]
+    end
+
+    Approved --> Checkpointer[(SQLite Time-Travel Checkpointer)]
+    Checkpointer --> Deliver([Deliver Scaffolding to Learner])
+
+    classDef agent fill:#FFFDFB,stroke:#E8725A,stroke-width:2px,color:#2B2320;
+    classDef gate fill:#FCF4F2,stroke:#B93E29,stroke-width:2px,color:#B93E29;
+    classDef storage fill:#F7F4F0,stroke:#2B2320,stroke-width:1.5px,color:#2B2320;
+    class DiagNode,TeachNode agent;
+    class CriticNode,Rewrite gate;
+    class Checkpointer storage;
+```
+
+1. **Diagnostician Node**: Analyzes raw typing duration, backspaces, paste anomalies, and Bayesian Knowledge Tracing scores. Recommends the appropriate ladder rung ($1 \to 7$) and flags detected misconceptions.
+2. **Teacher Agent Node**: Generates a single pedagogical inquiry conforming strictly to the **One-Question Rule**. Selects appropriate visual scaffolding (code trace, Mermaid diagram with prediction blanks, or complexity plot).
+3. **Critic Quality Gate (Synchronous Invariant Check)**: Evaluates the draft before it can ever be delivered. If the draft leaks code, explains the direct solution prematurely, or asks multiple questions, the Critic demands an immediate rewrite with explicit negative constraints (bounded to max 2 cycles).
+4. **Time-Travel SQLite Checkpointer**: Persists the complete graph state into SQLite (`data/tutor.db`), enabling students to rewind and fork conversations down alternative decision trees.
 
 ---
 
