@@ -66,6 +66,13 @@ describe("Backend Service Layer Tests", () => {
     ok(turnResponse.visualSpec, "Turn response should contain visualSpec on Rung 4");
     ok(Array.isArray(turnResponse.visualSpec.rows), "visualSpec should contain whiteboard rows");
 
+    // Verify real-time agentTrace deliberation payload is returned
+    ok(turnResponse.agentTrace, "turnResponse should contain agentTrace");
+    strictEqual(typeof turnResponse.agentTrace.diagnostician.state, "string");
+    strictEqual(typeof turnResponse.agentTrace.teacher.ladderRung, "number");
+    ok(turnResponse.agentTrace.critic.passed, "critic should have passed");
+    ok(turnResponse.agentTrace.visualizer, "visualizer trace should exist on Rung 4");
+
     // Verify turn was persisted in SQLite and visualSpec is restored
     const db = getDb();
     const rows = db.prepare("SELECT * FROM turns WHERE session_id = ?").all(sessionId) as any[];
@@ -76,6 +83,8 @@ describe("Backend Service Layer Tests", () => {
     ok(tutorTurn, "Tutor turn with Rung 4 should exist");
     ok(tutorTurn.visualSpec, "Restored turn should have visualSpec parsed from DB");
     ok(Array.isArray(tutorTurn.visualSpec.rows), "Restored visualSpec should have rows");
+    ok(tutorTurn.agentTrace, "Restored tutor turn should have parsed agentTrace from SQLite");
+    strictEqual(tutorTurn.agentTrace.critic.passed, true);
   });
 
   it("computes live dashboard metrics from real SQLite rows", () => {

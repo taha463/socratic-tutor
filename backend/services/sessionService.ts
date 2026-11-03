@@ -99,7 +99,7 @@ export class SessionService {
 
     // Retrieve all turns for this session
     const turnRows = db.prepare(
-      `SELECT id, session_id, role, text, rung, skill_used, signals_json, ts 
+      `SELECT id, session_id, role, text, rung, skill_used, signals_json, critic_verdict, ts 
        FROM turns 
        WHERE session_id = ? 
        ORDER BY ts ASC`
@@ -111,12 +111,14 @@ export class SessionService {
       rung?: number;
       skill_used?: string;
       signals_json?: string;
+      critic_verdict?: string;
       ts: string;
     }>;
 
     const turns: SessionTurnDTO[] = turnRows.map((r) => {
       let visualSpec = null;
       let signals = undefined;
+      let agentTrace = undefined;
 
       if (r.skill_used) {
         try {
@@ -130,6 +132,15 @@ export class SessionService {
         } catch {}
       }
 
+      if (r.critic_verdict) {
+        try {
+          const parsed = JSON.parse(r.critic_verdict);
+          if (parsed && parsed.agentTrace) {
+            agentTrace = parsed.agentTrace;
+          }
+        } catch {}
+      }
+
       return {
         id: r.id,
         sessionId: r.session_id,
@@ -139,6 +150,7 @@ export class SessionService {
         visualSpec,
         signals,
         timestamp: r.ts,
+        agentTrace,
       };
     });
 

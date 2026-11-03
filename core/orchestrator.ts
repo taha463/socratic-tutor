@@ -14,6 +14,38 @@ import { getLLMClient } from "./llm";
 import { ragService } from "../backend/services/ragService";
 import { detectAtomicMisconception } from "./misconceptions";
 
+export interface AgentDeliberationTrace {
+  timestamp: string;
+  diagnostician: {
+    state: string;
+    frustration: number;
+    recommendedRung: number;
+    level: string;
+    detectedMisconception?: string | null;
+    reasoning: string;
+    signals: Record<string, any>;
+  };
+  visualizer?: {
+    chosenSkill: string;
+    reasoning: string;
+    concept: string;
+  } | null;
+  teacher: {
+    singleQuestion: string;
+    ladderRung: number;
+    ladderName: string;
+    hasFactualGrounding: boolean;
+  };
+  critic: {
+    passed: boolean;
+    leakDetected: boolean;
+    multiQuestionViolation: boolean;
+    rewritesDone: number;
+    issues: string[];
+    summary: string;
+  };
+}
+
 export interface TutorResponse {
   text: string;
   sessionId: string;
@@ -26,6 +58,7 @@ export interface TutorResponse {
   criticVerdict?: CriticVerdict;
   criticPassed: boolean;
   rewritesDone: number;
+  agentTrace?: AgentDeliberationTrace;
 }
 
 export class TutorOrchestrator {
@@ -229,9 +262,46 @@ export class TutorOrchestrator {
       rewriteInstructions = verdict.rewriteInstructions || "Review and enforce Socratic zero answer leak invariants.";
     }
 
-    // 6. Record tutor turn
-    const tutorTurnId = crypto.randomUUID();
+    const rungName = RUNG_DEFINITIONS[activeRung]?.name || "Probe";
     const approvedText = finalDraft?.replyText || "What do you think happens next?";
+
+    // 6. Build real-time Multi-Agent Deliberation Trace
+    const agentTrace: AgentDeliberationTrace = {
+      timestamp: new Date().toISOString(),
+      diagnostician: {
+        state: diag.state,
+        frustration: Number((diag.frustration || 0).toFixed(2)),
+        recommendedRung: diag.recommendedRung,
+        level: diag.level,
+        detectedMisconception: atomicMisconception ? atomicMisconception.name : null,
+        reasoning: diag.reasoning || `Evaluated learner state as ${diag.state} with frustration ${(diag.frustration || 0).toFixed(2)}.`,
+        signals,
+      },
+      visualizer: visualSpec ? {
+        chosenSkill: visualSpec.skill || "sketch",
+        reasoning: visualSpec.reasoning || "Scaffold generated with Socratic mystery gap.",
+        concept: visualSpec.concept || topic,
+      } : null,
+      teacher: {
+        singleQuestion: finalDraft?.singleQuestion || approvedText,
+        ladderRung: activeRung,
+        ladderName: rungName,
+        hasFactualGrounding: Boolean(ragContext),
+      },
+      critic: {
+        passed: finalVerdict?.passed ?? true,
+        leakDetected: Boolean(finalVerdict?.answerLeaked),
+        multiQuestionViolation: Boolean(finalVerdict?.multipleQuestions),
+        rewritesDone: rewriteCount,
+        issues: finalVerdict?.issues || [],
+        summary: (finalVerdict?.passed ?? true)
+          ? "Approved: 0 direct answer leakage detected. Enforced single question rule."
+          : `Critic flagged violations: ${(finalVerdict?.issues || []).join("; ")}`,
+      },
+    };
+
+    // 7. Record tutor turn
+    const tutorTurnId = crypto.randomUUID();
     this.learnerStore.recordTurn({
       id: tutorTurnId,
       sessionId,
@@ -239,11 +309,9 @@ export class TutorOrchestrator {
       text: approvedText,
       rung: activeRung,
       skillUsed: visualSpec ? JSON.stringify(visualSpec) : null,
-      criticVerdict: JSON.stringify(finalVerdict),
+      criticVerdict: JSON.stringify({ verdict: finalVerdict, agentTrace }),
       ts: new Date().toISOString(),
     });
-
-    const rungName = RUNG_DEFINITIONS[activeRung]?.name || "Probe";
 
     return {
       text: approvedText,
@@ -257,6 +325,7 @@ export class TutorOrchestrator {
       criticVerdict: finalVerdict ?? undefined,
       criticPassed: finalVerdict?.passed ?? true,
       rewritesDone: rewriteCount,
+      agentTrace,
     };
   }
 }

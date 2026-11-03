@@ -36,6 +36,7 @@ export class TurnService {
       visualSpec: result.visualSpec,
       criticPassed: result.criticVerdict?.passed ?? true,
       timestamp: new Date().toISOString(),
+      agentTrace: result.agentTrace,
     };
   }
 }

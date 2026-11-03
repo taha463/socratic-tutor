@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { LogoSymbol } from "@/components/brand/Logo";
 import { VisualRenderer } from "@/components/visuals/VisualRenderer";
+import { AgentDeliberationHUD } from "@/components/agents/AgentDeliberationHUD";
+import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
 interface Message {
   id: string;
@@ -13,6 +15,7 @@ interface Message {
   rung?: number;
   visualSpec?: Record<string, any> | null;
   timestamp: string;
+  agentTrace?: AgentDeliberationTrace;
 }
 
 function SessionWorkspaceContent() {
@@ -126,6 +129,7 @@ function SessionWorkspaceContent() {
               rung: t.rung,
               visualSpec: t.visualSpec,
               timestamp: t.timestamp,
+              agentTrace: t.agentTrace,
             }))
           );
         }
@@ -312,6 +316,7 @@ function SessionWorkspaceContent() {
         rung: data.rung,
         visualSpec: data.visualSpec,
         timestamp: new Date().toISOString(),
+        agentTrace: data.agentTrace,
       };
 
       setMessages((prev) => [...prev, newTutorMsg]);
@@ -540,6 +545,9 @@ function SessionWorkspaceContent() {
                     </svg>
                     <div style={{ display: "flex", flexDirection: "column", gap: "14px", minWidth: 0, flex: 1 }}>
                       <p style={{ margin: 0, maxWidth: "560px", fontSize: "16px" }}>{msg.text}</p>
+
+                      {/* Real-Time Multi-Agent Deliberation HUD */}
+                      <AgentDeliberationHUD trace={msg.agentTrace} rung={msg.rung} />
 
                       {/* Dynamic Visual Scaffold Component */}
                       {msg.visualSpec && (

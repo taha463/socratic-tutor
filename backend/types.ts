@@ -2,6 +2,10 @@
  * Backend Data Transfer Objects & Interfaces
  */
 
+import type { AgentDeliberationTrace } from "../core/orchestrator";
+
+export type { AgentDeliberationTrace };
+
 export interface ClientSignals {
   typing_duration_seconds?: number;
   tab_switches?: number;
@@ -30,6 +34,7 @@ export interface TurnExecutionResponse {
   visualSpec?: Record<string, any> | null;
   criticPassed: boolean;
   timestamp: string;
+  agentTrace?: AgentDeliberationTrace;
 }
 
 export interface SessionTurnDTO {
@@ -41,6 +46,7 @@ export interface SessionTurnDTO {
   visualSpec?: Record<string, any> | null;
   signals?: ClientSignals;
   timestamp: string;
+  agentTrace?: AgentDeliberationTrace;
 }
 
 export interface SessionDetailDTO {
