@@ -54,6 +54,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   box-shadow: 0 1px 3px rgba(43, 35, 32, 0.05);
   box-sizing: border-box;
   min-width: 0;
+  padding: 24px;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+  }
 }
 
 /* Hallmark modern tactile button hovers: transform & shadow only, no layout thrashing */

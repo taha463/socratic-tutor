@@ -129,17 +129,42 @@ export class DashboardService {
     }
     if (streakDays === 0) streakDays = 3; // Baseline active learner
 
-    // 8. Concept list
+    // 8. Concept list with deduplication and normalized Title Casing
+    const conceptMap = new Map<string, {
+      conceptId: string;
+      name: string;
+      score: number;
+      decayedScore: number;
+      attempts: number;
+      lastSeen: string;
+    }>();
+
+    for (const m of masteryList) {
+      const normKey = m.conceptId.toLowerCase().trim().replace(/[\s_-]+/g, "_");
+      const titleName = m.conceptId
+        .replace(/_/g, " ")
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ");
+
+      const existing = conceptMap.get(normKey);
+      if (!existing || m.score > existing.score) {
+        conceptMap.set(normKey, {
+          conceptId: normKey,
+          name: titleName,
+          score: m.score,
+          decayedScore: m.decayedScore,
+          attempts: (existing?.attempts || 0) + m.attempts,
+          lastSeen: "Today",
+        });
+      } else {
+        existing.attempts += m.attempts;
+      }
+    }
+
     const concepts =
-      masteryList.length > 0
-        ? masteryList.map((m) => ({
-            conceptId: m.conceptId,
-            name: m.conceptId.replace(/_/g, " "),
-            score: m.score,
-            decayedScore: m.decayedScore,
-            attempts: m.attempts,
-            lastSeen: new Date().toISOString(),
-          }))
+      conceptMap.size > 0
+        ? Array.from(conceptMap.values())
         : [
             { conceptId: "recursion", name: "Recursion", score: 0.82, decayedScore: 0.80, attempts: 12, lastSeen: "Today" },
             { conceptId: "base_case", name: "Base Case", score: 0.75, decayedScore: 0.72, attempts: 8, lastSeen: "Today" },

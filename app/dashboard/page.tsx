@@ -55,12 +55,49 @@ export default function DashboardPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Normalize and deduplicate concepts across casing and formatting
+  const rawConcepts = data?.concepts || [];
+  const normalizedConceptsMap = new Map<string, { conceptId: string; name: string; score: number; lastSeen?: string }>();
+  rawConcepts.forEach((c) => {
+    const key = c.conceptId.toLowerCase().trim().replace(/[\s_-]+/g, "_");
+    const rawName = c.name || c.conceptId;
+    const titleName = rawName
+      .replace(/_/g, " ")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+    const existing = normalizedConceptsMap.get(key);
+    if (!existing || c.score > existing.score) {
+      normalizedConceptsMap.set(key, {
+        conceptId: key,
+        name: titleName,
+        score: c.score,
+        lastSeen: c.lastSeen,
+      });
+    }
+  });
+
+  const fallbackCurriculum = [
+    { conceptId: "recursion", name: "Recursion", score: 0.82 },
+    { conceptId: "binary_trees", name: "Binary Trees", score: 0.68 },
+    { conceptId: "big_o", name: "Big-O", score: 0.74 },
+    { conceptId: "pointers", name: "Pointers", score: 0.41 },
+    { conceptId: "gradient_descent", name: "Gradient Descent", score: 0.57 },
+    { conceptId: "sql_joins", name: "SQL Joins", score: 0.88 },
+    { conceptId: "hash_maps", name: "Hash Maps", score: 0.63 },
+    { conceptId: "sorting", name: "Sorting", score: 0.77 },
+    { conceptId: "graphs", name: "Graphs", score: 0.35 },
+  ];
+
+  const uniqueConceptsList = Array.from(normalizedConceptsMap.values());
+
   // Practice items dynamically derived from real backend mastery data
-  const practiceItems = (data?.concepts && data.concepts.length > 0)
-    ? data.concepts.map((c) => {
+  const practiceItems = uniqueConceptsList.length > 0
+    ? uniqueConceptsList.map((c) => {
       const pct = Math.round(c.score * 100);
       return {
-        name: c.name || c.conceptId.replace(/_/g, " "),
+        name: c.name,
         value: pct,
         width: `${pct}%`,
         fill: pct > 50 ? "#E8725A" : "#FFFDFB",
@@ -69,13 +106,18 @@ export default function DashboardPage() {
         topicKey: c.conceptId,
       };
     })
-    : [
-      { name: "Graphs", value: 35, width: "35%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 18", topicKey: "graphs" },
-      { name: "Pointers", value: 41, width: "41%", fill: "#FFFDFB", border: "2px solid #E8725A", last: "Oct 29", topicKey: "pointers" },
-      { name: "Gradient descent", value: 57, width: "57%", fill: "#E8725A", border: "0", last: "Oct 27", topicKey: "gradient_descent" },
-      { name: "Hash maps", value: 63, width: "63%", fill: "#E8725A", border: "0", last: "Oct 30", topicKey: "hash_maps" },
-      { name: "Binary trees", value: 68, width: "68%", fill: "#E8725A", border: "0", last: "Oct 12", topicKey: "binary_trees" },
-    ];
+    : fallbackCurriculum.slice(0, 5).map((c) => {
+      const pct = Math.round(c.score * 100);
+      return {
+        name: c.name,
+        value: pct,
+        width: `${pct}%`,
+        fill: pct > 50 ? "#E8725A" : "#FFFDFB",
+        border: pct > 50 ? "0" : "2px solid #E8725A",
+        last: "Recently",
+        topicKey: c.conceptId,
+      };
+    });
 
   // Calendar cells dynamically calculated from activity
   const calendarCells = [];
@@ -127,35 +169,21 @@ export default function DashboardPage() {
       { id: "s-3", date: "2 days ago", concept: "Recursion", max: 2, hints: 1, time: "25 min", result: "Mastered", color: "#B93E29" },
     ];
 
-  // Dynamic Wagon Wheel calculation from real backend SQLite concepts
-  const wheelConcepts = (data?.concepts && data.concepts.length >= 3)
-    ? data.concepts
-    : (data?.concepts && data.concepts.length > 0)
-      ? [
-        ...data.concepts,
-        ...[
-          { conceptId: "curiosity", name: "Inquiry", score: 0.65 },
-          { conceptId: "reasoning", name: "Deduction", score: 0.70 },
-        ].slice(0, 3 - data.concepts.length)
-      ]
-      : [
-        { conceptId: "recursion", name: "Recursion", score: 0.82 },
-        { conceptId: "binary_trees", name: "Binary trees", score: 0.68 },
-        { conceptId: "big_o", name: "Big-O", score: 0.74 },
-        { conceptId: "pointers", name: "Pointers", score: 0.41 },
-        { conceptId: "gradient_descent", name: "Gradient descent", score: 0.57 },
-        { conceptId: "sql_joins", name: "SQL joins", score: 0.88 },
-        { conceptId: "http", name: "HTTP", score: 0.91 },
-        { conceptId: "hash_maps", name: "Hash maps", score: 0.63 },
-        { conceptId: "sorting", name: "Sorting", score: 0.77 },
-        { conceptId: "graphs", name: "Graphs", score: 0.35 },
-      ];
+  // Dynamic Wagon Wheel calculation: ensure at least 3 distinct spokes without duplicates
+  const wheelUnique = [...uniqueConceptsList];
+  for (const fb of fallbackCurriculum) {
+    if (wheelUnique.length >= 3) break;
+    if (!wheelUnique.some((u) => u.conceptId === fb.conceptId)) {
+      wheelUnique.push(fb);
+    }
+  }
+  const wheelConcepts = wheelUnique.length >= 3 ? wheelUnique : fallbackCurriculum.slice(0, 5);
 
   const N = wheelConcepts.length;
-  const cx = 250;
-  const cy = 250;
+  const cx = 270;
+  const cy = 230;
   const rMin = 24;
-  const rMax = 150;
+  const rMax = 125;
 
   const wheelPoints = wheelConcepts.map((c, i) => {
     const angle = -Math.PI / 2 + (2 * Math.PI * i) / N;
@@ -167,22 +195,24 @@ export default function DashboardPage() {
     const innerX = cx + rMin * Math.cos(angle);
     const innerY = cy + rMin * Math.sin(angle);
 
-    const rLabel = rMax + 38;
+    const rLabel = rMax + 26;
     const labelX = cx + rLabel * Math.cos(angle);
     const labelY = cy + rLabel * Math.sin(angle);
 
-    const rScore = rMax + 54;
-    const scoreX = cx + rScore * Math.cos(angle);
-    const scoreY = cy + rScore * Math.sin(angle);
-
     const cos = Math.cos(angle);
-    const anchor: "start" | "end" | "middle" = cos > 0.25 ? "start" : cos < -0.25 ? "end" : "middle";
+    const sin = Math.sin(angle);
+    const anchor: "start" | "end" | "middle" = cos > 0.28 ? "start" : cos < -0.28 ? "end" : "middle";
 
-    const color = score >= 0.8 ? "#B93E29" : "#E8725A";
+    let dyName = "-2";
+    if (anchor === "middle") {
+      dyName = sin < -0.5 ? "-16" : "14";
+    }
+
+    const color = score >= 0.8 ? "#B93E29" : score >= 0.5 ? "#E8725A" : "#B93E29";
     const isNeedsPractice = score < 0.5;
 
     return {
-      name: c.name || c.conceptId.replace(/_/g, " "),
+      name: c.name,
       scorePct: Math.round(score * 100),
       x,
       y,
@@ -190,9 +220,8 @@ export default function DashboardPage() {
       innerY,
       labelX,
       labelY,
-      scoreX,
-      scoreY,
       anchor,
+      dyName,
       color,
       isNeedsPractice,
     };
@@ -486,21 +515,21 @@ export default function DashboardPage() {
                 Needs practice, under 50%
               </span>
             </div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "8px 0" }}>
-              <svg viewBox="0 0 500 500" role="img" aria-label="Wagon wheel of mastery by concept" style={{ width: "100%", maxWidth: "500px", height: "auto", display: "block" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0" }}>
+              <svg viewBox="0 0 540 460" role="img" aria-label="Wagon wheel of mastery by concept" style={{ width: "100%", maxWidth: "540px", height: "auto", display: "block" }}>
                 {/* Concentric Guide Circles */}
-                <circle cx="250" cy="250" r="55.5" fill="none" stroke="#E5DED7" strokeWidth="1" />
-                <circle cx="250" cy="250" r="87" fill="none" stroke="#E5DED7" strokeWidth="1" />
-                <circle cx="250" cy="250" r="118.5" fill="none" stroke="#E5DED7" strokeWidth="1" />
-                <circle cx="250" cy="250" r="150" fill="none" stroke="#D6CCC3" strokeWidth="1" />
-                <text x="254" y="191" fontFamily="Geist Mono, monospace" fontSize="12" fill="#6B5F59">25</text>
-                <text x="254" y="160" fontFamily="Geist Mono, monospace" fontSize="12" fill="#6B5F59">50</text>
+                <circle cx="270" cy="230" r="49" fill="none" stroke="#E5DED7" strokeWidth="1" />
+                <circle cx="270" cy="230" r="74" fill="none" stroke="#E5DED7" strokeWidth="1" />
+                <circle cx="270" cy="230" r="100" fill="none" stroke="#E5DED7" strokeWidth="1" />
+                <circle cx="270" cy="230" r="125" fill="none" stroke="#D6CCC3" strokeWidth="1" />
+                <text x="274" y="184" fontFamily="Geist Mono, monospace" fontSize="11" fill="#6B5F59">25</text>
+                <text x="274" y="159" fontFamily="Geist Mono, monospace" fontSize="11" fill="#6B5F59">50</text>
 
                 {/* Dynamic Polygon connecting mastery endpoints */}
                 <polygon
                   points={polygonPoints}
                   fill="#E8725A"
-                  fillOpacity="0.10"
+                  fillOpacity="0.12"
                   stroke="#E8725A"
                   strokeWidth="1.5"
                   strokeLinejoin="round"
@@ -515,7 +544,7 @@ export default function DashboardPage() {
                       x2={pt.x.toFixed(1)}
                       y2={pt.y.toFixed(1)}
                       stroke={pt.color}
-                      strokeWidth="10"
+                      strokeWidth="8"
                       strokeLinecap="round"
                     />
                     {pt.isNeedsPractice && (
@@ -525,7 +554,7 @@ export default function DashboardPage() {
                         x2={pt.x.toFixed(1)}
                         y2={pt.y.toFixed(1)}
                         stroke="#FFFDFB"
-                        strokeWidth="5"
+                        strokeWidth="4"
                         strokeLinecap="round"
                       />
                     )}
@@ -533,49 +562,52 @@ export default function DashboardPage() {
                 ))}
 
                 {/* Center Hub */}
-                <circle cx="250" cy="250" r="22" fill="#FFFDFB" stroke="#D6CCC3" strokeWidth="1.5" />
-                <text x="250" y="256" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="16" fontWeight="500" fill="#2B2320">
+                <circle cx="270" cy="230" r="22" fill="#FFFDFB" stroke="#D6CCC3" strokeWidth="1.5" />
+                <text x="270" y="236" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="16" fontWeight="500" fill="#2B2320">
                   {currentAvg}
                 </text>
 
-                {/* Concept Labels */}
-                <g fontFamily="Onest, sans-serif" fontSize="13" fill="#2B2320">
-                  {wheelPoints.map((pt, idx) => (
-                    <text
-                      key={`lbl-${idx}`}
+                {/* Unified Concept & Percentage Labels (Stacked with tspan) */}
+                {wheelPoints.map((pt, idx) => (
+                  <text
+                    key={`spoke-lbl-${idx}`}
+                    x={pt.labelX.toFixed(1)}
+                    y={pt.labelY.toFixed(1)}
+                    textAnchor={pt.anchor}
+                  >
+                    <tspan
                       x={pt.labelX.toFixed(1)}
-                      y={pt.labelY.toFixed(1)}
-                      textAnchor={pt.anchor}
+                      dy={pt.dyName}
+                      fontFamily="Onest, sans-serif"
+                      fontSize="13"
+                      fontWeight="500"
+                      fill="#2B2320"
                     >
                       {pt.name}
-                    </text>
-                  ))}
-                </g>
-
-                {/* Mastery Percentage Labels */}
-                <g fontFamily="Geist Mono, monospace" fontSize="12" fill="#6B5F59">
-                  {wheelPoints.map((pt, idx) => (
-                    <text
-                      key={`pct-${idx}`}
-                      x={pt.scoreX.toFixed(1)}
-                      y={pt.scoreY.toFixed(1)}
-                      textAnchor={pt.anchor}
+                    </tspan>
+                    <tspan
+                      x={pt.labelX.toFixed(1)}
+                      dy="16"
+                      fontFamily="Geist Mono, monospace"
+                      fontSize="12"
+                      fontWeight="600"
+                      fill={pt.color}
                     >
                       {pt.scorePct}%
-                    </text>
-                  ))}
-                </g>
+                    </tspan>
+                  </text>
+                ))}
               </svg>
             </div>
-            <p style={{ margin: 0, color: "var(--muted)" }}>
-              <span className="fig" style={{ color: "var(--ink)", fontWeight: 500 }}>
+            <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--rule-2)", fontSize: "14px", color: "var(--muted)" }}>
+              <span className="fig" style={{ color: "var(--ink)", fontWeight: 600 }}>
                 {masteredCount} of {wheelPoints.length}
               </span>{" "}
               concepts mastered.{" "}
               {gapConcepts.length > 0
-                ? `${gapConcepts.slice(0, 2).join(" and ")} are the gaps to close next.`
+                ? `${gapConcepts.slice(0, 2).join(" and ")} ${gapConcepts.length === 1 ? "is the gap" : "are the gaps"} to close next.`
                 : "Continuous mastery sustained across all concepts."}
-            </p>
+            </div>
           </div>
 
           {/* Right charts column */}
@@ -586,13 +618,13 @@ export default function DashboardPage() {
               <p style={{ margin: "4px 0 12px", color: "var(--muted)" }}>
                 {monthData[0]?.name} to {monthData[monthData.length - 1]?.name}, across every concept you have practised.
               </p>
-              <svg viewBox="0 0 580 220" role="img" aria-label="Line chart" style={{ width: "100%", height: "auto", display: "block" }}>
+              <svg viewBox="0 0 600 220" role="img" aria-label="Line chart" style={{ width: "100%", height: "auto", display: "block" }}>
                 <g stroke="#E5DED7" strokeWidth="1">
-                  <line x1="40" y1="20" x2="560" y2="20" />
-                  <line x1="40" y1="60" x2="560" y2="60" />
-                  <line x1="40" y1="100" x2="560" y2="100" />
-                  <line x1="40" y1="140" x2="560" y2="140" />
-                  <line x1="40" y1="180" x2="560" y2="180" stroke="#D6CCC3" />
+                  <line x1="40" y1="20" x2="570" y2="20" />
+                  <line x1="40" y1="60" x2="570" y2="60" />
+                  <line x1="40" y1="100" x2="570" y2="100" />
+                  <line x1="40" y1="140" x2="570" y2="140" />
+                  <line x1="40" y1="180" x2="570" y2="180" stroke="#D6CCC3" />
                 </g>
                 <g fontFamily="Geist Mono, monospace" fontSize="12" fill="#6B5F59" textAnchor="end">
                   <text x="32" y="24">100</text>
@@ -641,16 +673,78 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div role="img" aria-label="Stacked bars by week" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {weeklyHelpRows.map((row) => (
-                  <div key={row.range} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{ width: "80px", flexShrink: 0, fontSize: "13px", color: "var(--muted)" }}>{row.range}</div>
-                    <div style={{ flex: 1, display: "flex", gap: "2px", height: "30px" }}>
-                      <div className="fig" style={{ width: row.a, background: "#B93E29", color: "#fff", borderRadius: "6px 0 0 6px", display: "flex", alignItems: "center", paddingLeft: "10px", fontSize: "12px", boxSizing: "border-box" }}>{row.a}</div>
-                      <div className="fig" style={{ width: row.b, background: "#E8725A", color: "#2B2320", display: "flex", alignItems: "center", paddingLeft: "10px", fontSize: "12px", boxSizing: "border-box" }}>{row.b}</div>
-                      <div className="fig" style={{ width: row.c, background: "#F8CFC3", color: "#2B2320", borderRadius: "0 6px 6px 0", display: "flex", alignItems: "center", paddingLeft: "10px", fontSize: "12px", boxSizing: "border-box" }}>{row.c}</div>
+                {weeklyHelpRows.map((row) => {
+                  const valA = parseInt(row.a, 10);
+                  const valB = parseInt(row.b, 10);
+                  const valC = parseInt(row.c, 10);
+                  return (
+                    <div key={row.range} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ width: "80px", flexShrink: 0, fontSize: "13px", color: "var(--muted)" }}>{row.range}</div>
+                      <div style={{ flex: 1, display: "flex", gap: "2px", height: "30px", minWidth: 0, overflow: "hidden", borderRadius: "6px" }}>
+                        <div
+                          className="fig"
+                          title={`Worked it out: ${row.a}`}
+                          style={{
+                            width: row.a,
+                            background: "#B93E29",
+                            color: "#fff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "12px",
+                            boxSizing: "border-box",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "clip",
+                            minWidth: 0,
+                          }}
+                        >
+                          {valA >= 8 ? row.a : ""}
+                        </div>
+                        <div
+                          className="fig"
+                          title={`Guided: ${row.b}`}
+                          style={{
+                            width: row.b,
+                            background: "#E8725A",
+                            color: "#2B2320",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "12px",
+                            boxSizing: "border-box",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "clip",
+                            minWidth: 0,
+                          }}
+                        >
+                          {valB >= 8 ? row.b : ""}
+                        </div>
+                        <div
+                          className="fig"
+                          title={`Reveal: ${row.c}`}
+                          style={{
+                            width: row.c,
+                            background: "#F8CFC3",
+                            color: "#2B2320",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "12px",
+                            boxSizing: "border-box",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "clip",
+                            minWidth: 0,
+                          }}
+                        >
+                          {valC >= 8 ? row.c : ""}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
