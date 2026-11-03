@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Award, Copy, Check, Download, X } from "lucide-react";
 import type { ProofOfMasteryCertificate } from "@/backend/services/certificateService";
 
 interface MasteryCertificateModalProps {
@@ -81,7 +82,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "18px" }}>🏆</span>
+            <Award size={18} style={{ color: "#D97706" }} />
             <span style={{ fontWeight: 700, fontSize: "14px", color: "#1E293B" }}>
               Verified Proof-of-Mastery Certificate
             </span>
@@ -105,7 +106,8 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
                 cursor: "pointer",
               }}
             >
-              <span>{copied ? "✓ Link Copied!" : "📋 Copy Verification Link"}</span>
+              {copied ? <Check size={13} style={{ color: "#059669" }} /> : <Copy size={13} />}
+              <span>{copied ? "Link Copied!" : "Copy Verification Link"}</span>
             </button>
 
             <button
@@ -125,7 +127,8 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
                 cursor: "pointer",
               }}
             >
-              <span>📥 Download SVG</span>
+              <Download size={13} />
+              <span>Download SVG</span>
             </button>
 
             <button
@@ -134,13 +137,15 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               style={{
                 background: "none",
                 border: "none",
-                fontSize: "18px",
                 color: "#64748B",
                 cursor: "pointer",
                 padding: "4px 8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              ✕
+              <X size={18} />
             </button>
           </div>
         </div>
@@ -164,7 +169,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
             <rect x="15" y="15" width="770" height="510" rx="8" fill="#FFFDF9" stroke="#E2D9CE" strokeWidth="2" />
             <rect x="25" y="25" width="750" height="490" rx="4" fill="none" stroke="#B93E29" strokeWidth="2" strokeDasharray="4 2" />
 
-            {/* Corner Rosettes / Flourishes */}
+            {/* Corner Rosettes */}
             <circle cx="25" cy="25" r="8" fill="#B93E29" />
             <circle cx="775" cy="25" r="8" fill="#B93E29" />
             <circle cx="25" cy="515" r="8" fill="#B93E29" />
@@ -173,7 +178,15 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
             {/* Header Badge */}
             <g transform="translate(368, 48)">
               <circle cx="32" cy="32" r="30" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
-              <text x="32" y="38" textAnchor="middle" fontSize="24">🏛️</text>
+              {/* Classical Crest Columns SVG */}
+              <path
+                d="M20 42h24M22 42V26M28 42V26M36 42V26M42 42V26M18 26l14-10 14 10z"
+                fill="none"
+                stroke="#B45309"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </g>
 
             <text x="400" y="130" textAnchor="middle" fontFamily="serif" fontSize="13" letterSpacing="4" fill="#8C7E75" fontWeight="600">
@@ -209,7 +222,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               <rect width="680" height="90" rx="6" fill="#FAF5EE" stroke="#E6DDD2" />
 
               {/* Col 1: Diagnostician */}
-              <text x="85" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#1E3A8A">🩺 Diagnostician</text>
+              <text x="85" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#1E3A8A">Diagnostician</text>
               <text x="85" y="50" textAnchor="middle" fontSize="15" fontWeight="700" fill="#1D4ED8">{certificate.masteryScore}%</text>
               <text x="85" y="68" textAnchor="middle" fontSize="10" fill="#6B7280">BKT Mastery</text>
 
@@ -217,7 +230,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               <line x1="170" y1="15" x2="170" y2="75" stroke="#E2D9CE" />
 
               {/* Col 2: Critic Quality Gate */}
-              <text x="255" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#065F46">⚖️ Critic Gate</text>
+              <text x="255" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#065F46">Critic Gate</text>
               <text x="255" y="50" textAnchor="middle" fontSize="15" fontWeight="700" fill="#047857">0% Leak</text>
               <text x="255" y="68" textAnchor="middle" fontSize="10" fill="#6B7280">Direct Answer Invariant</text>
 
@@ -225,7 +238,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               <line x1="340" y1="15" x2="340" y2="75" stroke="#E2D9CE" />
 
               {/* Col 3: Teacher Ladder */}
-              <text x="425" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#854D0E">✍️ Teacher Ladder</text>
+              <text x="425" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#854D0E">Teacher Ladder</text>
               <text x="425" y="50" textAnchor="middle" fontSize="15" fontWeight="700" fill="#B45309">Rung {certificate.ladderPeak}</text>
               <text x="425" y="68" textAnchor="middle" fontSize="10" fill="#6B7280">Peak Scaffold Level</text>
 
@@ -233,7 +246,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               <line x1="510" y1="15" x2="510" y2="75" stroke="#E2D9CE" />
 
               {/* Col 4: Dialogue Depth */}
-              <text x="595" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#581C87">💬 Turns</text>
+              <text x="595" y="28" textAnchor="middle" fontSize="11" fontWeight="700" fill="#581C87">Dialogue Turns</text>
               <text x="595" y="50" textAnchor="middle" fontSize="15" fontWeight="700" fill="#7E22CE">{certificate.turnsCompleted}</text>
               <text x="595" y="68" textAnchor="middle" fontSize="10" fill="#6B7280">Socratic Inquiries</text>
             </g>
@@ -250,7 +263,7 @@ export const MasteryCertificateModal: React.FC<MasteryCertificateModalProps> = (
               Issued: {new Date(certificate.issuedAt).toLocaleDateString()}
             </text>
             <text x="750" y="492" textAnchor="end" fontFamily="sans-serif" fontSize="10" fill="#10B981" fontWeight="600">
-              ✓ Multi-Agent Consensus Verified
+              Multi-Agent Consensus Verified
             </text>
           </svg>
         </div>

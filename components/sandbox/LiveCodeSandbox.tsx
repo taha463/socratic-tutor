@@ -1,6 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  Zap,
+  Play,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+  Edit3,
+  Lightbulb,
+} from "lucide-react";
 import type { PythonTraceStep } from "@/skills/trace/pythonSandbox";
 
 interface LiveCodeSandboxProps {
@@ -150,7 +159,7 @@ Can you ask me a Socratic question to test if I understand why the program reach
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "16px" }}>⚡</span>
+          <Zap size={16} style={{ color: "#F59E0B" }} />
           <span style={{ fontWeight: 700, fontSize: "13px", letterSpacing: "0.5px" }}>
             LIVE PYTHON TRACE SANDBOX
           </span>
@@ -207,7 +216,8 @@ Can you ask me a Socratic question to test if I understand why the program reach
               transition: "background 0.2s ease",
             }}
           >
-            <span>{isRunning ? "Running..." : "▶ Run & Trace"}</span>
+            <Play size={13} fill="currentColor" />
+            <span>{isRunning ? "Running..." : "Run & Trace"}</span>
           </button>
         </div>
       </div>
@@ -314,10 +324,13 @@ Can you ask me a Socratic question to test if I understand why the program reach
                   color: "#94A3B8",
                   fontSize: "11px",
                   cursor: "pointer",
-                  textDecoration: "underline",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
                 }}
               >
-                ✏️ Edit Code
+                <Edit3 size={12} />
+                <span>Edit Code</span>
               </button>
             </div>
           )}
@@ -354,6 +367,9 @@ Can you ask me a Socratic question to test if I understand why the program reach
                   onClick={() => setCurrentStepIdx(Math.max(0, currentStepIdx - 1))}
                   disabled={currentStepIdx === 0}
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
                     padding: "4px 10px",
                     borderRadius: "4px",
                     background: currentStepIdx === 0 ? "#2D3748" : "#3B82F6",
@@ -364,13 +380,17 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     cursor: currentStepIdx === 0 ? "not-allowed" : "pointer",
                   }}
                 >
-                  ⏮ Prev
+                  <SkipBack size={12} />
+                  <span>Prev</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentStepIdx(Math.min(steps.length - 1, currentStepIdx + 1))}
                   disabled={currentStepIdx === steps.length - 1}
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
                     padding: "4px 10px",
                     borderRadius: "4px",
                     background: currentStepIdx === steps.length - 1 ? "#2D3748" : "#3B82F6",
@@ -381,12 +401,16 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     cursor: currentStepIdx === steps.length - 1 ? "not-allowed" : "pointer",
                   }}
                 >
-                  Next ⏭
+                  <span>Next</span>
+                  <SkipForward size={12} />
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentStepIdx(0)}
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
                     padding: "4px 8px",
                     borderRadius: "4px",
                     background: "#333342",
@@ -396,7 +420,8 @@ Can you ask me a Socratic question to test if I understand why the program reach
                     cursor: "pointer",
                   }}
                 >
-                  Reset
+                  <RotateCcw size={11} />
+                  <span>Reset</span>
                 </button>
               </div>
 
@@ -416,7 +441,7 @@ Can you ask me a Socratic question to test if I understand why the program reach
                 fontSize: "12px",
               }}
             >
-              Click <strong>"▶ Run & Trace"</strong> to step through execution lines and inspect local variables.
+              Click <strong>"Run & Trace"</strong> to step through execution lines and inspect local variables.
             </div>
           )}
 
@@ -534,7 +559,8 @@ Can you ask me a Socratic question to test if I understand why the program reach
                 boxShadow: "0 2px 8px rgba(99, 102, 241, 0.3)",
               }}
             >
-              <span>💡 Ask Socratic Tutor About This Step</span>
+              <Lightbulb size={15} />
+              <span>Ask Socratic Tutor About This Step</span>
             </button>
           )}
         </div>
@@ -542,3 +568,4 @@ Can you ask me a Socratic question to test if I understand why the program reach
     </div>
   );
 };
+

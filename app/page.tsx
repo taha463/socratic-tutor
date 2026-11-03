@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { LogoSymbol } from "@/components/brand/Logo";
 
 /* Hallmark · v2.0.0 · genre: modern-minimal · theme: Coral · posture: Stage · job: start learning */
@@ -267,8 +268,8 @@ export default function LandingPage() {
                           padding: "12px",
                         }}
                       >
-                        <div style={{ fontSize: "11px", fontWeight: 700, color: "#14532D", textTransform: "uppercase" }}>
-                          ✓ Solved Target
+                        <div style={{ fontSize: "11px", fontWeight: 700, color: "#14532D", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                          <CheckCircle2 size={13} style={{ color: "#16A34A" }} /> Solved Target
                         </div>
                         <div style={{ fontSize: "13px", fontWeight: 600, color: "#2C2C2C", marginTop: "4px" }}>
                           Base Case: n &le; 1

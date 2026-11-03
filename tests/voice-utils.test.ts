@@ -30,3 +30,4 @@ What happens to the [call stack](https://en.wikipedia.org/wiki/Call_stack)?
     expect(cleanTextForSpeech("    ")).toBe("");
   });
 });
+

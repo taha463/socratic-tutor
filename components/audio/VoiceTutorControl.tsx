@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { Volume2, VolumeX, Square, Mic } from "lucide-react";
 import {
   speakSocraticQuestion,
   stopSpeaking,
@@ -46,7 +47,7 @@ export const MessageAudioSpeaker: React.FC<MessageAudioSpeakerProps> = ({ text }
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: "4px",
+        gap: "5px",
         padding: "3px 8px",
         borderRadius: "14px",
         background: isSpeaking ? "#FEE2E2" : "#F3F4F6",
@@ -58,7 +59,12 @@ export const MessageAudioSpeaker: React.FC<MessageAudioSpeakerProps> = ({ text }
         transition: "all 0.15s ease",
       }}
     >
-      <span>{isSpeaking ? "⏹ Stop" : "🔊 Listen"}</span>
+      {isSpeaking ? (
+        <Square size={11} fill="currentColor" />
+      ) : (
+        <Volume2 size={12} />
+      )}
+      <span>{isSpeaking ? "Stop" : "Listen"}</span>
       {isSpeaking && (
         <span
           style={{
@@ -171,7 +177,11 @@ export const VoiceDictationMic: React.FC<VoiceDictationMicProps> = ({
         boxShadow: isListening ? "0 0 10px rgba(239, 68, 68, 0.5)" : "none",
       }}
     >
-      <span style={{ fontSize: "16px" }}>{isListening ? "⏹" : "🎙️"}</span>
+      {isListening ? (
+        <Square size={15} fill="currentColor" />
+      ) : (
+        <Mic size={16} />
+      )}
     </button>
   );
 };
@@ -208,7 +218,12 @@ export const VoiceSessionHeaderToggle: React.FC<VoiceSessionHeaderToggleProps> =
         transition: "all 0.2s ease",
       }}
     >
-      <span>{autoSpeak ? "🔊 Voice Mode: ON" : "🔈 Voice Mode: OFF"}</span>
+      {autoSpeak ? (
+        <Volume2 size={13} style={{ color: "#059669" }} />
+      ) : (
+        <VolumeX size={13} />
+      )}
+      <span>{autoSpeak ? "Voice Mode: ON" : "Voice Mode: OFF"}</span>
     </button>
   );
 };

@@ -1,6 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  Activity,
+  PenTool,
+  Palette,
+  ShieldCheck,
+  ChevronDown,
+  Check,
+  X,
+  Sparkles,
+} from "lucide-react";
 import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
 interface AgentDeliberationHUDProps {
@@ -80,7 +90,7 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "5px",
+              gap: "6px",
               padding: "2px 8px",
               borderRadius: "12px",
               background: currentTheme.bg,
@@ -89,7 +99,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
               fontWeight: 600,
             }}
           >
-            <span>🩺 Diagnostician:</span>
+            <Activity size={13} style={{ color: currentTheme.text }} />
+            <span>Diagnostician:</span>
             <span>{diagnostician.state}</span>
             <span style={{ opacity: 0.75, fontWeight: 400 }}>({Math.round(diagnostician.frustration * 100)}% friction)</span>
           </span>
@@ -100,7 +111,7 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "5px",
+              gap: "6px",
               padding: "2px 8px",
               borderRadius: "12px",
               background: "#F3F4F6",
@@ -109,7 +120,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
               fontWeight: 600,
             }}
           >
-            <span>✍️ Teacher:</span>
+            <PenTool size={13} style={{ color: "#374151" }} />
+            <span>Teacher:</span>
             <span>Rung {teacher.ladderRung} ({teacher.ladderName})</span>
           </span>
 
@@ -120,7 +132,7 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "5px",
+                gap: "6px",
                 padding: "2px 8px",
                 borderRadius: "12px",
                 background: "#FEF3C7",
@@ -129,7 +141,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
                 fontWeight: 600,
               }}
             >
-              <span>🎨 Visualizer:</span>
+              <Palette size={13} style={{ color: "#92400E" }} />
+              <span>Visualizer:</span>
               <span>{visualizer.chosenSkill}</span>
             </span>
           )}
@@ -140,7 +153,7 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "5px",
+              gap: "6px",
               padding: "2px 8px",
               borderRadius: "12px",
               background: critic.passed ? "#ECFDF5" : "#FEF2F2",
@@ -149,8 +162,10 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
               fontWeight: 600,
             }}
           >
-            <span>⚖️ Critic:</span>
-            <span>{critic.passed ? "0% Leak Verified ✓" : "Violations Detected"}</span>
+            <ShieldCheck size={13} style={{ color: critic.passed ? "#065F46" : "#991B1B" }} />
+            <span>Critic:</span>
+            <span>{critic.passed ? "0% Leak Verified" : "Violations Detected"}</span>
+            {critic.passed && <Check size={12} style={{ color: "#059669" }} />}
           </span>
         </div>
 
@@ -167,7 +182,7 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
-            gap: "4px",
+            gap: "5px",
             padding: "4px 8px",
             borderRadius: "4px",
           }}
@@ -175,9 +190,13 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
           onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
         >
           <span>{isOpen ? "Hide Consensus" : "Inspect Multi-Agent Consensus"}</span>
-          <span style={{ fontSize: "10px", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-            ▼
-          </span>
+          <ChevronDown
+            size={13}
+            style={{
+              transform: isOpen ? "rotate(180deg)" : "none",
+              transition: "transform 0.2s ease",
+            }}
+          />
         </button>
       </div>
 
@@ -206,7 +225,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>🩺</span> Diagnostician Agent
+                <Activity size={14} style={{ color: currentTheme.text }} />
+                <span>Diagnostician Agent</span>
               </span>
               <span
                 style={{
@@ -266,7 +286,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>✍️</span> Teacher Agent
+                <PenTool size={14} style={{ color: "#1E40AF" }} />
+                <span>Teacher Agent</span>
               </span>
               <span
                 style={{
@@ -319,7 +340,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>🎨</span> Visualizer Agent
+                <Palette size={14} style={{ color: "#92400E" }} />
+                <span>Visualizer Agent</span>
               </span>
               <span
                 style={{
@@ -365,7 +387,8 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontWeight: 700, color: critic.passed ? "#065F46" : "#991B1B", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>⚖️</span> Critic Quality Gate
+                <ShieldCheck size={14} style={{ color: critic.passed ? "#065F46" : "#991B1B" }} />
+                <span>Critic Quality Gate</span>
               </span>
               <span
                 style={{
@@ -385,13 +408,21 @@ export const AgentDeliberationHUD: React.FC<AgentDeliberationHUDProps> = ({ trac
               {critic.summary}
             </p>
 
-            <div style={{ fontSize: "11px", display: "flex", flexDirection: "column", gap: "3px" }}>
+            <div style={{ fontSize: "11px", display: "flex", flexDirection: "column", gap: "4px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>{critic.leakDetected ? "❌" : "✓"}</span>
+                {critic.leakDetected ? (
+                  <X size={12} style={{ color: "#DC2626" }} />
+                ) : (
+                  <Check size={12} style={{ color: "#16A34A" }} />
+                )}
                 <span>Zero-Answer-Leak Invariant</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>{critic.multiQuestionViolation ? "❌" : "✓"}</span>
+                {critic.multiQuestionViolation ? (
+                  <X size={12} style={{ color: "#DC2626" }} />
+                ) : (
+                  <Check size={12} style={{ color: "#16A34A" }} />
+                )}
                 <span>One-Question Rule Verified</span>
               </div>
               <div style={{ color: "var(--muted)", marginTop: "2px" }}>

@@ -14,6 +14,7 @@ import {
 } from "@/components/audio/VoiceTutorControl";
 import { speakSocraticQuestion } from "@/components/audio/voiceUtils";
 import { MasteryCertificateModal } from "@/components/certificate/MasteryCertificateModal";
+import { Award, Code2, Pencil, Clock, AlertTriangle } from "lucide-react";
 import type { ProofOfMasteryCertificate } from "@/backend/services/certificateService";
 import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
@@ -328,7 +329,7 @@ function SessionWorkspaceContent() {
             {
               id: `tutor-limit-${Date.now()}`,
               role: "tutor",
-              text: `⏳ **Model limit reached.** The AI model quota is temporarily in cooldown.\n\n` +
+              text: `**Model limit reached.** The AI model quota is temporarily in cooldown.\n\n` +
                 `• **Quota resets in:** ~${secs} seconds\n` +
                 `• **Next window opens at:** **${timeStr}**\n\n` +
                 `Please take a moment to reflect on your previous thought or interact with the visual sketchboard on the right while the quota resets!`,
@@ -481,7 +482,10 @@ function SessionWorkspaceContent() {
                 color: "#78350F",
               }}
             >
-              <span>⏳ Quota reset at {capacityNotice.retryAt}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <Clock size={13} />
+                <span>Quota reset at {capacityNotice.retryAt}</span>
+              </span>
               <span
                 style={{
                   fontFamily: "monospace",
@@ -535,20 +539,30 @@ function SessionWorkspaceContent() {
               type="button"
               onClick={handleClaimCertificate}
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
                 background: "#FEF3C7",
                 border: "1px solid #F59E0B",
                 color: "#92400E",
                 fontWeight: 600,
               }}
             >
-              🏆 Proof of Mastery
+              <Award size={14} style={{ color: "#D97706" }} />
+              <span>Proof of Mastery</span>
             </button>
             <button
               className={`btn btn-sm ${showSandbox ? "btn-primary" : ""}`}
               type="button"
               onClick={() => setShowSandbox(!showSandbox)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
             >
-              {showSandbox ? "💻 Close Sandbox" : "💻 Python Sandbox"}
+              <Code2 size={14} />
+              <span>{showSandbox ? "Close Sandbox" : "Python Sandbox"}</span>
             </button>
             <button
               className="btn btn-sm"
@@ -663,7 +677,7 @@ function SessionWorkspaceContent() {
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: 700, fontSize: "15px" }}>
-                    <span style={{ fontSize: "20px" }}>⚠️</span>
+                    <AlertTriangle size={20} style={{ color: "#D97706" }} />
                     <span>AI Model Limit Reached ({capacityNotice.provider || "Groq & OpenRouter"})</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -748,8 +762,10 @@ function SessionWorkspaceContent() {
                     title="Ask the AI tutor to draw a visual sketchboard for this step"
                     disabled={isLoading || (capacityNotice?.limited && capacityNotice.secondsRemaining > 0)}
                     onClick={() => handleSend("Could you draw a visual sketchboard diagram to explain this concept?", true)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
                   >
-                    ✏️ Explain with sketch
+                    <Pencil size={13} />
+                    <span>Explain with sketch</span>
                   </button>
                   <button
                     className="btn btn-primary"

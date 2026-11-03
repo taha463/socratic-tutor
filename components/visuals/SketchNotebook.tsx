@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { PenTool, CheckCircle2, Lightbulb, Mic, HelpCircle, X, ArrowRight } from "lucide-react";
 
 export interface SketchRowData {
   row_type: "mapping_pair" | "process_flow" | "annotation_text" | string;
@@ -269,6 +270,9 @@ export function SketchNotebook({
             type="button"
             className="btn btn-sm font-sketch"
             style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
               background: penEnabled ? "#C87A72" : "#FFFDFB",
               color: penEnabled ? "#FFFFFF" : "#5C5652",
               border: "1.5px solid #C87A72",
@@ -276,7 +280,8 @@ export function SketchNotebook({
               borderRadius: "8px",
             }}
           >
-            {penEnabled ? "✏️ Pen Active" : "✏️ Draw & Annotate"}
+            <PenTool size={13} />
+            <span>{penEnabled ? "Pen Active" : "Draw & Annotate"}</span>
           </button>
           {penEnabled && (
             <>
@@ -646,15 +651,19 @@ export function SketchNotebook({
                             {isSolved && (
                               <span
                                 style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
                                   background: "#6AA84F",
                                   color: "#FFFFFF",
-                                  fontSize: "12px",
+                                  fontSize: "11px",
                                   padding: "2px 6px",
                                   borderRadius: "4px",
                                   fontWeight: 700,
                                 }}
                               >
-                                ✓ SOLVED
+                                <CheckCircle2 size={11} />
+                                <span>SOLVED</span>
                               </span>
                             )}
                           </div>
@@ -680,7 +689,7 @@ export function SketchNotebook({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                  <span style={{ fontSize: "16px" }}>💡</span>
+                  <Lightbulb size={16} style={{ color: "#D97706" }} />
                   <span className="font-sketch" style={{ fontSize: "14px", fontWeight: 700, color: "#7A7A7A", textTransform: "uppercase" }}>
                     Teacher Blackboard Summary
                   </span>
@@ -704,7 +713,7 @@ export function SketchNotebook({
                   gap: "12px",
                 }}
               >
-                <span style={{ fontSize: "20px", flexShrink: 0 }}>🎙️</span>
+                <Mic size={18} style={{ color: "#B45309", flexShrink: 0, marginTop: "2px" }} />
                 <div>
                   <div className="font-sketch" style={{ fontSize: "13px", fontWeight: 700, color: "#92400E", textTransform: "uppercase", marginBottom: "2px" }}>
                     Socratic Prompt for You
@@ -751,7 +760,7 @@ export function SketchNotebook({
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "20px" }}>🧩</span>
+                <HelpCircle size={20} style={{ color: "#B45309" }} />
                 <h3 className="font-sketch" style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#2C2C2C" }}>
                   Solve the Socratic Mystery Box
                 </h3>
@@ -762,13 +771,15 @@ export function SketchNotebook({
                 style={{
                   background: "none",
                   border: "none",
-                  fontSize: "20px",
                   cursor: "pointer",
                   color: "#7A7A7A",
-                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "4px",
                 }}
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
 
@@ -820,7 +831,9 @@ export function SketchNotebook({
                   }}
                 >
                   <span>{opt}</span>
-                  <span style={{ fontSize: "14px", color: "#7A7A7A" }}>→ Select</span>
+                  <span style={{ fontSize: "14px", color: "#7A7A7A", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    Select <ArrowRight size={13} />
+                  </span>
                 </button>
               ))}
             </div>

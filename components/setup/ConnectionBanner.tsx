@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 
 export function ConnectionBanner() {
   const [provider, setProvider] = useState("mock");
@@ -97,10 +98,10 @@ export function ConnectionBanner() {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          style={{ background: "transparent", border: 0, color: "var(--muted)", cursor: "pointer", fontSize: "14px", padding: "0 4px" }}
+          style={{ background: "transparent", border: 0, color: "var(--muted)", cursor: "pointer", display: "inline-flex", alignItems: "center", padding: "0 4px" }}
           aria-label="Dismiss banner"
         >
-          ✕
+          <X size={14} />
         </button>
       </div>
     </div>
