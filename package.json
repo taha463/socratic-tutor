@@ -9,10 +9,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --loader ./scripts/loader.mjs --experimental-strip-types --test tests/storage.test.ts tests/llm.test.ts tests/ladder.test.ts tests/learner.test.ts tests/leak-detection.test.ts tests/skills.test.ts tests/trace-sandbox.test.ts tests/advanced-skills.test.ts tests/backend.test.ts tests/sketch.test.ts tests/viva-voce.test.ts tests/misconceptions.test.ts tests/trace-step-prediction.test.ts tests/problem-ingest.test.ts tests/voice-utils.test.ts tests/certificate.test.ts",
+    "test": "node --loader ./scripts/loader.mjs --experimental-strip-types --test tests/storage.test.ts tests/llm.test.ts tests/ladder.test.ts tests/learner.test.ts tests/leak-detection.test.ts tests/skills.test.ts tests/trace-sandbox.test.ts tests/advanced-skills.test.ts tests/backend.test.ts tests/sketch.test.ts tests/viva-voce.test.ts tests/misconceptions.test.ts tests/trace-step-prediction.test.ts tests/problem-ingest.test.ts tests/voice-utils.test.ts tests/certificate.test.ts tests/langgraph.test.ts",
     "eval": "node --loader ./scripts/loader.mjs --experimental-strip-types eval/run.ts"
   },
   "dependencies": {
+    "@langchain/core": "^1.3.4",
+    "@langchain/langgraph": "^1.6.0",
     "lucide-react": "^0.468.0",
     "next": "^15.1.0",
     "react": "^19.0.0",

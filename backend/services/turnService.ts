@@ -16,8 +16,8 @@ export class TurnService {
   async executeTurn(req: TurnExecutionRequest): Promise<TurnExecutionResponse> {
     const { sessionId, learnerId = "default-learner", message, topic = "General", signals = {}, groundTruth } = req;
 
-    // Delegate to core multi-agent orchestrator
-    const result = await this.orchestrator.handleTurn({
+    // Delegate to core LangGraph multi-agent StateGraph orchestrator
+    const result = await this.orchestrator.handleGraphTurn({
       sessionId,
       learnerId,
       message,

@@ -13,6 +13,7 @@ import type { BaseLLMProvider, ChatMessage } from "./llm/types";
 import { getLLMClient } from "./llm";
 import { ragService } from "../backend/services/ragService";
 import { detectAtomicMisconception } from "./misconceptions";
+import { runSocraticGraphTurn, getSocraticGraphMermaid, SocraticGraphCheckpointer } from "./graph";
 
 export interface AgentDeliberationTrace {
   timestamp: string;
@@ -327,5 +328,33 @@ export class TutorOrchestrator {
       rewritesDone: rewriteCount,
       agentTrace,
     };
+  }
+
+  /**
+   * Executes a turn via the formal LangGraph StateGraph engine with cyclic quality gate
+   * and SQLite checkpoint persistence.
+   */
+  async handleGraphTurn(params: {
+    sessionId: string;
+    learnerId: string;
+    message: string;
+    topic?: string;
+    signals?: Record<string, any>;
+    groundTruth?: string | null;
+  }): Promise<TutorResponse> {
+    return runSocraticGraphTurn(params, {
+      diagnostician: this.diagnostician,
+      teacher: this.teacher,
+      critic: this.critic,
+      visualizer: this.visualizer,
+      learnerStore: this.learnerStore,
+    });
+  }
+
+  /**
+   * Returns the Mermaid diagram representation of the LangGraph multi-agent topology.
+   */
+  getGraphMermaid(): string {
+    return getSocraticGraphMermaid();
   }
 }
