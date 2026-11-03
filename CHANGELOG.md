@@ -36,3 +36,4 @@ Socratic Tutor v2.0 transitions the project from the centralized Docker/Celery/R
 
 ## [1.0.0] - 2026-04-15
 - Initial prototype release of FEHM.AI cognitive engine with Celery, FastAPI, and MongoDB.
+

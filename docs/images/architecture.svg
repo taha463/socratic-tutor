@@ -1,0 +1,286 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 780" width="100%" height="auto">
+  <defs>
+    <!-- Graph paper grid pattern (Sketchboard style) -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#ECE6DF" stroke-width="0.8" />
+    </pattern>
+    
+    <!-- Drop Shadow -->
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2B2320" flood-opacity="0.06" />
+    </filter>
+    <filter id="highlight-shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#B93E29" flood-opacity="0.12" />
+    </filter>
+
+    <style>
+      .whiteboard-bg { fill: #FAF8F5; }
+      .grid-layer { fill: url(#grid); }
+      .board-frame { fill: #FFFDFB; stroke: #E5DED7; stroke-width: 1.5; rx: 14px; }
+      .sketch-card { fill: #FFFDFB; stroke: #DFD7CF; stroke-width: 1.5; rx: 10px; }
+      .accent-card { fill: #FFFDFB; stroke: #B93E29; stroke-width: 2; rx: 10px; }
+      .gate-card { fill: #FCF4F2; stroke: #B93E29; stroke-width: 2; rx: 10px; }
+      .node-card { fill: #FBF8F5; stroke: #E5DED7; stroke-width: 1.2; rx: 8px; }
+      .highlight-node { fill: #FEF7F4; stroke: #E8725A; stroke-width: 1.5; rx: 8px; }
+      
+      .main-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; font-size: 22px; font-weight: 700; fill: #2B2320; }
+      .main-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 400; fill: #7D7069; }
+      .section-badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 700; fill: #B93E29; letter-spacing: 0.06em; text-transform: uppercase; }
+      .card-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: 700; fill: #2B2320; }
+      .card-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #6B5F59; }
+      .mono-txt { font-family: "Geist Mono", "Fira Code", monospace; font-size: 11px; fill: #B93E29; font-weight: 600; }
+      .pill-badge { fill: #B93E29; rx: 4px; }
+      .pill-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; font-weight: 700; fill: #FFFFFF; }
+      
+      .flow-arrow { stroke: #B93E29; stroke-width: 2; fill: none; marker-end: url(#arrow-coral); stroke-linecap: round; }
+      .dark-arrow { stroke: #2B2320; stroke-width: 1.5; fill: none; marker-end: url(#arrow-dark); stroke-linecap: round; }
+      .loop-arrow { stroke: #B93E29; stroke-width: 2; stroke-dasharray: 5,4; fill: none; marker-end: url(#arrow-coral); }
+      .branch-arrow { stroke: #8C7E77; stroke-width: 1.5; stroke-dasharray: 4,4; fill: none; marker-end: url(#arrow-gray); }
+    </style>
+
+    <marker id="arrow-coral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#B93E29" />
+    </marker>
+    <marker id="arrow-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#2B2320" />
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#8C7E77" />
+    </marker>
+  </defs>
+
+  <!-- 1. Background Sketchboard Canvas with Graph Paper Grid -->
+  <rect width="1080" height="780" class="whiteboard-bg" />
+  <rect width="1080" height="780" class="grid-layer" />
+
+  <!-- Outer Whiteboard Frame -->
+  <g transform="translate(24, 20)">
+    <rect width="1032" height="740" rx="14" fill="#FFFFFF" fill-opacity="0.85" stroke="#DFD7CF" stroke-width="1.5" filter="url(#card-shadow)" />
+
+    <!-- Top Window Controls (Sketchboard UI) -->
+    <g transform="translate(20, 18)">
+      <circle cx="0" cy="0" r="6" fill="#F87171" />
+      <circle cx="16" cy="0" r="6" fill="#FBBF24" />
+      <circle cx="32" cy="0" r="6" fill="#34D399" />
+      <text x="50" y="4" font-family="monospace" font-size="12" fill="#8C7E77" font-weight="600">Socratic Tutor v2.0 • System Architecture Whiteboard</text>
+    </g>
+
+    <!-- Top Right Badges -->
+    <g transform="translate(820, 10)">
+      <rect x="0" y="0" width="190" height="24" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1" />
+      <text x="14" y="16" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#92400E">⚡ 80/20 Socratic Whiteboard</text>
+    </g>
+
+    <!-- Header Description -->
+    <g transform="translate(20, 52)">
+      <text x="0" y="0" class="main-title">Multi-Agent Cognitive Architecture</text>
+      <text x="0" y="20" class="main-sub">Unified Next.js 15 Full-Stack App Router • LangGraph StateGraph Core • In-Process SQLite WAL • Pyodide Wasm</text>
+    </g>
+
+    <!-- ========================================================================= -->
+    <!-- LAYER 1: NEXT.JS 15 FULL-STACK APP ROUTER (PRESENTATION & API LAYER)     -->
+    <!-- ========================================================================= -->
+    <g transform="translate(20, 88)">
+      <rect width="992" height="120" rx="10" class="sketchCard" fill="#FFFDFB" stroke="#DFD7CF" stroke-width="1.5" />
+      
+      <!-- Section Header -->
+      <g transform="translate(18, 18)">
+        <rect x="0" y="0" width="8" height="14" fill="#B93E29" rx="2" />
+        <text x="16" y="12" class="section-badge">1. Unified Presentation &amp; API Layer (Next.js 15 App Router)</text>
+      </g>
+
+      <!-- UI Cards Sub-row -->
+      <g transform="translate(18, 38)">
+        <!-- Landing Page -->
+        <rect x="0" y="0" width="226" height="66" class="node-card" />
+        <text x="12" y="22" class="card-title">Landing Page (/)</text>
+        <text x="12" y="38" class="card-sub">• Interactive Call-Stack Whiteboard</text>
+        <text x="12" y="52" class="card-sub">• 7-Rung Visual Showcase &amp; Pedagogy</text>
+
+        <!-- Workspace -->
+        <rect x="242" y="0" width="242" height="66" class="highlight-node" />
+        <text x="12" y="22" class="card-title" fill="#B93E29">Workspace (/session/[id])</text>
+        <text x="12" y="38" class="card-sub">• 7-Rung Ladder &amp; HUD Telemetry</text>
+        <text x="12" y="52" class="card-sub">• Pyodide Sandbox &amp; Voice Dictation</text>
+
+        <!-- Dashboard -->
+        <rect x="500" y="0" width="232" height="66" class="node-card" />
+        <text x="12" y="22" class="card-title">Dashboard (/dashboard)</text>
+        <text x="12" y="38" class="card-sub">• Wagon Wheel Radar &amp; BKT Spoke</text>
+        <text x="12" y="52" class="card-sub">• 30-Day Heatmap &amp; Spaced Repetition</text>
+
+        <!-- API Handlers -->
+        <rect x="748" y="0" width="226" height="66" class="node-card" />
+        <text x="12" y="22" class="card-title">Server API Routes</text>
+        <text x="12" y="38" class="mono-txt">/api/turn • /api/graph</text>
+        <text x="12" y="52" class="mono-txt">/api/dashboard • /api/cert</text>
+      </g>
+    </g>
+
+    <!-- Connector: Next.js API down to LangGraph Core -->
+    <path d="M 516 208 L 516 236" class="dark-arrow" />
+    <text x="526" y="226" font-family="monospace" font-size="10" fill="#7D7069" font-weight="600">Typed Request / State Transition</text>
+
+    <!-- ========================================================================= -->
+    <!-- LAYER 2: LANGGRAPH MULTI-AGENT STATEGRAPH ORCHESTRATION (THE CORE ENGINE) -->
+    <!-- ========================================================================= -->
+    <g transform="translate(20, 240)">
+      <rect width="992" height="240" rx="10" class="accent-card" filter="url(#highlight-shadow)" />
+
+      <!-- Section Header -->
+      <g transform="translate(18, 20)">
+        <rect x="0" y="0" width="8" height="14" fill="#B93E29" rx="2" />
+        <text x="16" y="12" class="section-badge">2. Tutor Orchestrator — LangGraph Cyclic Multi-Agent StateGraph</text>
+        <rect x="680" y="-3" width="276" height="20" rx="4" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1" />
+        <text x="690" y="11" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#991B1B">🛡️ Code-Enforced Zero Answer Leak Guarantee</text>
+      </g>
+
+      <!-- Graph State Store Card -->
+      <g transform="translate(18, 44)">
+        <rect x="0" y="0" width="168" height="176" rx="8" fill="#FBF8F5" stroke="#E5DED7" stroke-width="1.2" />
+        <text x="14" y="22" class="card-title">Graph State</text>
+        <line x1="14" y1="28" x2="154" y2="28" stroke="#E5DED7" stroke-width="1" />
+        <text x="14" y="46" class="card-sub">• sessionId, learnerId</text>
+        <text x="14" y="64" class="card-sub">• currentRung (1..7)</text>
+        <text x="14" y="82" class="card-sub">• frustrationEstimate</text>
+        <text x="14" y="100" class="card-sub">• bktMasteryScore</text>
+        <text x="14" y="118" class="card-sub">• typingCadenceSignals</text>
+        <text x="14" y="136" class="card-sub">• teacherDraft + Visual</text>
+        <text x="14" y="154" class="card-sub">• criticVerdict &amp; loops</text>
+        <text x="14" y="168" class="mono-txt">SQLite WAL Checkpoint</text>
+      </g>
+
+      <!-- AGENT NODES IN LANGGRAPH -->
+      <g transform="translate(202, 44)">
+        
+        <!-- Node 1: Diagnostician -->
+        <g transform="translate(0, 0)">
+          <rect width="224" height="110" rx="8" class="highlight-node" />
+          <text x="14" y="22" class="card-title" fill="#B93E29">1. Diagnostician Node</text>
+          <text x="14" y="40" class="card-sub">• Telemetry friction modeling</text>
+          <text x="14" y="56" class="card-sub">• Typing cadence &amp; paste audit</text>
+          <text x="14" y="72" class="card-sub">• BKT knowledge state decay</text>
+          <text x="14" y="88" class="card-sub">• Recommends Rung 1..7</text>
+          <rect x="14" y="94" width="105" height="12" rx="2" fill="#FEE2E2" />
+          <text x="18" y="103" font-family="monospace" font-size="9" font-weight="700" fill="#991B1B">Passive HUD Signals</text>
+        </g>
+
+        <!-- Node 2: Teacher Agent -->
+        <g transform="translate(244, 0)">
+          <rect width="250" height="110" rx="8" class="node-card" />
+          <text x="14" y="22" class="card-title">2. Teacher Agent Node</text>
+          <text x="14" y="40" class="card-sub">• Strictly One-Question Rule</text>
+          <text x="14" y="56" class="card-sub">• Synthesizes targeted inquiry</text>
+          <text x="14" y="72" class="card-sub">• Invokes Visualizer for blanks</text>
+          <text x="14" y="88" class="card-sub">• Never dumps final answers</text>
+          <rect x="14" y="94" width="125" height="12" rx="2" fill="#FEF3C7" />
+          <text x="18" y="103" font-family="monospace" font-size="9" font-weight="700" fill="#92400E">Rung 1-7 Scaffolding</text>
+        </g>
+
+        <!-- Node 3: Critic Gate -->
+        <g transform="translate(514, 0)">
+          <rect width="254" height="110" rx="8" class="gate-card" filter="url(#card-shadow)" />
+          <text x="14" y="22" class="card-title" fill="#B93E29">3. Critic Quality Gate</text>
+          <text x="14" y="40" class="card-sub">• Synchronous Invariant Check</text>
+          <text x="14" y="56" class="card-sub">• Blocks premature answer leaks</text>
+          <text x="14" y="72" class="card-sub">• Rejects multi-question confusion</text>
+          <text x="14" y="88" class="card-sub">• Demands targeted cyclic rewrite</text>
+          <rect x="14" y="94" width="112" height="12" rx="2" fill="#B93E29" />
+          <text x="18" y="103" class="pill-txt">STRICT QUALITY GATE</text>
+        </g>
+
+        <!-- Arrow: Diagnostician to Teacher -->
+        <path d="M 224 55 L 244 55" class="flow-arrow" />
+
+        <!-- Arrow: Teacher to Critic -->
+        <path d="M 494 55 L 514 55" class="flow-arrow" />
+
+        <!-- Cyclic Rewrite Loop Arrow: Critic back to Teacher -->
+        <path d="M 640 110 C 640 162, 370 162, 370 114" class="loop-arrow" />
+        <g transform="translate(410, 166)">
+          <rect x="-10" y="-12" width="220" height="20" rx="4" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1" />
+          <text x="0" y="2" class="mono-txt" font-size="10">↺ Leak Detected: Rewrite (Max 2 Cycles)</text>
+        </g>
+
+        <!-- Approved Turn Exit from Critic -->
+        <path d="M 768 55 C 785 55, 785 140, 710 140 L 670 140" class="flow-arrow" />
+        <rect x="580" y="128" width="95" height="24" rx="4" fill="#2B2320" />
+        <text x="590" y="144" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#FFFDFB">✓ Turn Approved</text>
+      </g>
+    </g>
+
+    <!-- Connector: LangGraph Core down to Storage & Foundations -->
+    <path d="M 516 480 L 516 508" class="dark-arrow" />
+
+    <!-- ========================================================================= -->
+    <!-- LAYER 3: STORAGE, SANDBOX & RUNTIME FOUNDATIONS                           -->
+    <!-- ========================================================================= -->
+    <g transform="translate(20, 512)">
+      <rect width="992" height="204" rx="10" class="sketchCard" fill="#FFFDFB" stroke="#DFD7CF" stroke-width="1.5" />
+
+      <!-- Section Header -->
+      <g transform="translate(18, 18)">
+        <rect x="0" y="0" width="8" height="14" fill="#B93E29" rx="2" />
+        <text x="16" y="12" class="section-badge">3. Storage Engine, In-Browser Sandboxing &amp; External Multi-Modal Services</text>
+      </g>
+
+      <!-- Foundation Columns -->
+      <g transform="translate(18, 38)">
+        
+        <!-- Column 1: SQLite Storage Engine -->
+        <g transform="translate(0, 0)">
+          <rect width="232" height="146" rx="8" class="node-card" />
+          <text x="14" y="22" class="card-title">In-Process SQLite</text>
+          <text x="14" y="38" class="mono-txt">node:sqlite (WAL Mode)</text>
+          <text x="14" y="56" class="card-sub">• Zero server setup or daemon</text>
+          <text x="14" y="72" class="card-sub">• Local file: data/tutor.db</text>
+          <text x="14" y="88" class="card-sub">• Sessions, Turns, Signals</text>
+          <text x="14" y="104" class="card-sub">• Bayesian Knowledge Tracing</text>
+          <text x="14" y="120" class="card-sub">• Time-Travel Checkpointing</text>
+          <text x="14" y="136" class="mono-txt">100% Private on Device</text>
+        </g>
+
+        <!-- Column 2: In-Browser Pyodide Sandbox -->
+        <g transform="translate(244, 0)">
+          <rect width="242" height="146" rx="8" class="highlight-node" />
+          <text x="14" y="22" class="card-title" fill="#B93E29">Browser Web Worker</text>
+          <text x="14" y="38" class="mono-txt">Pyodide (Python in Wasm)</text>
+          <text x="14" y="56" class="card-sub">• 100% Client-side sandbox</text>
+          <text x="14" y="72" class="card-sub">• Zero remote code execution risk</text>
+          <text x="14" y="88" class="card-sub">• Step-by-step variable inspection</text>
+          <text x="14" y="104" class="card-sub">• Interactive prediction checks</text>
+          <text x="14" y="120" class="card-sub">• 5-second CPU watchdog</text>
+          <text x="14" y="136" class="mono-txt">60 FPS Call-Stack Stepping</text>
+        </g>
+
+        <!-- Column 3: Multi-Provider LLM Gateway -->
+        <g transform="translate(498, 0)">
+          <rect width="236" height="146" rx="8" class="node-card" />
+          <text x="14" y="22" class="card-title">LLM Cascading Gateway</text>
+          <text x="14" y="38" class="mono-txt">Multi-Provider Router</text>
+          <text x="14" y="56" class="card-sub">• Groq Cloud (500+ tok/s)</text>
+          <text x="14" y="72" class="card-sub">• OpenRouter Fallback</text>
+          <text x="14" y="88" class="card-sub">• Ollama (100% Offline)</text>
+          <text x="14" y="104" class="card-sub">• Anthropic Claude 3.5 Sonnet</text>
+          <text x="14" y="120" class="card-sub">• OpenAI GPT-4o / Gemini</text>
+          <text x="14" y="136" class="mono-txt">Configurable in .env</text>
+        </g>
+
+        <!-- Column 4: Optional FastAPI Sketch Server -->
+        <g transform="translate(746, 0)">
+          <rect width="210" height="146" rx="8" class="node-card" stroke="#B93E29" />
+          <text x="14" y="22" class="card-title">FastAPI Sketchboard</text>
+          <text x="14" y="38" class="mono-txt">Port 8000 (Optional)</text>
+          <text x="14" y="56" class="card-sub">• python -m backend.sketch_server</text>
+          <text x="14" y="72" class="card-sub">• Generative SVG whiteboards</text>
+          <text x="14" y="88" class="card-sub">• Concept visual synthesis</text>
+          <text x="14" y="104" class="card-sub">• Interactive sketch stream</text>
+          <text x="14" y="120" class="card-sub">• CORS linked to Next.js UI</text>
+          <text x="14" y="136" class="mono-txt">"Explain with sketch"</text>
+        </g>
+
+      </g>
+    </g>
+
+  </g>
+</svg>
