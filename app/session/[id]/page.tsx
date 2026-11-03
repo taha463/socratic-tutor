@@ -13,6 +13,8 @@ import {
   VoiceSessionHeaderToggle,
 } from "@/components/audio/VoiceTutorControl";
 import { speakSocraticQuestion } from "@/components/audio/voiceUtils";
+import { MasteryCertificateModal } from "@/components/certificate/MasteryCertificateModal";
+import type { ProofOfMasteryCertificate } from "@/backend/services/certificateService";
 import type { AgentDeliberationTrace } from "@/core/orchestrator";
 
 interface Message {
@@ -45,6 +47,8 @@ function SessionWorkspaceContent() {
   const [useSignals, setUseSignals] = useState(true);
   const [showSandbox, setShowSandbox] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(false);
+  const [certificate, setCertificate] = useState<ProofOfMasteryCertificate | null>(null);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
   // Behavioral signals telemetry tracking
   const [typingStartTime, setTypingStartTime] = useState<number | null>(null);
@@ -154,6 +158,29 @@ function SessionWorkspaceContent() {
       active = false;
     };
   }, [sessionId, initialTopic]);
+
+  const handleClaimCertificate = async () => {
+    try {
+      const res = await fetch("/api/certificate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, topic }),
+      });
+      const data = await res.json();
+      if (data && data.certificateId) {
+        setCertificate(data);
+        setIsCertModalOpen(true);
+      }
+    } catch (e) {
+      console.error("[Session] Error claiming certificate:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (searchParams?.get("cert") === "true") {
+      handleClaimCertificate();
+    }
+  }, [sessionId, searchParams]);
 
   // Auto-scroll messages
   useEffect(() => {
@@ -503,6 +530,19 @@ function SessionWorkspaceContent() {
             </p>
           </div>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              className="btn btn-sm"
+              type="button"
+              onClick={handleClaimCertificate}
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #F59E0B",
+                color: "#92400E",
+                fontWeight: 600,
+              }}
+            >
+              🏆 Proof of Mastery
+            </button>
             <button
               className={`btn btn-sm ${showSandbox ? "btn-primary" : ""}`}
               type="button"
@@ -865,6 +905,13 @@ function SessionWorkspaceContent() {
           </aside>
         </div>
       </main>
+
+      {/* Verified Proof-of-Mastery Certificate Modal */}
+      <MasteryCertificateModal
+        certificate={certificate}
+        isOpen={isCertModalOpen}
+        onClose={() => setIsCertModalOpen(false)}
+      />
     </div>
   );
 }
