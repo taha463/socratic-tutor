@@ -68,63 +68,111 @@ Click any preview below to inspect the full-resolution screenshot:
 
 ---
 
-### 4. Interactive Call-Stack Whiteboard (80/20 Socratic Rule)
-*The tutor renders 80% of the mental model, leaving the critical 20% guard condition for the student to deduce.*
-
-<p align="center">
-  <a href="docs/images/socratic-whiteboard.png" target="_blank" title="Click to zoom full screen">
-    <img src="docs/images/socratic-whiteboard.png" alt="Interactive Recursion Call Stack Whiteboard" width="85%" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #E5DED7;" />
-  </a>
-  <br />
-  <sub>⚡ <em>Click image to zoom full-screen • Interactive Whiteboard with Mystery Box: Prompts the learner to complete the guard step</em></sub>
-</p>
-
----
-
 ## 🏛️ System Architecture
 
-Socratic Tutor v2.0 replaces centralized microservices (Celery, Redis, MongoDB) with a clean, local-first in-process architecture.
+Socratic Tutor v2.0 replaces centralized microservice architectures (Docker, Celery, Redis, MongoDB) with a clean, high-performance, local-first in-process single stack.
 
 <p align="center">
-  <a href="docs/images/architecture.svg" target="_blank" title="Click to open vector architectural blueprint">
-    <img src="docs/images/architecture.svg" alt="Socratic Tutor System Architecture Blueprint" width="100%" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #E5DED7;" />
+  <a href="docs/images/architecture.png" target="_blank" title="Click to zoom full screen">
+    <img src="docs/images/architecture.png" alt="Socratic Tutor System Architecture Diagram" width="100%" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #E5DED7;" />
   </a>
   <br />
-  <sub>📐 <em>System Architecture Whiteboard Blueprint: Next.js Presentation &amp; API Layer → LangGraph Multi-Agent StateGraph Engine → In-Process SQLite WAL &amp; Pyodide Web Workers</em></sub>
+  <sub>📐 <em>System Architecture Flow: Next.js Presentation &amp; API Layer → LangGraph Multi-Agent Engine with Critic Gate → SQLite WAL &amp; Pyodide WebAssembly Sandbox (Click to zoom full-screen)</em></sub>
 </p>
 
-### LangGraph Cyclic Multi-Agent Topology
-
-The tutoring loop is choreographed as a cyclic state graph in `@langchain/langgraph`:
+### Interactive System Architecture Diagram (GitHub-Native Mermaid)
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#FFFDFB',
+    'primaryTextColor': '#2B2320',
+    'primaryBorderColor': '#E8725A',
+    'lineColor': '#B93E29',
+    'secondaryColor': '#FAF8F5',
+    'tertiaryColor': '#F4EFEB',
+    'fontFamily': '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+    'fontSize': '14px'
+  }
+}}%%
+
 flowchart TD
-    Start([Learner Message & Telemetry]) --> DiagNode[1. Diagnostician Node]
-    
-    subgraph StateGraph [LangGraph Cyclic Agent Runtime]
-        DiagNode -->|Estimate Frustration & BKT Rung| TeachNode[2. Teacher Agent Node]
-        TeachNode -->|Draft Step & Visual with Blanks| CriticNode{3. Critic Quality Gate}
-        
-        CriticNode -->|Answer Leaked OR Multiple Questions| Rewrite[Demand Targeted Rewrite]
-        Rewrite -->|Bounded Loop: Max 2 Iterations| TeachNode
-        CriticNode -->|Verdict: PASSED Zero Leaks| Approved[Approved Turn State]
+    %% USER NODE
+    Learner(["👤 <b>Learner</b><br/>(Web Browser)"]):::userNode
+
+    %% PRESENTATION LAYER
+    subgraph WebApp ["🌐 <b>Next.js 15 Full-Stack App Router (Unified Single Process)</b>"]
+        direction TB
+        UI["🖥️ <b>Web Client UI (Hallmark Coral Theme)</b><br/>• Socratic Workspace (/session)<br/>• Mastery Radar Dashboard (/dashboard)<br/>• Behavioral Telemetry (Hesitation, WPM, Pastes)"]:::uiNode
+        API["⚡ <b>Server API Handlers (Node.js Engine)</b><br/>• POST /api/turn &nbsp;• POST /api/graph<br/>• GET /api/dashboard &nbsp;• POST /api/certificate"]:::apiNode
+        UI <-->|JSON Payload & Live Signals| API
     end
 
-    Approved --> Checkpointer[(SQLite Time-Travel Checkpointer)]
-    Checkpointer --> Deliver([Deliver Scaffolding to Learner])
+    %% MULTI-AGENT STATEGRAPH
+    subgraph AgentRuntime ["🧠 <b>LangGraph Multi-Agent StateGraph Engine</b>"]
+        direction TB
+        
+        Diag["🎯 <b>1. Diagnostician Agent</b><br/>• Analyzes typing cadence & frustration<br/>• Computes Bayesian Knowledge Tracing<br/>• Recommends Hint Ladder Rung (1 → 7)"]:::diagNode
 
-    classDef agent fill:#FFFDFB,stroke:#E8725A,stroke-width:2px,color:#2B2320;
-    classDef gate fill:#FCF4F2,stroke:#B93E29,stroke-width:2px,color:#B93E29;
-    classDef storage fill:#F7F4F0,stroke:#2B2320,stroke-width:1.5px,color:#2B2320;
-    class DiagNode,TeachNode agent;
-    class CriticNode,Rewrite gate;
-    class Checkpointer storage;
+        Teacher["🧑‍🏫 <b>2. Teacher Agent</b><br/>• Strictly enforces One-Question Rule<br/>• Scaffolds mental models (Rungs 1-7)<br/>• Inserts visual blanks [ ? ] (80/20 Rule)"]:::teacherNode
+
+        Critic{"🛡️ <b>3. Critic Quality Gate</b><br/><b>Synchronous Invariant Check:</b><br/>1. Did teacher leak the answer or code?<br/>2. Are there multiple questions?"}:::criticNode
+
+        Rewrite["↺ <b>Cyclic Rewrite Loop</b><br/>Rejects draft & returns targeted prompt<br/>with strict negative constraints<br/><i>(Bounded: Max 2 cycles)</i>"]:::rewriteNode
+
+        Diag -->|Frustration & Rung Selection| Teacher
+        Teacher -->|Draft Question & Visual Scaffold| Critic
+        Critic -->|❌ <b>LEAK DETECTED</b><br/>Reject & Require Rewrite| Rewrite
+        Rewrite -->|Feedback Context| Teacher
+    end
+
+    %% STORAGE & EXECUTION
+    subgraph Infrastructure ["💾 <b>Storage Engine & Isolated Execution Boundaries</b>"]
+        direction LR
+        SQLite[("💾 <b>In-Process SQLite (node:sqlite)</b><br/>• Local WAL Mode (data/tutor.db)<br/>• Sessions, Turns, Signals, BKT Mastery<br/>• LangGraph Time-Travel Checkpoints")]:::storageNode
+        Pyodide["🐍 <b>Pyodide WebAssembly Sandbox</b><br/>• 100% Client-side Web Worker<br/>• Zero server code execution risk<br/>• Step-by-step variable inspection"]:::sandboxNode
+        LLM["🤖 <b>Multi-Provider LLM Gateway</b><br/>• Groq Cloud (500+ tok/s)<br/>• Local Ollama (100% Offline)<br/>• OpenRouter • Anthropic • OpenAI"]:::llmNode
+        Sketch["🎨 <b>FastAPI Sketchpad (Port 8000)</b><br/>• Generative SVG whiteboard engine<br/>• Powers 'Explain with sketch'"]:::sketchNode
+    end
+
+    %% EDGES ACROSS BOUNDARIES
+    Learner <-->|Socratic Inquiry & Feedback| UI
+    API -->|1. Dispatch Turn & Telemetry State| Diag
+    Critic -->|✅ <b>PASSED: ZERO LEAKS</b><br/>Approved Pedagogical Turn| API
+    
+    AgentRuntime <-->|Checkpoint Graph State| SQLite
+    AgentRuntime <-->|Prompt & Response Stream| LLM
+    UI <-->|Execute Student Code in Browser| Pyodide
+    UI -.->|Optional Whiteboard Sketch Stream| Sketch
+
+    %% STYLING
+    classDef userNode fill:#2B2320,color:#FFFFFF,stroke:#2B2320,stroke-width:2px;
+    classDef uiNode fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px;
+    classDef apiNode fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px;
+    classDef diagNode fill:#FEF7F4,color:#2B2320,stroke:#E8725A,stroke-width:2px;
+    classDef teacherNode fill:#FFFDFB,color:#2B2320,stroke:#B93E29,stroke-width:2px;
+    classDef criticNode fill:#FEF2F2,color:#991B1B,stroke:#DC2626,stroke-width:2.5px;
+    classDef rewriteNode fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2px,stroke-dasharray: 4 4;
+    classDef storageNode fill:#F8FAFC,color:#0F172A,stroke:#64748B,stroke-width:2px;
+    classDef sandboxNode fill:#F0FDF4,color:#14532D,stroke:#16A34A,stroke-width:2px;
+    classDef llmNode fill:#F5F3FF,color:#4C1D95,stroke:#7C3AED,stroke-width:2px;
+    classDef sketchNode fill:#FFFBEB,color:#78350F,stroke:#D97706,stroke-width:2px;
 ```
 
-1. **Diagnostician Node**: Analyzes raw typing duration, backspaces, paste anomalies, and Bayesian Knowledge Tracing scores. Recommends the appropriate ladder rung ($1 \to 7$) and flags detected misconceptions.
-2. **Teacher Agent Node**: Generates a single pedagogical inquiry conforming strictly to the **One-Question Rule**. Selects appropriate visual scaffolding (code trace, Mermaid diagram with prediction blanks, or complexity plot).
-3. **Critic Quality Gate (Synchronous Invariant Check)**: Evaluates the draft before it can ever be delivered. If the draft leaks code, explains the direct solution prematurely, or asks multiple questions, the Critic demands an immediate rewrite with explicit negative constraints (bounded to max 2 cycles).
-4. **Time-Travel SQLite Checkpointer**: Persists the complete graph state into SQLite (`data/tutor.db`), enabling students to rewind and fork conversations down alternative decision trees.
+### Architectural Breakdown
+
+1. **Presentation & Full-Stack Boundary (Next.js 15 App Router)**:
+   - Single-command execution: hosts the Web Client and the server-side API Route Handlers in a single Node.js runtime process on port 3000.
+   - Captures client telemetry passively (keystroke pacing, backspace hesitation, paste length) to detect struggle without invading learner privacy.
+2. **LangGraph Cyclic Multi-Agent Core**:
+   - **Diagnostician Node**: Analyzes raw typing duration, backspaces, paste anomalies, and Bayesian Knowledge Tracing scores. Recommends the appropriate ladder rung ($1 \to 7$) and flags detected misconceptions.
+   - **Teacher Agent Node**: Generates a single pedagogical inquiry conforming strictly to the **One-Question Rule**. Selects appropriate visual scaffolding (code trace, Mermaid diagram with prediction blanks, or complexity plot).
+   - **Critic Quality Gate (Synchronous Invariant Check)**: Evaluates the draft before it can ever be delivered. If the draft leaks code, explains the direct solution prematurely, or asks multiple questions, the Critic demands an immediate rewrite with explicit negative constraints (bounded to max 2 cycles).
+3. **Storage & Sandboxed Execution**:
+   - **In-Process SQLite (`node:sqlite`)**: High-throughput WAL mode embedded database storing sessions, turns, telemetry, and LangGraph state checkpoints with zero external daemon configuration.
+   - **Pyodide WebAssembly Sandboxing**: Code execution happens **100% inside client-side browser Web Workers**. Zero student code runs on the server, eliminating remote code execution vulnerabilities while providing real-time 60 FPS stepping.
+   - **Optional FastAPI Sketchpad**: Generates generative SVG whiteboard sketches on port 8000 when the learner clicks *"Explain with sketch"*.
 
 ---
 
