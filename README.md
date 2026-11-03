@@ -69,31 +69,31 @@ Click any preview below to inspect the full-resolution screenshot:
 ---
 
 ## 🏛️ System Architecture
-
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#FFFDFB','primaryTextColor':'#2B2320','primaryBorderColor':'#E8725A','lineColor':'#B93E29','tertiaryColor':'#FAF8F5','fontSize':'14px'}}}%%
 flowchart TB
-    User([Learner])
+    User(["👤 Learner"]):::start
 
     subgraph Browser
-        UI[Web UI]
-        Py["Pyodide<br/>runs student code"]
+        UI["🖥️ Web UI"]:::agent
+        Py["🐍 Pyodide<br/>runs student code"]:::safe
     end
 
     subgraph Server["Next.js Server :3000"]
-        API["API Routes<br/>turn / graph / dashboard"]
+        API["⚡ API Routes<br/>turn / graph / dashboard"]:::plain
     end
 
     subgraph Agents["LangGraph Agents"]
         direction LR
-        D[Diagnostician] --> T[Teacher] --> V[Visualizer] --> C{Critic}
+        D["🎯 Diagnostician"]:::agent --> T["🧑‍🏫 Teacher"]:::agent --> V["🎨 Visualizer"]:::agent --> C{"🛡️ Critic"}:::critic
         C -. rewrite .-> T
     end
 
     subgraph Services
         direction LR
-        LLM["LLM Gateway<br/>Groq / Ollama / Claude / OpenAI"]
-        DB[("SQLite<br/>tutor.db")]
-        SK["Sketchpad :8000<br/>optional"]
+        LLM["🤖 LLM Gateway"]:::plain
+        DB[("💾 SQLite")]:::plain
+        SK["✏️ Sketchpad :8000<br/>optional"]:::plain
     end
 
     User <--> UI
@@ -105,38 +105,42 @@ flowchart TB
     Agents <--> LLM
     Agents <--> DB
 
-    classDef agent fill:#fdeceb,stroke:#d9534f,color:#222
-    classDef gate fill:#fff4d6,stroke:#c99a00,color:#222
-    classDef store fill:#eef2f7,stroke:#6b7a90,color:#222
-    class D,T,V agent
-    class C gate
-    class DB,LLM,SK store
+    classDef start fill:#FFFDFB,color:#2B2320,stroke:#B93E29,stroke-width:2px
+    classDef agent fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px
+    classDef critic fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2px
+    classDef safe fill:#F0FDF4,color:#14532D,stroke:#16A34A,stroke-width:2px
+    classDef plain fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px
+    style Browser fill:#FAF8F5,stroke:#D6CCC3,color:#2B2320
+    style Server fill:#FAF8F5,stroke:#D6CCC3,color:#2B2320
+    style Agents fill:#FAF8F5,stroke:#D6CCC3,color:#2B2320
+    style Services fill:#FAF8F5,stroke:#D6CCC3,color:#2B2320
 ```
+
 ### 2. LangGraph Cyclic Multi-Agent Topology
 
 The tutoring loop is choreographed as a cyclic state graph in `@langchain/langgraph`:
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#FFFDFB','primaryTextColor':'#2B2320','primaryBorderColor':'#E8725A','lineColor':'#B93E29','tertiaryColor':'#FAF8F5','fontSize':'14px'}}}%%
 flowchart TB
-    In(["Learner message + typing signals"])
+    In(["👤 Learner message + typing signals"]):::start
 
-    D["<b>1. Diagnostician</b><br/>reads hesitation, WPM, pastes<br/>updates mastery (BKT)<br/>picks hint rung 1 to 7"]
-    T["<b>2. Teacher</b><br/>asks one question only<br/>never gives the answer"]
-    V["<b>3. Visualizer</b><br/>trace or diagram with blanks [ ? ]"]
-    C{"<b>4. Critic</b><br/>answer leaked?<br/>more than one question?"}
-    S[("Save checkpoint<br/>SQLite")]
-    Out(["Send to learner"])
+    D["🎯 <b>1. Diagnostician</b><br/>reads hesitation, WPM, pastes<br/>updates mastery (BKT)<br/>picks hint rung 1 to 7"]:::agent
+    T["🧑‍🏫 <b>2. Teacher</b><br/>asks one question only<br/>never gives the answer"]:::agent
+    V["🎨 <b>3. Visualizer</b><br/>trace or diagram with blanks [ ? ]"]:::agent
+    C{"🛡️ <b>4. Critic</b><br/>answer leaked?<br/>more than one question?"}:::critic
+    S[("💾 Save checkpoint<br/>SQLite")]:::plain
+    Out(["✅ Send to learner"]):::safe
 
     In --> D --> T --> V --> C
     C -->|fail: rewrite, max 2 times| T
     C -->|pass| S --> Out
 
-    classDef agent fill:#fdeceb,stroke:#d9534f,color:#222
-    classDef gate fill:#fff4d6,stroke:#c99a00,color:#222
-    classDef store fill:#eef2f7,stroke:#6b7a90,color:#222
-    class D,T,V agent
-    class C gate
-    class S store
+    classDef start fill:#FFFDFB,color:#2B2320,stroke:#B93E29,stroke-width:2px
+    classDef agent fill:#FFFDFB,color:#2B2320,stroke:#E8725A,stroke-width:2px
+    classDef critic fill:#FFF1F2,color:#9F1239,stroke:#F43F5E,stroke-width:2.5px
+    classDef safe fill:#F0FDF4,color:#14532D,stroke:#16A34A,stroke-width:2px
+    classDef plain fill:#FAF8F5,color:#2B2320,stroke:#D6CCC3,stroke-width:1.5px
 ```
 
 ## ⚡ Backend Architecture & Service Execution Guide
